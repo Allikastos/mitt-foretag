@@ -2,219 +2,204 @@
 
 const services = [
   {
-    title: "Löpande bokföring",
+    title: "Redovisning",
     description:
-      "Noggrant utförd redovisning, moms och avstämningar som skapar en stabil finansiell grund och minskar friktionen i vardagen.",
+      "Löpande redovisning, moms och avstämningar med fokus på kvalitet, ordning och ett mer tillförlitligt ekonomiskt underlag.",
   },
   {
-    title: "Finansiell rapportering",
+    title: "Rapportering",
     description:
-      "Rapportering med relevanta nyckeltal, tydliga kommentarer och struktur som gör ekonomin användbar för ledning, ägare och styrelse.",
+      "Rapporter som lyfter fram det viktiga i verksamheten och gör det enklare att förstå lönsamhet, kassaflöde och utveckling.",
   },
   {
     title: "Analys och rådgivning",
     description:
-      "Kvalificerat stöd kring lönsamhet, kassaflöde och prioriteringar när verksamheten behöver ett mer strategiskt ekonomiskt perspektiv.",
+      "Ekonomisk analys och löpande beslutsstöd för mindre företag som vill arbeta mer genomtänkt och med större kontroll.",
   },
 ];
 
 const steps = [
   {
     number: "01",
-    title: "Strategisk genomgång",
+    title: "Nuläge och prioriteringar",
     description:
-      "Arbetet inleds med att förstå affären, nuvarande rutiner och vilka ekonomiska frågor som kräver mest precision.",
+      "Vi börjar med att förstå verksamheten, nuvarande arbetssätt och vilka ekonomiska frågor som behöver mest tydlighet.",
   },
   {
     number: "02",
     title: "Struktur och leverans",
     description:
-      "Därefter sätts en tydlig process för redovisning, rapportering och återkommande uppföljning med rätt nivå av kontroll.",
+      "Därefter etableras en tydlig process för redovisning, rapportering och uppföljning med rätt nivå av precision.",
   },
   {
     number: "03",
-    title: "Löpande beslutsstöd",
+    title: "Kontroll och beslutsstöd",
     description:
-      "Resultatet blir en ekonomifunktion som inte bara levererar siffror, utan underlag som stärker beslut och skapar framförhållning.",
+      "Ni får en mer stabil ekonomifunktion och ett bättre underlag för beslut, planering och långsiktig utveckling.",
   },
 ];
 
 const heroPoints = [
-  {
-    title: "Struktur",
-    description:
-      "En stabil process för redovisning, rapportering och ekonomisk uppföljning.",
-  },
-  {
-    title: "Insikt",
-    description:
-      "Rapporter som ger sammanhang, tydlighet och bättre beslutsunderlag.",
-  },
-  {
-    title: "Närvaro",
-    description:
-      "Tillgänglig rådgivning när verksamheten står inför viktiga prioriteringar.",
-  },
+  "Ekonomisk kontroll med högre kvalitet i varje steg",
+  "Rapportering som stödjer beslut, inte bara administration",
+  "Lugn, analytisk och affärsnära rådgivning för småföretag",
 ];
 
 const trustPoints = [
-  "Diskret, tillgänglig och affärsnära rådgivning",
-  "Anpassat för ägarledda bolag, konsultverksamheter och mindre team",
-  "Fokus på kvalitet, tydlighet och långsiktigt förtroende",
+  "Premium, analytisk och lugn leverans",
+  "Fokus på ekonomisk kontroll och beslutsstöd",
+  "Passar mindre företag, konsultbolag och ägarledda verksamheter",
 ];
 
 export default function Home() {
   return (
-    <main className="bg-[radial-gradient(circle_at_top,#faf8f4_0%,#f2eee6_42%,#ece6dc_100%)] text-neutral-950">
-      <section className="px-4 pt-5 pb-14 sm:px-6 lg:px-8 lg:pt-6 lg:pb-20">
-        <div className="mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] bg-white/90 shadow-[0_50px_140px_-70px_rgba(0,0,0,0.4)] ring-1 ring-black/5 backdrop-blur">
-          <div className="border-b border-neutral-200/80 bg-white/80 px-7 py-3.5 sm:px-8 lg:px-12">
-            <div className="flex flex-col gap-2 text-xs tracking-[0.08em] text-neutral-500 sm:flex-row sm:items-center sm:justify-between">
+    <main className="bg-[#F7F7F5] text-[#1A1A1A]">
+      <section className="px-6 py-6">
+        <div className="mx-auto max-w-6xl overflow-hidden rounded-[2.25rem] border border-black/5 bg-white shadow-[0_40px_120px_-70px_rgba(0,0,0,0.35)]">
+          <div className="bg-[#0B0B0C] px-6 py-3">
+            <div className="flex flex-col gap-2 text-[11px] uppercase tracking-[0.18em] text-white/65 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-wrap items-center gap-4">
-                <span>013-32 85 80</span>
-                <span>info@dittforetag.se</span>
+                <span>albinholmberg@icloud.com</span>
+                <span>076-0218499</span>
               </div>
-              <span>Redovisning och finansiell rådgivning för företag med höga krav på kvalitet</span>
+              <span className="text-[#C6A15B]">
+                Ekonomisk styrning och redovisning för småföretag
+              </span>
             </div>
           </div>
 
-          <header className="flex items-center justify-between px-7 py-6 sm:px-8 lg:px-12 lg:py-7">
-            <a href="#" className="text-[1.7rem] font-semibold tracking-[-0.03em] text-neutral-950">
-              Mitt Företag
+          <header className="flex items-center justify-between px-6 py-6">
+            <a href="#" className="flex flex-col leading-none">
+              <span className="text-xl font-medium tracking-[0.2em] text-[#0B0B0C] uppercase">
+                Bidewind
+              </span>
+              <span className="mt-2 text-[11px] tracking-[0.24em] text-[#6B6B6B] uppercase">
+                Consulting
+              </span>
             </a>
 
-            <nav className="hidden items-center gap-10 text-sm text-neutral-700 md:flex">
-              <a href="#tjanster" className="transition hover:text-neutral-950">
+            <nav className="hidden items-center gap-8 text-sm text-[#6B6B6B] md:flex">
+              <a href="#tjanster" className="transition hover:text-[#1A1A1A]">
                 Tjänster
               </a>
-              <a href="#process" className="transition hover:text-neutral-950">
+              <a href="#process" className="transition hover:text-[#1A1A1A]">
                 Process
               </a>
-              <a href="#om" className="transition hover:text-neutral-950">
-                Om
+              <a href="#om" className="transition hover:text-[#1A1A1A]">
+                Om mig
               </a>
-              <a href="#kontakt" className="transition hover:text-neutral-950">
+              <a href="#kontakt" className="transition hover:text-[#1A1A1A]">
                 Kontakt
               </a>
             </nav>
 
             <a
               href="#kontakt"
-              className="inline-flex items-center rounded-full border border-neutral-300 px-4 py-2.5 text-sm font-medium text-neutral-950 transition hover:border-neutral-950 hover:bg-neutral-950 hover:text-white"
+              className="rounded-2xl bg-[#0B0B0C] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
             >
               Boka möte
             </a>
           </header>
 
-          <div className="relative min-h-[42rem] overflow-hidden bg-neutral-950">
-            <img
-              src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1800&q=80"
-              alt="Möte runt ett bord med laptop och dokument"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-neutral-950/48" />
-            <div className="absolute inset-0 bg-[linear-gradient(96deg,rgba(10,10,10,0.8)_0%,rgba(10,10,10,0.58)_45%,rgba(10,10,10,0.2)_100%)]" />
+          <div className="grid gap-14 border-t border-black/5 px-6 py-24 lg:grid-cols-[minmax(0,1.05fr)_minmax(21rem,0.95fr)] lg:items-center">
+            <div className="max-w-2xl">
+              <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
+                Ekonomisk kontroll + beslutsstöd
+              </p>
 
-            <div className="relative z-10 flex min-h-[42rem] items-center px-7 py-20 sm:px-8 lg:px-12 lg:py-24">
-              <div className="grid w-full gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(19rem,0.85fr)] lg:gap-16">
-                <div className="max-w-3xl">
-                  <span className="inline-flex rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-xs font-medium tracking-[0.22em] text-white uppercase backdrop-blur-sm">
-                    Redovisning • Rapportering • Rådgivning
-                  </span>
+              <h1 className="mt-6 text-5xl font-semibold leading-tight tracking-[-0.05em] text-[#0B0B0C] sm:text-6xl">
+                Ekonomisk styrning med större klarhet och kontroll
+              </h1>
 
-                  <h1 className="mt-9 text-5xl font-semibold tracking-[-0.05em] text-white text-balance sm:text-6xl lg:text-[5.25rem] lg:leading-[0.94]">
-                    Redovisning och ekonomisk rådgivning för småföretag
-                  </h1>
+              <p className="mt-6 text-lg leading-8 text-[#6B6B6B]">
+                Bidewind Consulting hjälper småföretag med redovisning, rapportering
+                och ekonomisk analys, för bättre beslut och stabil tillväxt.
+              </p>
 
-                  <p className="mt-7 max-w-2xl text-lg leading-8 text-neutral-200 sm:text-[1.15rem]">
-                    Jag hjälper småföretag i Linköping och i övriga Sverige med
-                    bokföring, rapportering och ekonomisk rådgivning för bättre
-                    kontroll över lönsamhet, kassaflöde och nästa beslut.
-                  </p>
+              <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+                <a
+                  href="#kontakt"
+                  className="rounded-2xl bg-[#0B0B0C] px-6 py-3 text-center text-sm font-medium text-white transition hover:opacity-90"
+                >
+                  Boka rådgivning
+                </a>
+                <a
+                  href="#tjanster"
+                  className="rounded-2xl border border-neutral-200 px-6 py-3 text-center text-sm font-medium text-[#1A1A1A] transition hover:bg-neutral-50"
+                >
+                  Se tjänster
+                </a>
+              </div>
 
-                  <div className="mt-12 flex flex-col gap-4 sm:flex-row">
-                    <a
-                      href="#kontakt"
-                      className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3.5 text-sm font-medium text-neutral-950 transition hover:bg-neutral-200"
-                    >
-                      Boka ett inledande möte
-                    </a>
-                    <a
-                      href="#tjanster"
-                      className="inline-flex items-center justify-center rounded-full border border-white/30 bg-white/10 px-6 py-3.5 text-sm font-medium text-white transition hover:bg-white/18"
-                    >
-                      Utforska tjänster
-                    </a>
+              <div className="mt-12 grid gap-4 sm:grid-cols-3">
+                {heroPoints.map((point) => (
+                  <div
+                    key={point}
+                    className="rounded-3xl border border-neutral-200 bg-[#F7F7F5] p-6"
+                  >
+                    <p className="text-sm leading-6 text-[#6B6B6B]">{point}</p>
                   </div>
-                </div>
-
-                <div className="max-w-md rounded-[2rem] border border-white/14 bg-white/10 p-7 text-white shadow-[0_30px_80px_-50px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:p-8 lg:ml-auto lg:self-end">
-                  <p className="text-xs uppercase tracking-[0.22em] text-neutral-300">
-                    För bolag som vill ha
-                  </p>
-                  <p className="mt-4 text-2xl font-semibold tracking-[-0.03em] text-balance">
-                    hög kvalitet i leveransen och tydlighet i varje steg.
-                  </p>
-
-                  <div className="mt-8 space-y-5">
-                    {heroPoints.map((point) => (
-                      <div key={point.title} className="border-t border-white/12 pt-5 first:border-t-0 first:pt-0">
-                        <p className="text-sm font-medium text-white">{point.title}</p>
-                        <p className="mt-1.5 text-sm leading-6 text-neutral-300">
-                          {point.description}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
 
-            <div className="absolute bottom-8 left-7 flex items-center gap-2 sm:left-8 lg:left-12">
-              <span className="h-2.5 w-2.5 rounded-full bg-white" />
-              <span className="h-2.5 w-2.5 rounded-full bg-white/45" />
-              <span className="h-2.5 w-2.5 rounded-full bg-white/45" />
+            <div className="space-y-6">
+              <div className="overflow-hidden rounded-[2rem] bg-[#0B0B0C]">
+                <img
+                  src="https://images.pexels.com/photos/20251480/pexels-photo-20251480.jpeg?cs=srgb&dl=pexels-jakubzerdzicki-20251480.jpg&fm=jpg"
+                  alt="Arbete med kalkylator, anteckningar och finansiella rapporter vid skrivbord"
+                  className="h-[32rem] w-full object-cover opacity-90"
+                />
+              </div>
+
+              <div className="rounded-3xl border border-neutral-200 bg-[#F7F7F5] p-6">
+                <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
+                  Tagline
+                </p>
+                <p className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#0B0B0C]">
+                  Ekonomisk styrning och redovisning för småföretag
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="tjanster" className="px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,26rem)] lg:items-end">
+      <section id="tjanster" className="py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-end">
             <div className="max-w-3xl">
-              <p className="text-sm font-medium tracking-[0.22em] text-neutral-500 uppercase">
+              <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
                 Tjänster
               </p>
-              <h2 className="mt-5 text-3xl font-semibold tracking-[-0.04em] text-balance sm:text-4xl lg:text-[2.9rem]">
-                En genomarbetad ekonomifunktion, utan att vardagen blir tyngre.
+              <h2 className="mt-5 text-3xl font-semibold tracking-[-0.04em] text-[#0B0B0C] sm:text-4xl">
+                Redovisning och rådgivning med större precision och bättre balans.
               </h2>
             </div>
 
-            <p className="max-w-xl text-base leading-7 text-neutral-600">
-              Tjänsterna är utformade för företag som vill ha hög kvalitet,
-              tydlig kommunikation och rapportering som faktiskt används i
-              verksamheten.
+            <p className="text-base leading-7 text-[#6B6B6B]">
+              Fokus ligger inte bara på att leverera siffror, utan på att skapa
+              struktur, överblick och ett mer användbart ekonomiskt beslutsunderlag.
             </p>
           </div>
 
-          <div className="mt-14 grid gap-6 lg:grid-cols-3">
+          <div className="mt-14 grid gap-6 md:grid-cols-3">
             {services.map((service, index) => (
               <article
                 key={service.title}
-                className="flex h-full flex-col rounded-[2rem] bg-white/90 p-9 shadow-[0_30px_80px_-60px_rgba(0,0,0,0.38)] ring-1 ring-black/5 transition hover:-translate-y-1 hover:shadow-[0_36px_90px_-56px_rgba(0,0,0,0.42)] sm:p-10"
+                className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-[0_24px_60px_-55px_rgba(0,0,0,0.2)]"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium tracking-[0.2em] text-neutral-400">
+                  <span className="text-sm font-medium tracking-[0.22em] text-[#C6A15B]">
                     0{index + 1}
                   </span>
-                  <span className="h-11 w-11 rounded-2xl bg-neutral-950" />
+                  <span className="h-10 w-10 rounded-2xl bg-[#0B0B0C]" />
                 </div>
 
-                <h3 className="mt-10 text-2xl font-semibold tracking-[-0.03em] text-balance">
+                <h3 className="mt-8 text-2xl font-semibold tracking-[-0.03em] text-[#0B0B0C]">
                   {service.title}
                 </h3>
-                <p className="mt-5 text-base leading-7 text-neutral-600">
+                <p className="mt-4 text-base leading-7 text-[#6B6B6B]">
                   {service.description}
                 </p>
               </article>
@@ -223,152 +208,135 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="process" className="px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
-        <div className="mx-auto max-w-7xl rounded-[2.4rem] bg-neutral-950 px-7 py-14 text-white shadow-[0_40px_100px_-60px_rgba(0,0,0,0.55)] sm:px-8 sm:py-16 lg:px-12 lg:py-20">
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,25rem)] lg:items-end">
-            <div className="max-w-3xl">
-              <p className="text-sm font-medium tracking-[0.22em] text-neutral-400 uppercase">
-                Så arbetar vi
+      <section id="process" className="py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="rounded-[2.25rem] bg-[#0B0B0C] px-6 py-16 text-white sm:px-8 lg:px-10">
+            <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-end">
+              <div className="max-w-3xl">
+                <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
+                  Process
+                </p>
+                <h2 className="mt-5 text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">
+                  En lugn, tydlig och analytisk arbetsprocess.
+                </h2>
+              </div>
+
+              <p className="text-base leading-7 text-white/70">
+                Arbetet är utformat för att ge bättre kontroll utan att skapa onödig
+                komplexitet i vardagen.
               </p>
-              <h2 className="mt-5 text-3xl font-semibold tracking-[-0.04em] text-balance sm:text-4xl lg:text-[2.9rem]">
-                Ett arbetssätt byggt för ordning, tempo och förtroende.
-              </h2>
             </div>
 
-            <p className="max-w-xl text-base leading-7 text-neutral-300">
-              Upplägget är enkelt, men genomarbetat. Målet är att skapa tydlighet i
-              leveransen och trygghet i de beslut som följer.
-            </p>
-          </div>
-
-          <div className="mt-14 grid gap-6 lg:grid-cols-3">
-            {steps.map((step) => (
-              <article
-                key={step.number}
-                className="rounded-[2rem] border border-white/10 bg-white/5 p-9 backdrop-blur-sm sm:p-10"
-              >
-                <p className="text-sm font-medium tracking-[0.2em] text-neutral-400">
-                  {step.number}
-                </p>
-                <h3 className="mt-8 text-2xl font-semibold tracking-[-0.03em] text-balance">
-                  {step.title}
-                </h3>
-                <p className="mt-5 text-base leading-7 text-neutral-300">
-                  {step.description}
-                </p>
-              </article>
-            ))}
+            <div className="mt-14 grid gap-6 md:grid-cols-3">
+              {steps.map((step) => (
+                <article
+                  key={step.number}
+                  className="rounded-3xl border border-white/10 bg-white/5 p-6"
+                >
+                  <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B]">
+                    {step.number}
+                  </p>
+                  <h3 className="mt-8 text-2xl font-semibold tracking-[-0.03em]">
+                    {step.title}
+                  </h3>
+                  <p className="mt-4 text-base leading-7 text-white/70">
+                    {step.description}
+                  </p>
+                </article>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="om" className="px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,1.18fr)_minmax(19rem,0.82fr)] lg:gap-10">
-          <div className="rounded-[2.2rem] bg-white/92 p-9 shadow-[0_30px_80px_-60px_rgba(0,0,0,0.38)] ring-1 ring-black/5 sm:p-12">
-            <p className="text-sm font-medium tracking-[0.22em] text-neutral-500 uppercase">
-              Om samarbetet
-            </p>
-            <h2 className="mt-5 max-w-3xl text-3xl font-semibold tracking-[-0.04em] text-balance sm:text-4xl lg:text-[2.85rem]">
-              En partner som kombinerar noggrannhet i detaljerna med förståelse för affären.
+      <section id="om" className="py-24">
+        <div className="mx-auto grid max-w-6xl gap-6 px-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(19rem,0.92fr)]">
+          <div className="rounded-[2.25rem] border border-neutral-200 bg-white p-8 shadow-[0_24px_60px_-55px_rgba(0,0,0,0.18)] sm:p-10">
+            <h2 className="text-2xl font-semibold tracking-[-0.03em] text-[#0B0B0C]">
+              Om mig
             </h2>
-            <p className="mt-7 max-w-3xl text-lg leading-8 text-neutral-600">
-              Jag arbetar nära företagare, konsulter och mindre bolag som vill ha en
-              rådgivare som både skapar ordning i redovisningen och kan förklara vad
-              siffrorna betyder i praktiken.
-            </p>
-            <p className="mt-6 max-w-3xl text-lg leading-8 text-neutral-600">
-              Med bas i Linköping hjälper jag småföretag lokalt och i resten av
-              Sverige att skapa en tydligare, mer förutsägbar och mer användbar
-              ekonomifunktion.
+
+            <p className="mt-4 text-[#6B6B6B] leading-8 sm:text-lg">
+              Jag heter Albin Holmberg och arbetar med redovisning och ekonomisk
+              analys för mindre företag. Mitt fokus är att skapa struktur, tydlighet
+              och bättre beslutsunderlag, inte bara leverera siffror.
             </p>
           </div>
 
-          <div className="space-y-6">
-            <div className="rounded-[2rem] border border-neutral-200 bg-neutral-50/90 p-8 shadow-[0_24px_60px_-56px_rgba(0,0,0,0.35)]">
-              <p className="text-sm font-medium tracking-[0.22em] text-neutral-500 uppercase">
-                Vad kunder värdesätter
-              </p>
-              <ul className="mt-8 space-y-4">
-                {trustPoints.map((point) => (
-                  <li
-                    key={point}
-                    className="rounded-2xl border border-neutral-200 bg-white px-5 py-4 text-sm leading-6 text-neutral-700"
-                  >
-                    {point}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="rounded-[2rem] bg-neutral-950 p-8 text-white shadow-[0_30px_70px_-55px_rgba(0,0,0,0.45)]">
-              <p className="text-sm font-medium tracking-[0.22em] text-neutral-400 uppercase">
-                Inriktning
-              </p>
-              <p className="mt-5 text-2xl font-semibold tracking-[-0.03em] text-balance">
-                Tydligare ekonomisk styrning börjar nästan alltid med bättre struktur.
-              </p>
-            </div>
+          <div className="rounded-[2.25rem] border border-neutral-200 bg-[#F7F7F5] p-8">
+            <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
+              Positionering
+            </p>
+            <ul className="mt-8 space-y-4">
+              {trustPoints.map((point) => (
+                <li
+                  key={point}
+                  className="rounded-3xl border border-neutral-200 bg-white p-6 text-sm leading-6 text-[#6B6B6B]"
+                >
+                  {point}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
 
-      <section id="kontakt" className="px-4 pb-24 sm:px-6 lg:px-8 lg:pb-32">
-        <div className="mx-auto max-w-7xl rounded-[2.2rem] bg-white/92 px-7 py-12 shadow-[0_30px_80px_-60px_rgba(0,0,0,0.38)] ring-1 ring-black/5 sm:px-8 sm:py-14 lg:px-12 lg:py-16">
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,23rem)] lg:items-end lg:gap-12">
+      <section id="kontakt" className="py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="grid gap-8 rounded-[2.25rem] border border-neutral-200 bg-white p-8 shadow-[0_24px_60px_-55px_rgba(0,0,0,0.18)] lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-end sm:p-10">
             <div className="max-w-3xl">
-              <p className="text-sm font-medium tracking-[0.22em] text-neutral-500 uppercase">
+              <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
                 Kontakt
               </p>
-              <h2 className="mt-5 text-3xl font-semibold tracking-[-0.04em] text-balance sm:text-4xl lg:text-[2.85rem]">
-                Vill du ha en mer strukturerad ekonomifunktion och tydligare underlag för nästa beslut?
+              <h2 className="mt-5 text-3xl font-semibold tracking-[-0.04em] text-[#0B0B0C] sm:text-4xl">
+                Vill du få större kontroll över siffrorna och tryggare underlag för dina beslut?
               </h2>
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-neutral-600">
-                Hör av dig för ett första samtal om bokföring, rapportering eller
-                rådgivning, så ser vi hur upplägget bäst kan anpassas till din
-                verksamhet.
+              <p className="mt-5 text-base leading-7 text-[#6B6B6B] sm:text-lg sm:leading-8">
+                Hör av dig så bokar vi ett första samtal om redovisning, rapportering
+                eller ekonomisk rådgivning för din verksamhet.
               </p>
             </div>
 
-            <div className="rounded-[2rem] bg-neutral-950 p-7 text-white shadow-[0_35px_80px_-55px_rgba(0,0,0,0.5)] sm:p-8">
-              <p className="text-sm font-medium tracking-[0.18em] text-neutral-400 uppercase">
-                Kontaktväg
+            <div className="rounded-3xl bg-[#0B0B0C] p-6 text-white">
+              <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
+                Kontaktuppgifter
               </p>
+              <p className="mt-4 text-neutral-300">albinholmberg@icloud.com</p>
+              <p className="text-neutral-300 mt-2">076-0218499</p>
               <a
-                href="mailto:info@dittforetag.se"
-                className="mt-4 block text-2xl font-semibold tracking-[-0.03em] transition hover:text-neutral-300"
+                href="mailto:albinholmberg@icloud.com"
+                className="mt-6 inline-flex rounded-2xl bg-white px-6 py-3 text-sm font-medium text-[#0B0B0C] transition hover:opacity-90"
               >
-                info@dittforetag.se
-              </a>
-              <p className="mt-2 text-sm text-neutral-400">013-32 85 80</p>
-              <a
-                href="mailto:info@dittforetag.se"
-                className="mt-7 inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-medium text-neutral-950 transition hover:bg-neutral-200"
-              >
-                Kontakta oss
+                Kontakta mig
               </a>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="border-t border-black/8 px-6 py-20 sm:px-8 lg:px-12 lg:py-24">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="text-2xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-3xl">
-            Redovisning och ekonomisk rådgivning för mindre företag
-          </h2>
+      <section className="py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="border-t border-neutral-200 pt-24">
+            <div className="max-w-4xl">
+              <h2 className="text-2xl font-semibold tracking-[-0.03em] text-[#0B0B0C]">
+                Redovisning och ekonomisk rådgivning för mindre företag
+              </h2>
 
-          <p className="mt-4 text-neutral-600 leading-7 sm:text-lg sm:leading-8">
-            Som företagare behöver du inte bara bokföring, du behöver förstå dina
-            siffror. Jag hjälper små och medelstora företag med löpande redovisning,
-            rapportering och ekonomisk analys för att skapa bättre beslutsunderlag.
-          </p>
+              <p className="mt-4 text-[#6B6B6B] leading-8 sm:text-lg">
+                Som företagare behöver du inte bara bokföring, du behöver förstå dina
+                siffror. Bidewind Consulting hjälper små och medelstora företag med
+                löpande redovisning, rapportering och ekonomisk analys för att skapa
+                bättre beslutsunderlag.
+              </p>
 
-          <p className="mt-4 text-neutral-600 leading-7 sm:text-lg sm:leading-8">
-            Oavsett om du driver konsultverksamhet eller ett växande bolag kan rätt
-            struktur i ekonomin göra stor skillnad för din lönsamhet. För småföretag
-            i Linköping och övriga Sverige innebär det bättre kontroll, tydligare
-            rapportering och mer genomtänkta ekonomiska beslut.
-          </p>
+              <p className="mt-4 text-[#6B6B6B] leading-8 sm:text-lg">
+                Oavsett om du driver konsultverksamhet eller ett växande bolag kan
+                rätt struktur i ekonomin göra stor skillnad för din lönsamhet. För
+                småföretag i Linköping och övriga Sverige innebär det bättre kontroll,
+                tydligare rapportering och mer genomtänkta ekonomiska beslut.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
     </main>
