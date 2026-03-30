@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Mitt Företag | Redovisning och finansiell rådgivning",
+  title: "Redovisning & ekonomisk rådgivning för småföretag | Mitt Företag",
   description:
-    "Modern redovisning, finansiell rapportering och rådgivning för små och medelstora företag.",
+    "Jag hjälper småföretag med bokföring, rapportering och ekonomisk analys. Få bättre kontroll på lönsamhet och kassaflöde.",
 };
 
 export default function RootLayout({

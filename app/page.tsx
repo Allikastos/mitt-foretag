@@ -123,13 +123,13 @@ export default function Home() {
                   </span>
 
                   <h1 className="mt-9 text-5xl font-semibold tracking-[-0.05em] text-white text-balance sm:text-6xl lg:text-[5.25rem] lg:leading-[0.94]">
-                    Ekonomisk styrning med större klarhet, precision och lugn.
+                    Redovisning och ekonomisk rådgivning för småföretag
                   </h1>
 
                   <p className="mt-7 max-w-2xl text-lg leading-8 text-neutral-200 sm:text-[1.15rem]">
-                    Jag hjälper entreprenörer, konsultbolag och växande företag att
-                    bygga en mer ordnad redovisning, bättre rapportering och tydligare
-                    beslutsunderlag för nästa steg.
+                    Jag hjälper småföretag i Linköping och i övriga Sverige med
+                    bokföring, rapportering och ekonomisk rådgivning för bättre
+                    kontroll över lönsamhet, kassaflöde och nästa beslut.
                   </p>
 
                   <div className="mt-12 flex flex-col gap-4 sm:flex-row">
@@ -277,8 +277,9 @@ export default function Home() {
               siffrorna betyder i praktiken.
             </p>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-neutral-600">
-              Ambitionen är enkel: att göra ekonomin tydligare, mer förutsägbar och
-              mer användbar i det dagliga beslutsfattandet.
+              Med bas i Linköping hjälper jag småföretag lokalt och i resten av
+              Sverige att skapa en tydligare, mer förutsägbar och mer användbar
+              ekonomifunktion.
             </p>
           </div>
 
@@ -347,6 +348,27 @@ export default function Home() {
               </a>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="border-t border-black/8 px-6 py-20 sm:px-8 lg:px-12 lg:py-24">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-2xl font-semibold tracking-[-0.03em] text-neutral-950 sm:text-3xl">
+            Redovisning och ekonomisk rådgivning för mindre företag
+          </h2>
+
+          <p className="mt-4 text-neutral-600 leading-7 sm:text-lg sm:leading-8">
+            Som företagare behöver du inte bara bokföring, du behöver förstå dina
+            siffror. Jag hjälper små och medelstora företag med löpande redovisning,
+            rapportering och ekonomisk analys för att skapa bättre beslutsunderlag.
+          </p>
+
+          <p className="mt-4 text-neutral-600 leading-7 sm:text-lg sm:leading-8">
+            Oavsett om du driver konsultverksamhet eller ett växande bolag kan rätt
+            struktur i ekonomin göra stor skillnad för din lönsamhet. För småföretag
+            i Linköping och övriga Sverige innebär det bättre kontroll, tydligare
+            rapportering och mer genomtänkta ekonomiska beslut.
+          </p>
         </div>
       </section>
     </main>
