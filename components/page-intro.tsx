@@ -15,7 +15,7 @@ export function PageIntro({
   aside,
 }: PageIntroProps) {
   return (
-    <section className="pb-12 pt-16 md:pb-16 md:pt-24">
+    <section className="pb-10 pt-10 md:pb-16 md:pt-20">
       <SectionContainer>
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,23rem)] lg:items-end lg:gap-12">
           <div className="max-w-[52rem]">

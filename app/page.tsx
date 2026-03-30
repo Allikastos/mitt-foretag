@@ -15,7 +15,7 @@ export const metadata = createMetadata(
 export default function HomePage() {
   return (
     <>
-      <section className="pb-16 pt-14 md:pb-20 md:pt-20">
+      <section className="pb-16 pt-8 md:pb-20 md:pt-16 lg:pt-20">
         <SectionContainer>
           <div className="overflow-hidden rounded-[2.75rem] border border-black/6 bg-white shadow-[0_36px_90px_-62px_rgba(0,0,0,0.24)]">
             <div className="grid gap-12 px-8 py-10 md:px-12 md:py-14 lg:grid-cols-[minmax(0,1.08fr)_minmax(18rem,0.92fr)] lg:items-center lg:gap-14 lg:px-14 lg:py-16">
