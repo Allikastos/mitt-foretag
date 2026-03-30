@@ -12,8 +12,8 @@ export function SiteFooter() {
               {siteConfig.name}
             </p>
             <p className="mt-5 text-lg leading-8 text-white/72">
-              Premium redovisning, finansiell rapportering och ekonomisk rådgivning
-              för mindre företag i Linköping och i övriga Sverige.
+              Redovisning, finansiell rapportering och ekonomisk rådgivning för
+              mindre företag i Linköping och i övriga Sverige.
             </p>
           </div>
 

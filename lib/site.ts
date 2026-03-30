@@ -68,7 +68,7 @@ export const services: Service[] = [
     ],
     seoTitle: "Redovisning för småföretag",
     seoDescription:
-      "Premium redovisning för småföretag i Linköping och Sverige med fokus på struktur, precision och löpande kontroll.",
+      "Redovisning för småföretag i Linköping och Sverige med fokus på struktur, precision och löpande kontroll.",
   },
   {
     slug: "rapportering",

@@ -1,6 +1,19 @@
+"use client";
+
+import type { FormEvent } from "react";
+import { useState } from "react";
+
 export function ContactForm() {
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    event.currentTarget.reset();
+    setIsSubmitted(true);
+  }
+
   return (
-    <form className="space-y-6">
+    <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="grid gap-5 sm:grid-cols-2">
         <label className="block">
           <span className="mb-2.5 block text-sm font-medium text-[#0B0B0C]">
@@ -69,6 +82,15 @@ export function ContactForm() {
       >
         Skicka förfrågan
       </button>
+
+      {isSubmitted ? (
+        <p
+          aria-live="polite"
+          className="rounded-[1.4rem] border border-[#C6A15B]/30 bg-[#F7F3EA] px-4 py-3 text-sm font-medium text-[#0B0B0C]"
+        >
+          Tack för din förfrågan.
+        </p>
+      ) : null}
     </form>
   );
 }
