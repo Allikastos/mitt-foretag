@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -9,9 +12,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Ekonomisk styrning och redovisning för småföretag | Bidewind Consulting",
+  title: {
+    default: `${siteConfig.name} | ${siteConfig.tagline}`,
+    template: `%s | ${siteConfig.name}`,
+  },
   description:
-    "Bidewind Consulting hjälper småföretag med redovisning, rapportering och ekonomisk analys för bättre beslut och stabil tillväxt.",
+    "Bidewind Consulting hjälper mindre företag med redovisning, finansiell rapportering och ekonomisk analys för bättre kontroll, tydligare beslutsunderlag och långsiktigt hållbar styrning.",
 };
 
 export default function RootLayout({
@@ -22,7 +28,11 @@ export default function RootLayout({
   return (
     <html lang="sv" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        {children}
+        <div className="flex min-h-screen flex-col bg-[#F7F7F5] text-[#1A1A1A]">
+          <SiteHeader />
+          <main className="flex-1">{children}</main>
+          <SiteFooter />
+        </div>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-VH5R30NZY6"
           strategy="afterInteractive"
