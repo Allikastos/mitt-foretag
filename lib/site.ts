@@ -20,17 +20,25 @@ export type ServiceSlug = "redovisning" | "rapportering" | "radgivning";
 export type Service = {
   slug: ServiceSlug;
   title: string;
+  detailTitle: string;
   label: string;
   href: string;
   summary: string;
   overview: string;
-  detailLead: string;
   includedTitle: string;
+  includedLead: string;
   included: string[];
-  examplesTitle: string;
-  examples: string[];
+  includedOutro?: string;
+  secondaryTitle: string;
+  secondaryLead: string;
+  secondary: string[];
+  workTitle: string;
+  workParagraphs: string[];
   fitTitle: string;
+  fitLead: string;
   fit: string[];
+  ctaTitle: string;
+  ctaDescription: string;
   seoTitle: string;
   seoDescription: string;
 };
@@ -39,104 +47,148 @@ export const services: Service[] = [
   {
     slug: "redovisning",
     title: "Redovisning",
+    detailTitle: "Redovisning för mindre företag",
     label: "Redovisning",
     href: "/tjanster/redovisning",
     summary:
-      "Löpande redovisning med fokus på struktur, precision och kontinuitet för mindre företag som vill arbeta med bättre kontroll.",
+      "Löpande redovisning, bokföring och moms för mindre företag som vill ha ordning på siffrorna utan att lägga tid på det själva.",
     overview:
-      "Redovisningen ska skapa trygghet i vardagen och ge en stabil grund för resten av ekonomiarbetet. Bidewind Consulting hjälper mindre företag att bygga ordning i det löpande arbetet så att bokföring, moms och avstämningar håller en jämn och pålitlig nivå över tid.",
-    detailLead:
-      "Tyngdpunkten ligger på struktur, kvalitet och tydlighet, inte på ett reaktivt brandsläckningsarbete.",
-    includedTitle: "Det här kan ingå i redovisningsarbetet",
+      "Jag hjälper mindre företag med löpande redovisning, bokföring och moms. Målet är att du ska ha ordning på siffrorna och en tydlig bild av hur verksamheten går, utan att behöva lägga tid på det själv.",
+    includedTitle: "Vad ingår i redovisning?",
+    includedLead:
+      "Redovisning handlar om att löpande registrera och strukturera företagets ekonomi. Det är grunden för att kunna följa upp verksamheten och fatta rätt beslut.",
     included: [
-      "Löpande bokföring och löpande avstämningar",
-      "Momsredovisning och stöd kring periodiska rapporter",
-      "Struktur för underlag, rutiner och återkommande uppföljning",
-      "Bättre ordning inför bokslut, rapportering och fortsatt analys",
+      "Löpande bokföring",
+      "Hantering av moms",
+      "Avstämningar",
+      "Underlag inför bokslut",
     ],
-    examplesTitle: "Vad arbetet ska skapa",
-    examples: [
-      "En mer stabil ekonomifunktion i vardagen",
-      "Färre oklarheter kring siffror och underlag",
-      "Bättre kontroll över den löpande ekonomiska administrationen",
+    includedOutro:
+      "Allt görs på ett strukturerat sätt så att siffrorna alltid går att lita på.",
+    secondaryTitle: "Varför är redovisning viktigt?",
+    secondaryLead:
+      "En fungerande redovisning är avgörande för att ha kontroll på företagets ekonomi. Utan tydliga siffror blir det svårt att veta hur verksamheten faktiskt går.",
+    secondary: [
+      "Kontroll på intäkter och kostnader",
+      "Underlag för beslut",
+      "Mindre risk för fel",
+      "En stabil grund att bygga vidare på",
+    ],
+    workTitle: "Hur jag arbetar",
+    workParagraphs: [
+      "Jag arbetar löpande och strukturerat, med fokus på enkelhet och tydlighet. Du ska inte behöva fundera på hur redovisningen fungerar, den ska bara fungera.",
+      "Samarbetet anpassas efter din verksamhet, men målet är alltid detsamma: att du ska ha ordning på ekonomin och veta vad siffrorna visar.",
     ],
     fitTitle: "Vem det passar för",
+    fitLead:
+      "Tjänsten passar mindre företag och konsulter som vill ha en enkel och pålitlig lösning för sin redovisning.",
     fit: [
-      "Småföretag som vill få bättre ordning i ekonomin",
-      "Konsultbolag och tjänsteföretag med behov av tydliga rutiner",
-      "Växande verksamheter som behöver mer struktur utan onödig komplexitet",
+      "Vill slippa lägga tid på bokföring",
+      "Vill ha bättre struktur",
+      "Vill känna trygghet i siffrorna",
     ],
-    seoTitle: "Redovisning för småföretag",
+    ctaTitle: "Vill du ha hjälp med redovisningen?",
+    ctaDescription: "Hör av dig så berättar jag mer.",
+    seoTitle: "Redovisning för mindre företag",
     seoDescription:
-      "Redovisning för småföretag i Linköping och Sverige med fokus på struktur, precision och löpande kontroll.",
+      "Redovisning för mindre företag i Linköping och Sverige med fokus på bokföring, moms, struktur och tydlig ekonomisk kontroll.",
   },
   {
     slug: "rapportering",
-    title: "Finansiell rapportering",
+    title: "Rapportering",
+    detailTitle: "Månadsrapportering och uppföljning",
     label: "Rapportering",
     href: "/tjanster/rapportering",
     summary:
-      "Finansiell rapportering som gör siffrorna tydliga och användbara för företagare som vill förstå sin ekonomiska position bättre.",
+      "Tydlig månadsrapportering och uppföljning som gör ekonomin enkel att förstå och använda i vardagen.",
     overview:
-      "Rapportering handlar inte bara om att sammanställa siffror. Den ska skapa insikt. Bidewind Consulting hjälper företag att få tydligare uppföljning, bättre förståelse för utvecklingen i verksamheten och ett mer användbart beslutsunderlag månad för månad.",
-    detailLead:
-      "Fokus ligger på klarhet i siffrorna och på att lyfta fram det som faktiskt är relevant att agera på.",
-    includedTitle: "Exempel på vad rapporteringen kan innehålla",
+      "Jag hjälper företag att följa upp sin ekonomi löpande genom tydlig och enkel rapportering. Du får en klar bild av hur verksamheten går och vad du behöver agera på.",
+    includedTitle: "Vad är rapportering?",
+    includedLead:
+      "Rapportering handlar om att sammanställa företagets ekonomi på ett sätt som är lätt att förstå.",
     included: [
-      "Månadsrapport med resultat, balans och kommentarer",
-      "Uppföljning av lönsamhet, kostnader och kassaflöde",
-      "Nyckeltal som gör det lättare att se trender och avvikelser",
-      "Tydligare struktur för att förstå nuläge och utveckling över tid",
+      "Intäkter",
+      "Kostnader",
+      "Resultat",
+      "Utveckling över tid",
     ],
-    examplesTitle: "Vad rapporteringen ska bidra med",
-    examples: [
-      "Bättre förståelse för företagets finansiella position",
-      "Större klarhet i hur verksamheten faktiskt utvecklas",
-      "Underlag som gör det enklare att prioritera rätt framåt",
+    includedOutro:
+      "Istället för att bara ha siffror i ett system får du en tydlig överblick över företagets ekonomi.",
+    secondaryTitle: "Varför är det viktigt?",
+    secondaryLead:
+      "Många företag tittar på siffrorna för sällan. Då blir det svårt att upptäcka problem i tid eller förstå vad som fungerar bra.",
+    secondary: [
+      "Fatta bättre beslut",
+      "Följa utvecklingen i företaget",
+      "Upptäcka problem tidigt",
+      "Få bättre kontroll över ekonomin",
+    ],
+    workTitle: "Hur jag arbetar",
+    workParagraphs: [
+      "Jag tar fram rapporter löpande och går igenom dem på ett enkelt och tydligt sätt.",
+      "Fokus ligger på att du ska förstå siffrorna, inte bara få dem presenterade. Det innebär att rapporteringen anpassas efter vad som är relevant för just din verksamhet.",
     ],
     fitTitle: "Vem det passar för",
+    fitLead:
+      "Tjänsten passar företag som vill ha bättre koll på hur verksamheten går, utan att behöva analysera allt själva.",
     fit: [
-      "Företagare som vill förstå sina siffror bättre",
-      "Mindre bolag som saknar tydlig löpande uppföljning",
-      "Verksamheter i förändring, tillväxt eller med höjda krav på kontroll",
+      "Vill följa upp ekonomin varje månad",
+      "Vill förstå vad siffrorna betyder",
+      "Vill fatta mer välgrundade beslut",
     ],
-    seoTitle: "Finansiell rapportering för mindre företag",
+    ctaTitle: "Vill du få bättre koll på hur ditt företag går?",
+    ctaDescription: "Hör av dig så berättar jag mer.",
+    seoTitle: "Månadsrapportering och uppföljning",
     seoDescription:
-      "Finansiell rapportering och uppföljning för mindre företag som vill ha tydligare siffror, bättre insikt och starkare beslutsunderlag.",
+      "Månadsrapportering och uppföljning för mindre företag som vill förstå siffrorna bättre och få bättre kontroll över ekonomin.",
   },
   {
     slug: "radgivning",
-    title: "Ekonomisk analys och rådgivning",
+    title: "Rådgivning",
+    detailTitle: "Ekonomisk rådgivning för bättre beslut",
     label: "Rådgivning",
     href: "/tjanster/radgivning",
     summary:
-      "Ett mer rådgivande och analytiskt stöd för företag som vill arbeta med lönsamhet, kostnadsstruktur och bättre ekonomiska beslut.",
+      "Ekonomisk rådgivning som hjälper dig att förstå siffrorna och använda dem för bättre beslut i företaget.",
     overview:
-      "Rådgivningsarbetet är till för företag som vill använda ekonomin mer strategiskt. Bidewind Consulting hjälper till att analysera siffror, förstå vad som driver resultatet och skapa större trygghet i viktiga beslut.",
-    detailLead:
-      "Det här är den mest rådgivande delen av erbjudandet och riktar sig till företag som vill ha mer än traditionell redovisning.",
-    includedTitle: "Exempel på rådgivningsområden",
+      "Jag hjälper företag att förstå sin ekonomi och använda siffrorna som ett verktyg i verksamheten. Målet är att du ska kunna fatta bättre beslut och utveckla företaget i rätt riktning.",
+    includedTitle: "Vad innebär ekonomisk rådgivning?",
+    includedLead:
+      "Ekonomisk rådgivning handlar om att gå från siffror till insikter.",
     included: [
-      "Lönsamhetsanalys och genomgång av affärsmodell",
-      "Kostnadsstruktur och prioriteringar i verksamheten",
-      "Kassaflödesmedvetenhet och bättre framförhållning",
-      "Beslutsstöd inför tillväxt, förändring eller osäkra perioder",
+      "Vad siffrorna betyder",
+      "Vad som påverkar lönsamheten",
+      "Var det finns förbättringspotential",
     ],
-    examplesTitle: "Situationer där rådgivning är särskilt värdefull",
-    examples: [
-      "När resultatet känns otydligt trots hög aktivitet",
-      "När företagaren behöver bättre kontroll inför nästa steg",
-      "När siffrorna behöver tolkas, inte bara rapporteras",
+    includedOutro:
+      "Istället för att bara se resultatet får du hjälp att förstå vad siffrorna faktiskt säger om verksamheten.",
+    secondaryTitle: "Vad kan du få hjälp med?",
+    secondaryLead:
+      "Rådgivningen anpassas efter din verksamhet, men kan till exempel handla om:",
+    secondary: [
+      "Lönsamhetsanalys",
+      "Kostnadsstruktur",
+      "Prissättning",
+      "Planering framåt",
+    ],
+    workTitle: "Hur jag arbetar",
+    workParagraphs: [
+      "Jag arbetar nära verksamheten och utgår från dina siffror och din situation.",
+      "Fokus ligger på att göra ekonomin konkret och användbar, så att du kan agera på den i vardagen.",
     ],
     fitTitle: "Vem det passar för",
+    fitLead:
+      "Tjänsten passar företag som vill ta nästa steg och använda ekonomin mer aktivt.",
     fit: [
-      "Företag som vill arbeta mer aktivt med lönsamhet och kontroll",
-      "Ägarledda bolag som saknar ett tydligt ekonomiskt beslutsstöd",
-      "Växande serviceföretag som behöver en mer analytisk partner",
+      "Vill förbättra lönsamheten",
+      "Vill få bättre beslutsunderlag",
+      "Vill utveckla verksamheten",
     ],
-    seoTitle: "Ekonomisk rådgivning för småföretag",
+    ctaTitle: "Vill du använda ekonomin som ett verktyg i ditt företag?",
+    ctaDescription: "Hör av dig så berättar jag mer.",
+    seoTitle: "Ekonomisk rådgivning för bättre beslut",
     seoDescription:
-      "Ekonomisk analys och rådgivning för småföretag i Linköping och Sverige med fokus på lönsamhet, kassaflöde och beslutsstöd.",
+      "Ekonomisk rådgivning för mindre företag som vill förstå siffrorna bättre, förbättra lönsamheten och fatta bättre beslut.",
   },
 ];
 
