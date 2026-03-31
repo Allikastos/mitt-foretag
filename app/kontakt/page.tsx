@@ -55,8 +55,8 @@ export default function ContactPage() {
                 Skicka en förfrågan
               </h2>
               <p className="mt-4 text-base leading-7 text-[#5F5F5F]">
-                Formuläret är redo för innehåll och utformat som om det vore live.
-                Backend kan kopplas på i nästa steg.
+                Beskriv kort vad ni behöver hjälp med, så återkommer jag så snart
+                jag kan.
               </p>
               <div className="mt-8">
                 <ContactForm />
