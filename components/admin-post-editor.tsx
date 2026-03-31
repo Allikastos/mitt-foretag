@@ -113,6 +113,14 @@ function hasMeaningfulContent(value: string) {
   return value.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").trim().length > 0;
 }
 
+function getErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+
+  return fallback;
+}
+
 export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
   const router = useRouter();
   const [posts, setPosts] = useState(initialPosts);
@@ -302,6 +310,13 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
         return;
       }
 
+      if (!data) {
+        setErrorMessage(
+          "Inlägget kunde inte sparas. Supabase returnerade inget svar."
+        );
+        return;
+      }
+
       const updatedPosts = selectedPostId
         ? posts.map((post) => (post.id === data.id ? data : post))
         : [data, ...posts];
@@ -326,6 +341,14 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
       startTransition(() => {
         router.refresh();
       });
+    } catch (error) {
+      console.error("Failed to persist post", error);
+      setErrorMessage(
+        getErrorMessage(
+          error,
+          "Inlägget kunde inte sparas just nu. Kontrollera anslutningen till Supabase och försök igen."
+        )
+      );
     } finally {
       setSavingIntent(null);
     }

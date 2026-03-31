@@ -41,6 +41,13 @@ export function AdminLoginForm() {
 
       router.replace("/admin");
       router.refresh();
+    } catch (error) {
+      console.error("Failed to sign in to admin", error);
+      setErrorMessage(
+        error instanceof Error && error.message.trim()
+          ? error.message
+          : "Inloggningen kunde inte genomföras just nu. Försök igen."
+      );
     } finally {
       setIsLoading(false);
     }

@@ -29,7 +29,7 @@ export default async function BlogPage() {
       <PageIntro
         eyebrow="Blogg"
         title="Perspektiv på redovisning, rapportering och ekonomisk styrning."
-        description="Här samlas artiklar och insikter från Bidewind Consulting. Innehållet hämtas från Supabase och är redo att fyllas på med publicerade inlägg."
+        description="Här samlas artiklar och insikter från Bidewind Consulting om redovisning, rapportering och ekonomisk styrning."
       />
 
       <section className="pb-24 pt-4 md:pb-24 md:pt-8">

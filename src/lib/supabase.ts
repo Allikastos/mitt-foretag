@@ -53,10 +53,18 @@ type TypedSupabaseClient = SupabaseClient<Database>;
 let browserClient: TypedSupabaseClient | null = null;
 export const BLOG_IMAGES_BUCKET = "blog-images";
 
+function getSupabasePublicKey() {
+  return (
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  );
+}
+
 export function getSupabaseEnv() {
   return {
     url: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    anonKey: getSupabasePublicKey(),
   };
 }
 
@@ -70,7 +78,7 @@ function requireSupabaseEnv() {
 
   if (!url || !anonKey) {
     throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY."
+      "Missing NEXT_PUBLIC_SUPABASE_URL or a public Supabase key."
     );
   }
 
