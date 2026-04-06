@@ -1,5 +1,7 @@
+const BRAND_NAME = "Altura Nova";
+
 export const SITE_CONFIG = {
-  name: "Altura Nova",
+  name: BRAND_NAME,
   description:
     "Redovisning, rapportering och ekonomisk rådgivning för företag som vill ha bättre kontroll, tydligare siffror och bättre beslutsunderlag.",
   domain: "alturanova.se",
@@ -14,7 +16,7 @@ export const SITE_CONFIG = {
     readArticle: "Läs artikel",
   },
   legalNotice:
-    "Altura Nova är ett varumärke under etablering. Under uppstartsperioden kan bolaget vara registrerat under ett annat namn.",
+    `${BRAND_NAME} är ett varumärke under etablering. Under uppstartsperioden kan bolaget vara registrerat under ett annat namn.`,
   contact: {
     email: "albinholmberg@icloud.com",
     phoneDisplay: "076-0218499",
