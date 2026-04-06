@@ -6,15 +6,16 @@ import { SectionContainer } from "@/components/section-container";
 import { createMetadata } from "@/lib/metadata";
 
 export const metadata = createMetadata(
-  "Redovisning, rapportering och rådgivning",
-  `${SITE_CONFIG.name} hjälper växande och ägarledda bolag med redovisning, rapportering och rådgivning för bättre kontroll, tydligare siffror och snabbare beslut.`,
+  "Redovisning, rapportering och rådgivning för växande företag",
+  `${SITE_CONFIG.name} hjälper växande och ägarledda bolag med redovisning, rapportering och rådgivning för bättre kontroll, tydligare siffror och snabbare beslut i verksamheten.`,
   { pathname: "/" }
 );
 
 const helpItems = [
-  "Redovisning som skapar ordning och minskar friktion",
-  "Rapportering som visar vad som påverkar resultatet",
-  "Rådgivning som gör besluten mer träffsäkra",
+  "tydlig ekonomisk överblick",
+  "bättre uppföljning över tid",
+  "underlag för beslut",
+  "en stabil grund för tillväxt",
 ];
 
 const serviceSections = [
@@ -69,12 +70,13 @@ export default function HomePage() {
                   {SITE_CONFIG.name}
                 </p>
                 <h1 className="mt-7 text-4xl font-semibold tracking-[-0.055em] text-[#0B0B0C] text-balance md:text-5xl lg:text-[4.2rem] lg:leading-[0.98]">
-                  Redovisning, rapportering och rådgivning för företag som vill styra med bättre siffror
+                  Ekonomisk kontroll som faktiskt driver bättre beslut
                 </h1>
                 <p className="mt-7 max-w-2xl text-lg leading-8 text-[#5F5F5F] md:text-[1.125rem]">
-                  {SITE_CONFIG.name} hjälper växande och ägarledda bolag att få
-                  bättre kontroll, tydligare uppföljning och ett starkare
-                  beslutsunderlag i vardagen.
+                  {SITE_CONFIG.name} hjälper växande och ägarledda företag att
+                  få tydliga siffror, bättre struktur och ett stabilt
+                  beslutsunderlag - så att du kan fokusera på att driva och
+                  utveckla verksamheten.
                 </p>
 
                 <div className="mt-12 flex flex-col gap-4 sm:flex-row">
@@ -82,13 +84,13 @@ export default function HomePage() {
                     href="/kontakt"
                     className="inline-flex items-center justify-center rounded-2xl bg-[#0B0B0C] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
                   >
-                    {SITE_CONFIG.cta.primary}
+                    Kontakta oss
                   </Link>
                   <Link
                     href="/tjanster"
                     className="inline-flex items-center justify-center rounded-2xl border border-black/10 px-6 py-3 text-sm font-medium text-[#0B0B0C] transition hover:bg-[#F7F7F5]"
                   >
-                    {SITE_CONFIG.cta.services}
+                    Se våra tjänster
                   </Link>
                 </div>
               </div>
@@ -133,15 +135,18 @@ export default function HomePage() {
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] lg:items-start lg:gap-12">
             <div className="max-w-[48rem]">
               <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
-                Tjänsteområden
+                Värde
               </p>
               <h2 className="mt-5 text-3xl font-semibold tracking-[-0.045em] text-[#0B0B0C] text-balance md:text-4xl">
-                Tre tjänsteområden som stärker den ekonomiska styrningen
+                Få mer än bara bokföring
               </h2>
               <p className="mt-6 text-lg leading-8 text-[#5F5F5F]">
-                Arbetet fokuserar på att göra ekonomin mer användbar i vardagen.
-                Ni får ordning i redovisningen, tydligare rapportering och bättre
-                stöd i beslut som påverkar lönsamhet och utveckling.
+                Många företag har sin redovisning på plats - men saknar tydlig
+                uppföljning, struktur och förståelse för vad siffrorna faktiskt
+                innebär.
+              </p>
+              <p className="mt-5 text-lg leading-8 text-[#5F5F5F]">
+                Vi arbetar nära våra kunder för att skapa:
               </p>
             </div>
 

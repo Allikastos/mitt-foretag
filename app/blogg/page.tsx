@@ -8,8 +8,8 @@ import { getPublishedPosts } from "@/src/lib/supabase-server";
 export const dynamic = "force-dynamic";
 
 export const metadata = createMetadata(
-  "Blogg",
-  `Artiklar från ${SITE_CONFIG.name} om redovisning, finansiell rapportering och ekonomisk rådgivning för växande och ägarledda bolag.`,
+  "Blogg om redovisning, rapportering och rådgivning",
+  `Artiklar från ${SITE_CONFIG.name} för företag som vill förstå kostnader, byta redovisningsbyrå och förbättra ekonomisk uppföljning.`,
   { pathname: "/blogg" }
 );
 
@@ -67,9 +67,26 @@ function formatDate(value: string | null, fallback: string) {
 
 export default async function BlogPage() {
   const posts = await getPublishedPosts();
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
+    })),
+  };
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+
       <PageIntro
         eyebrow="Blogg"
         title="Kunskapsbank för redovisning, rapportering och ekonomisk styrning."

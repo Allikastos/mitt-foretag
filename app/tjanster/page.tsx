@@ -7,8 +7,8 @@ import { createMetadata } from "@/lib/metadata";
 import { companyTypes, services } from "@/lib/site";
 
 export const metadata = createMetadata(
-  "Tjänster",
-  "Tjänster inom redovisning, finansiell rapportering och ekonomisk rådgivning för växande och ägarledda bolag i Linköping och Sverige.",
+  "Redovisning, rapportering och rådgivning",
+  "Tjänster inom redovisning, rapportering och ekonomisk rådgivning för växande och ägarledda bolag som vill ha bättre kontroll och tydligare beslutsunderlag.",
   { pathname: "/tjanster" }
 );
 

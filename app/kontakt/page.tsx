@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ContactForm } from "@/components/contact-form";
 import { SITE_CONFIG } from "@/config/site";
 import { PageIntro } from "@/components/page-intro";
@@ -24,7 +25,7 @@ const contactSteps = [
 
 export const metadata = createMetadata(
   "Kontakt",
-  `Boka ett första samtal med ${SITE_CONFIG.name} om redovisning, rapportering eller ekonomisk rådgivning. Ni får ett tydligt nästa steg utifrån ert nuläge.`,
+  `Boka ett första samtal med ${SITE_CONFIG.name} om redovisning, rapportering eller ekonomisk rådgivning. Vi återkopplar vanligtvis inom 24 timmar.`,
   { pathname: "/kontakt" }
 );
 
@@ -34,7 +35,7 @@ export default function ContactPage() {
       <PageIntro
         eyebrow="Kontakt"
         title="Boka ett första samtal om redovisning, rapportering eller ekonomisk rådgivning."
-        description={`Du behöver inte ha ett färdigt upplägg. Beskriv nuläge, frågor eller vad som känns oklart, så återkommer ${SITE_CONFIG.name} normalt inom en arbetsdag med ett tydligt nästa steg.`}
+        description={`Du behöver inte ha ett färdigt upplägg. Beskriv nuläge, frågor eller vad som känns oklart, så återkommer ${SITE_CONFIG.name} med ett tydligt nästa steg. Vi återkopplar vanligtvis inom 24 timmar.`}
       />
 
       <section className="pb-8 pt-8 md:pb-12 md:pt-10">
@@ -81,8 +82,7 @@ export default function ContactPage() {
                   Möten kan hållas digitalt eller på plats beroende på vad som
                   passar bäst. För företag i Linköping är det naturligt att ses
                   lokalt, men samarbeten fungerar lika väl med företag i övriga
-                  Sverige. Normalt får ni en första återkoppling inom en
-                  arbetsdag.
+                  Sverige. Vi återkopplar vanligtvis inom 24 timmar.
                 </p>
               </div>
             </div>
@@ -98,6 +98,17 @@ export default function ContactPage() {
               </p>
               <div className="mt-8">
                 <ContactForm />
+              </div>
+              <div className="mt-8 rounded-[1.5rem] border border-black/8 bg-[#F7F7F5] p-5 text-sm leading-7 text-[#5F5F5F]">
+                Vill ni förbereda mötet? Se{" "}
+                <Link href="/tjanster" className="font-medium text-[#0B0B0C] underline underline-offset-4">
+                  tjänsteområden
+                </Link>{" "}
+                eller läs relevanta artiklar i{" "}
+                <Link href="/blogg" className="font-medium text-[#0B0B0C] underline underline-offset-4">
+                  bloggen
+                </Link>
+                .
               </div>
             </div>
           </div>

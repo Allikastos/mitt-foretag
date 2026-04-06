@@ -16,6 +16,27 @@ type BlogPostPageProps = {
   params: Promise<{ slug: string }>;
 };
 
+const serviceLinkCards = [
+  {
+    title: "Redovisning",
+    href: "/tjanster/redovisning",
+    description:
+      "För företag som vill ha stabil löpande redovisning med hög kvalitet och tydlig struktur.",
+  },
+  {
+    title: "Rapportering",
+    href: "/tjanster/rapportering",
+    description:
+      "För bolag som vill följa upp ekonomi och nyckeltal mer aktivt i vardagen.",
+  },
+  {
+    title: "Rådgivning",
+    href: "/tjanster/radgivning",
+    description:
+      "För ledning och ägare som vill fatta mer träffsäkra beslut med bättre underlag.",
+  },
+] as const;
+
 function formatDate(value: string | null, fallback: string) {
   const date = value ?? fallback;
 
@@ -159,6 +180,31 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               Publicerad {formatDate(post.publish_at, post.created_at)}
             </p>
             <BlogRichText content={post.content} className="mt-6" />
+            <div className="mt-10 border-t border-black/8 pt-8">
+              <h2 className="text-2xl font-semibold tracking-[-0.03em] text-[#0B0B0C] md:text-3xl">
+                Nästa steg för er verksamhet
+              </h2>
+              <p className="mt-3 text-base leading-7 text-[#5F5F5F]">
+                Om ni vill omsätta insikterna i praktiken kan ni börja med det
+                tjänsteområde som är mest relevant för ert nuläge.
+              </p>
+              <div className="mt-6 grid gap-4 md:grid-cols-3">
+                {serviceLinkCards.map((service) => (
+                  <Link
+                    key={service.href}
+                    href={service.href}
+                    className="rounded-[1.5rem] border border-black/8 bg-[#F7F7F5] px-5 py-5 transition hover:border-black/20"
+                  >
+                    <h3 className="text-lg font-semibold tracking-[-0.02em] text-[#0B0B0C]">
+                      {service.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-7 text-[#5F5F5F]">
+                      {service.description}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </article>
         </SectionContainer>
       </section>

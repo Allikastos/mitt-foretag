@@ -39,27 +39,28 @@ export const services: Service[] = [
   {
     slug: "redovisning",
     title: "Redovisning",
-    detailTitle: "Redovisning för företag som vill ha ordning, kontroll och mindre administration",
+    detailTitle: "Redovisning som skapar kontroll - inte bara ordning",
     label: "Redovisning",
     href: "/tjanster/redovisning",
     summary:
-      "Löpande redovisning, bokföring och moms för företag som vill frigöra tid, minska risken för fel och få bättre kontroll över ekonomin.",
+      "Redovisning som ger en tydlig och pålitlig bild av verksamheten och skapar bättre kontroll i ekonomin.",
     overview:
-      `${SITE_CONFIG.name} hjälper växande och ägarledda bolag med löpande redovisning, bokföring och moms på ett sätt som skapar ordning i vardagen. Du får en struktur som fungerar löpande, tillförlitliga siffror och mindre tid som försvinner till administration.`,
-    includedTitle: "Det här ingår i ett redovisningsupplägg som håller över tid",
+      `Redovisning handlar inte bara om att följa regler - det handlar om att skapa en tydlig och pålitlig bild av verksamheten. På ${SITE_CONFIG.name} arbetar vi med redovisning som en grund för bättre kontroll, stabilitet och beslut.`,
+    includedTitle: "Det här får du",
     includedLead:
-      "Målet är inte bara korrekt bokföring, utan ett arbetssätt där ekonomin är uppdaterad, spårbar och enkel att följa upp varje månad.",
+      "Ni får ett redovisningsupplägg som bygger kvalitet i vardagen och stärker ert beslutsunderlag över tid.",
     included: [
-      "Löpande bokföring",
-      "Momsredovisning och löpande rapportering till rätt tid",
-      "Avstämningar som minskar risken för överraskningar",
-      "Ordning i underlag inför bokslut och fortsatt uppföljning",
+      "Löpande bokföring med hög kvalitet",
+      "Struktur i ekonomin",
+      "Korrekt moms och rapportering",
+      "Bokslut och årsredovisning",
+      "En stabil grund för analys",
     ],
     includedOutro:
-      "Det ger dig en trygg grund i ekonomin och gör det lättare att agera i tid när något förändras.",
+      "Det ger er en trygg ekonomisk grund och gör det lättare att styra verksamheten med precision.",
     secondaryTitle: "Vad tjänsten skapar i praktiken",
     secondaryLead:
-      "När redovisningen fungerar konsekvent blir ekonomin mindre av ett osäkerhetsmoment och mer av ett underlag för bättre beslut.",
+      "När redovisningen är stabil blir ekonomin mindre osäker och mer användbar i praktiska affärsbeslut.",
     secondary: [
       "Bättre kontroll över intäkter, kostnader och likviditet",
       "Mindre risk för fel, förseningar och dubbelarbete",
@@ -79,7 +80,7 @@ export const services: Service[] = [
       "Vill ha bättre struktur i underlag, rutiner och ansvar",
       "Vill kunna lita på att ekonomin är uppdaterad",
     ],
-    ctaTitle: "Vill du ha redovisning som ger ordning utan att ta onödig tid?",
+    ctaTitle: "Vill ni ha redovisning som skapar kontroll och stabilitet i vardagen?",
     ctaDescription:
       "Boka ett första samtal så går vi igenom nuläge, arbetssätt och vilket redovisningsupplägg som skapar bäst effekt i er verksamhet.",
     seoTitle: "Redovisning för växande företag",

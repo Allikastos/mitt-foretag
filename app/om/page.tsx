@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CTABlock } from "@/components/cta-block";
 import { SITE_CONFIG } from "@/config/site";
 import { PageIntro } from "@/components/page-intro";
@@ -7,7 +8,7 @@ import { values, workSteps } from "@/lib/site";
 
 export const metadata = createMetadata(
   `Om ${SITE_CONFIG.name}`,
-  `Lär känna ${SITE_CONFIG.name}, varför verksamheten finns och hur samarbetet är utformat för företag som vill ha tydligare ekonomisk struktur och bättre beslutsstöd.`,
+  `Lär känna ${SITE_CONFIG.name} och hur samarbetet är utformat för företag som vill ha tydligare ekonomisk struktur, bättre uppföljning och starkare beslutsstöd.`,
   { pathname: "/om" }
 );
 
@@ -16,8 +17,8 @@ export default function AboutPage() {
     <>
       <PageIntro
         eyebrow="Om"
-        title={`${SITE_CONFIG.name} finns för företag som vill göra ekonomin mer användbar i vardagen.`}
-        description="Målet är inte bara korrekt redovisning, utan ett arbetssätt som ger tydligare uppföljning, bättre beslutsunderlag och större trygghet i den ekonomiska styrningen."
+        title={`${SITE_CONFIG.name} finns för företag som vill fatta bättre beslut med tydligare ekonomisk kontroll.`}
+        description="Målet är inte bara korrekt redovisning, utan ett arbetssätt som gör ekonomin mer användbar i vardagen och skapar trygghet i styrningen."
       />
 
       <section className="pb-8 pt-8 md:pb-12 md:pt-10">
@@ -25,7 +26,7 @@ export default function AboutPage() {
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(18rem,0.92fr)]">
             <div className="rounded-[2.15rem] border border-black/8 bg-white p-8 shadow-[0_24px_60px_-55px_rgba(0,0,0,0.18)] md:p-10">
               <h2 className="text-balance text-2xl font-semibold tracking-[-0.035em] text-[#0B0B0C] md:text-3xl">
-                Varför {SITE_CONFIG.name} finns
+                Varför kunder väljer {SITE_CONFIG.name}
               </h2>
               <p className="mt-6 text-lg leading-8 text-[#5F5F5F]">
                 Många företag har tillgång till siffror, men inte alltid till den
@@ -36,7 +37,7 @@ export default function AboutPage() {
               <p className="mt-6 text-lg leading-8 text-[#5F5F5F]">
                 Det innebär redovisning som håller kvalitet, rapportering som går
                 att agera på och ekonomiska samtal som skapar bättre styrning
-                över tid. Ambitionen är att göra ekonomifunktionen till en
+                över tid. Ambitionen är att ekonomifunktionen ska bli en
                 tillgång i verksamheten, inte bara en administrativ nödvändighet.
               </p>
             </div>
@@ -70,7 +71,7 @@ export default function AboutPage() {
               Samarbetet
             </p>
             <h2 className="mt-5 text-balance text-3xl font-semibold tracking-[-0.045em] text-[#0B0B0C] md:text-4xl">
-              Så fungerar ett samarbete med {SITE_CONFIG.name}.
+              Så fungerar ett samarbete som skapar tydligt affärsvärde.
             </h2>
             <p className="mt-6 text-lg leading-8 text-[#5F5F5F]">
               Upplägget ska vara tydligt från början. Ni ska veta vad som händer,
@@ -93,6 +94,26 @@ export default function AboutPage() {
                 </p>
               </article>
             ))}
+          </div>
+        </SectionContainer>
+      </section>
+
+      <section className="pb-8">
+        <SectionContainer>
+          <div className="rounded-[1.75rem] border border-black/8 bg-[#F7F7F5] p-6 text-sm leading-7 text-[#5F5F5F]">
+            Fördjupa er i{" "}
+            <Link href="/tjanster" className="font-medium text-[#0B0B0C] underline underline-offset-4">
+              våra tjänster
+            </Link>{" "}
+            eller läs artiklar i{" "}
+            <Link href="/blogg" className="font-medium text-[#0B0B0C] underline underline-offset-4">
+              bloggen
+            </Link>
+            . När ni vill diskutera ert nuläge kan ni{" "}
+            <Link href="/kontakt" className="font-medium text-[#0B0B0C] underline underline-offset-4">
+              boka ett första samtal
+            </Link>
+            .
           </div>
         </SectionContainer>
       </section>
