@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SITE_CONFIG } from "@/config/site";
 
 type ServiceCardProps = {
   title: string;
@@ -14,7 +15,7 @@ export function ServiceCard({
   summary,
   href,
   label = "Tjänst",
-  ctaLabel = "Läs mer",
+  ctaLabel = SITE_CONFIG.cta.serviceDetails,
   variant = "compact",
 }: ServiceCardProps) {
   const isFeature = variant === "feature";

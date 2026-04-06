@@ -25,6 +25,27 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: SITE_CONFIG.name,
+    url: SITE_CONFIG.url,
+    email: SITE_CONFIG.contact.email,
+    telephone: SITE_CONFIG.contact.phoneDisplay,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: SITE_CONFIG.contact.city,
+      addressCountry: SITE_CONFIG.contact.country,
+    },
+  };
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_CONFIG.name,
+    url: SITE_CONFIG.url,
+    inLanguage: "sv-SE",
+  };
+
   return (
     <html lang="sv" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
@@ -33,6 +54,12 @@ export default function RootLayout({
           <main className="flex-1">{children}</main>
           <SiteFooter />
         </div>
+        <Script id="schema-organization" type="application/ld+json">
+          {JSON.stringify(organizationSchema)}
+        </Script>
+        <Script id="schema-website" type="application/ld+json">
+          {JSON.stringify(websiteSchema)}
+        </Script>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-VH5R30NZY6"
           strategy="afterInteractive"

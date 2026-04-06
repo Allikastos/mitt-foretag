@@ -10,6 +10,7 @@ import {
   type Database,
   type PostRow,
 } from "./supabase";
+import { LOCAL_SEO_POSTS } from "./local-posts";
 
 function isPostPublic(post: PostRow) {
   if (post.status !== "published") {
@@ -21,6 +22,24 @@ function isPostPublic(post: PostRow) {
   }
 
   return new Date(post.publish_at).getTime() <= Date.now();
+}
+
+function mergePosts(primary: PostRow[], secondary: PostRow[]) {
+  const bySlug = new Map<string, PostRow>();
+
+  for (const post of secondary) {
+    bySlug.set(post.slug, post);
+  }
+
+  for (const post of primary) {
+    bySlug.set(post.slug, post);
+  }
+
+  return Array.from(bySlug.values()).sort((a, b) => {
+    const aDate = new Date(a.publish_at ?? a.created_at).getTime();
+    const bDate = new Date(b.publish_at ?? b.created_at).getTime();
+    return bDate - aDate;
+  });
 }
 
 export async function createSupabaseServerClient() {
@@ -104,7 +123,7 @@ export async function getAdminPosts(): Promise<PostRow[]> {
 
 export async function getPublishedPosts(): Promise<PostRow[]> {
   if (!hasSupabaseEnv()) {
-    return [];
+    return LOCAL_SEO_POSTS;
   }
 
   const supabase = createPublicSupabaseClient();
@@ -116,17 +135,20 @@ export async function getPublishedPosts(): Promise<PostRow[]> {
 
   if (error) {
     console.error("Failed to fetch published posts", error);
-    return [];
+    return LOCAL_SEO_POSTS;
   }
 
-  return (data ?? []).filter(isPostPublic);
+  const remotePosts = (data ?? []).filter(isPostPublic);
+  return mergePosts(remotePosts, LOCAL_SEO_POSTS);
 }
 
 export async function getPublishedPostBySlug(
   slug: string
 ): Promise<PostRow | null> {
+  const localPost = LOCAL_SEO_POSTS.find((post) => post.slug === slug) ?? null;
+
   if (!hasSupabaseEnv()) {
-    return null;
+    return localPost;
   }
 
   const supabase = createPublicSupabaseClient();
@@ -141,8 +163,12 @@ export async function getPublishedPostBySlug(
       console.error(`Failed to fetch post for slug ${slug}`, error);
     }
 
-    return null;
+    return localPost;
   }
 
-  return isPostPublic(data) ? data : null;
+  if (isPostPublic(data)) {
+    return data;
+  }
+
+  return localPost;
 }

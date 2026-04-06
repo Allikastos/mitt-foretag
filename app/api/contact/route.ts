@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { SITE_CONFIG } from "@/config/site";
 
@@ -10,21 +11,10 @@ type ContactPayload = {
   website?: string;
 };
 
-function escapeHtml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function normalizeField(value: unknown) {
+function getSafeString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
-}
-
-function isValidEmail(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
 export async function POST(request: Request) {
@@ -33,115 +23,84 @@ export async function POST(request: Request) {
   try {
     payload = (await request.json()) as ContactPayload;
   } catch {
-    return Response.json({ error: "Ogiltig förfrågan." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Ogiltig förfrågan. Kontrollera formuläret och försök igen." },
+      { status: 400 }
+    );
   }
 
-  const name = normalizeField(payload.name);
-  const company = normalizeField(payload.company);
-  const email = normalizeField(payload.email);
-  const phone = normalizeField(payload.phone);
-  const message = normalizeField(payload.message);
-  const website = normalizeField(payload.website);
+  const name = getSafeString(payload.name);
+  const company = getSafeString(payload.company);
+  const email = getSafeString(payload.email);
+  const phone = getSafeString(payload.phone);
+  const message = getSafeString(payload.message);
+  const website = getSafeString(payload.website);
 
   if (website) {
-    return Response.json(
+    return NextResponse.json(
       {
         message:
-          "Tack. Din förfrågan är skickad. Jag återkommer för en första avstämning och förslag på nästa steg.",
+          "Tack för din förfrågan. Vi återkommer normalt inom en arbetsdag.",
       },
       { status: 200 }
     );
   }
 
   if (!name || !email || !message) {
-    return Response.json(
-      { error: "Namn, e-post och meddelande måste fyllas i." },
+    return NextResponse.json(
+      { error: "Namn, e-post och meddelande behöver fyllas i." },
       { status: 400 }
     );
   }
 
-  if (!isValidEmail(email)) {
-    return Response.json(
+  if (!EMAIL_REGEX.test(email)) {
+    return NextResponse.json(
       { error: "Ange en giltig e-postadress." },
       { status: 400 }
     );
   }
 
-  const resendApiKey = process.env.RESEND_API_KEY;
-
-  if (!resendApiKey) {
-    return Response.json(
+  if (!process.env.RESEND_API_KEY) {
+    return NextResponse.json(
       {
-        error: `Kontaktformuläret är inte kopplat till e-post ännu. Mejla direkt på ${SITE_CONFIG.contact.email}.`,
+        error:
+          "Kontaktformuläret är tillfälligt otillgängligt. Mejla gärna direkt till oss så återkommer vi snabbt.",
       },
-      { status: 500 }
+      { status: 503 }
     );
   }
 
-  const resend = new Resend(resendApiKey);
-  const toEmail = process.env.CONTACT_TO_EMAIL || SITE_CONFIG.contact.email;
-  const fromEmail = process.env.CONTACT_FROM_EMAIL || "onboarding@resend.dev";
-
-  const safeName = escapeHtml(name);
-  const safeCompany = company ? escapeHtml(company) : "Ej angivet";
-  const safeEmail = escapeHtml(email);
-  const safePhone = phone ? escapeHtml(phone) : "Ej angivet";
-  const safeMessage = escapeHtml(message).replaceAll("\n", "<br />");
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const from =
+    process.env.CONTACT_FROM_EMAIL || "Kontaktformulär <onboarding@resend.dev>";
+  const to = process.env.CONTACT_TO_EMAIL || SITE_CONFIG.contact.email;
 
   try {
-    const { error } = await resend.emails.send({
-      from: fromEmail,
-      to: [toEmail],
-      replyTo: email,
+    await resend.emails.send({
+      from,
+      to,
       subject: `Ny kontaktförfrågan från ${name}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111111;">
-          <h2>Ny kontaktförfrågan från webbplatsen</h2>
-          <p><strong>Namn:</strong> ${safeName}</p>
-          <p><strong>Företag:</strong> ${safeCompany}</p>
-          <p><strong>E-post:</strong> ${safeEmail}</p>
-          <p><strong>Telefon:</strong> ${safePhone}</p>
-          <p><strong>Meddelande:</strong></p>
-          <p>${safeMessage}</p>
-        </div>
-      `,
       text: [
-        "Ny kontaktförfrågan från webbplatsen",
-        "",
         `Namn: ${name}`,
-        `Företag: ${company || "Ej angivet"}`,
+        `Företag: ${company || "-"}`,
         `E-post: ${email}`,
-        `Telefon: ${phone || "Ej angivet"}`,
+        `Telefon: ${phone || "-"}`,
         "",
         "Meddelande:",
         message,
       ].join("\n"),
+      replyTo: email,
     });
 
-    if (error) {
-      console.error("Failed to send contact email", error);
-
-      return Response.json(
-        {
-          error: `Förfrågan kunde inte skickas just nu. Mejla direkt på ${SITE_CONFIG.contact.email}.`,
-        },
-        { status: 500 }
-      );
-    }
-
-    return Response.json(
-      {
-        message:
-          "Tack. Din förfrågan är skickad. Jag återkommer för en första avstämning och förslag på nästa steg.",
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({
+      message: "Tack för din förfrågan. Vi återkommer normalt inom en arbetsdag.",
+    });
   } catch (error) {
-    console.error("Unexpected error while sending contact email", error);
-
-    return Response.json(
+    console.error("Failed to send contact email", error);
+    return NextResponse.json(
       {
-        error: `Förfrågan kunde inte skickas just nu. Mejla direkt på ${SITE_CONFIG.contact.email}.`,
+        error:
+          "Förfrågan kunde inte skickas just nu. Försök igen eller mejla direkt till oss.",
       },
       { status: 500 }
     );

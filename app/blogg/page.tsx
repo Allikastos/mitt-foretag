@@ -9,8 +9,51 @@ export const dynamic = "force-dynamic";
 
 export const metadata = createMetadata(
   "Blogg",
-  `Artiklar från ${SITE_CONFIG.name} om redovisning, finansiell rapportering och ekonomisk rådgivning för mindre företag.`
+  `Artiklar från ${SITE_CONFIG.name} om redovisning, finansiell rapportering och ekonomisk rådgivning för växande och ägarledda bolag.`,
+  { pathname: "/blogg" }
 );
+
+const contentClusters = [
+  {
+    title: "Byta redovisningsbyrå",
+    description:
+      "Artiklar för företag som utvärderar byte av ekonomipartner och vill förstå risker, process och vad som bör vara på plats från start.",
+    href: "/tjanster/redovisning",
+    cta: "Se hur redovisningstjänsten fungerar",
+  },
+  {
+    title: "Månadsrapportering och uppföljning",
+    description:
+      "Innehåll för bolag som vill få bättre struktur i ekonomisk uppföljning och använda rapportering mer aktivt i styrning och prioritering.",
+    href: "/tjanster/rapportering",
+    cta: "Se upplägg för rapportering",
+  },
+  {
+    title: "Lönsamhet och ekonomisk rådgivning",
+    description:
+      "Perspektiv för ägarledda bolag som vill fatta bättre beslut om kostnadsstruktur, marginaler och nästa steg i verksamheten.",
+    href: "/tjanster/radgivning",
+    cta: "Se upplägg för rådgivning",
+  },
+];
+
+const faqItems = [
+  {
+    question: "Hur snabbt kan vi förvänta oss svar efter en kontaktförfrågan?",
+    answer:
+      "Normalt återkommer vi inom en arbetsdag med förslag på nästa steg utifrån ert nuläge.",
+  },
+  {
+    question: "Passar innehållet även företag utanför Linköping?",
+    answer:
+      "Ja. Artiklar och rådgivning är relevanta för företag i hela Sverige, även om verksamheten har bas i Linköping.",
+  },
+  {
+    question: "Vilka ämnen fokuserar bloggen på?",
+    answer:
+      "Bloggen fokuserar på redovisning, rapportering och rådgivning nära praktiska beslut i växande och ägarledda bolag.",
+  },
+];
 
 function formatDate(value: string | null, fallback: string) {
   const date = value ?? fallback;
@@ -29,11 +72,46 @@ export default async function BlogPage() {
     <>
       <PageIntro
         eyebrow="Blogg"
-        title="Perspektiv på redovisning, rapportering och ekonomisk styrning."
-        description={`Här samlas artiklar och insikter från ${SITE_CONFIG.name} om redovisning, rapportering och ekonomisk styrning.`}
+        title="Kunskapsbank för redovisning, rapportering och ekonomisk styrning."
+        description={`Här samlas artiklar från ${SITE_CONFIG.name} för företag som vill fatta bättre ekonomiska beslut och skapa starkare kontroll i vardagen.`}
       />
 
-      <section className="pb-24 pt-4 md:pb-24 md:pt-8">
+      <section className="pb-12 pt-4 md:pb-16 md:pt-8">
+        <SectionContainer>
+          <div className="rounded-[2rem] border border-black/8 bg-white p-8 shadow-[0_24px_60px_-55px_rgba(0,0,0,0.18)] md:p-10">
+            <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
+              Content-kluster
+            </p>
+            <h2 className="mt-5 text-2xl font-semibold tracking-[-0.03em] text-[#0B0B0C] md:text-3xl">
+              Välj område utifrån ert nuläge
+            </h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              {contentClusters.map((cluster) => (
+                <article
+                  key={cluster.title}
+                  className="rounded-[1.5rem] border border-black/8 bg-[#F7F7F5] px-5 py-5"
+                >
+                  <h3 className="text-lg font-semibold tracking-[-0.02em] text-[#0B0B0C]">
+                    {cluster.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-7 text-[#5F5F5F]">
+                    {cluster.description}
+                  </p>
+                  <Link
+                    href={cluster.href}
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#0B0B0C] transition hover:text-[#C6A15B]"
+                  >
+                    {cluster.cta}
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </div>
+        </SectionContainer>
+      </section>
+
+      <section className="pb-16 pt-0 md:pb-20">
         <SectionContainer>
           {posts.length > 0 ? (
             <div className="grid gap-6">
@@ -63,12 +141,23 @@ export default async function BlogPage() {
                   <p className="mt-5 max-w-3xl text-base leading-7 text-[#5F5F5F]">
                     {post.excerpt || "Inlägget saknar utdrag än så länge."}
                   </p>
-                  <Link
-                    href={`/blogg/${post.slug}`}
-                    className="mt-6 inline-flex text-sm font-medium text-[#0B0B0C] transition hover:text-[#C6A15B]"
-                  >
-                    Läs artikel
-                  </Link>
+                    <Link
+                      href={`/blogg/${post.slug}`}
+                      className="mt-6 inline-flex text-sm font-medium text-[#0B0B0C] transition hover:text-[#C6A15B]"
+                    >
+                      {SITE_CONFIG.cta.readArticle}
+                    </Link>
+                  <div className="mt-4 border-t border-black/8 pt-4">
+                    <p className="text-sm leading-7 text-[#5F5F5F]">
+                      Vill ni omsätta insikterna i praktiken?
+                    </p>
+                    <Link
+                      href="/kontakt"
+                      className="mt-1 inline-flex text-sm font-medium text-[#0B0B0C] transition hover:text-[#C6A15B]"
+                    >
+                      {SITE_CONFIG.cta.primary}
+                    </Link>
+                  </div>
                 </article>
               ))}
             </div>
@@ -83,6 +172,34 @@ export default async function BlogPage() {
               </p>
             </div>
           )}
+        </SectionContainer>
+      </section>
+
+      <section className="pb-24 pt-0 md:pb-24">
+        <SectionContainer>
+          <div className="rounded-[2rem] border border-black/8 bg-white p-8 shadow-[0_24px_60px_-55px_rgba(0,0,0,0.18)] md:p-10">
+            <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
+              Vanliga frågor
+            </p>
+            <h2 className="mt-5 text-2xl font-semibold tracking-[-0.03em] text-[#0B0B0C] md:text-3xl">
+              Frågor kopplade till ekonomiskt beslutsstöd
+            </h2>
+            <div className="mt-6 space-y-4">
+              {faqItems.map((item) => (
+                <article
+                  key={item.question}
+                  className="rounded-[1.5rem] border border-black/8 bg-[#F7F7F5] px-5 py-5"
+                >
+                  <h3 className="text-lg font-semibold tracking-[-0.02em] text-[#0B0B0C]">
+                    {item.question}
+                  </h3>
+                  <p className="mt-2 text-sm leading-7 text-[#5F5F5F]">
+                    {item.answer}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
         </SectionContainer>
       </section>
     </>

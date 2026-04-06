@@ -57,7 +57,7 @@ export function SiteHeader() {
               href="/kontakt"
               className="inline-flex items-center justify-center rounded-full bg-[#0B0B0C] px-5 py-3 text-sm font-medium text-white shadow-[0_18px_35px_-24px_rgba(0,0,0,0.45)] transition duration-200 hover:opacity-90"
             >
-              Boka möte
+              {SITE_CONFIG.cta.primaryShort}
             </Link>
           </div>
 
@@ -66,7 +66,7 @@ export function SiteHeader() {
               href="/kontakt"
               className="inline-flex items-center justify-center rounded-full bg-[#0B0B0C] px-3.5 py-2 text-[11px] font-medium text-white shadow-[0_14px_30px_-24px_rgba(0,0,0,0.45)] transition duration-200 hover:opacity-90"
             >
-              Boka möte
+              {SITE_CONFIG.cta.primaryShort}
             </Link>
 
             <button

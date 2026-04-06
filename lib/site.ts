@@ -45,10 +45,10 @@ export const services: Service[] = [
     summary:
       "Löpande redovisning, bokföring och moms för företag som vill frigöra tid, minska risken för fel och få bättre kontroll över ekonomin.",
     overview:
-      "Altura Nova hjälper mindre företag med löpande redovisning, bokföring och moms på ett sätt som skapar ordning i vardagen. Du får en struktur som fungerar löpande, tillförlitliga siffror och mindre tid som försvinner till administration.",
-    includedTitle: "Det här ingår i ett stabilt redovisningsupplägg",
+      `${SITE_CONFIG.name} hjälper växande och ägarledda bolag med löpande redovisning, bokföring och moms på ett sätt som skapar ordning i vardagen. Du får en struktur som fungerar löpande, tillförlitliga siffror och mindre tid som försvinner till administration.`,
+    includedTitle: "Det här ingår i ett redovisningsupplägg som håller över tid",
     includedLead:
-      "Målet är inte bara att bokföra rätt, utan att skapa ett arbetssätt där ekonomin är uppdaterad, spårbar och enkel att följa upp.",
+      "Målet är inte bara korrekt bokföring, utan ett arbetssätt där ekonomin är uppdaterad, spårbar och enkel att följa upp varje månad.",
     included: [
       "Löpande bokföring",
       "Momsredovisning och löpande rapportering till rätt tid",
@@ -59,7 +59,7 @@ export const services: Service[] = [
       "Det ger dig en trygg grund i ekonomin och gör det lättare att agera i tid när något förändras.",
     secondaryTitle: "Vad tjänsten skapar i praktiken",
     secondaryLead:
-      "När redovisningen fungerar som den ska blir ekonomin mindre av ett stressmoment och mer av ett pålitligt beslutsunderlag.",
+      "När redovisningen fungerar konsekvent blir ekonomin mindre av ett osäkerhetsmoment och mer av ett underlag för bättre beslut.",
     secondary: [
       "Bättre kontroll över intäkter, kostnader och likviditet",
       "Mindre risk för fel, förseningar och dubbelarbete",
@@ -81,10 +81,10 @@ export const services: Service[] = [
     ],
     ctaTitle: "Vill du ha redovisning som ger ordning utan att ta onödig tid?",
     ctaDescription:
-      "Boka ett första samtal så går vi igenom nuläge, arbetssätt och hur ett stabilt redovisningsupplägg kan se ut för ditt företag.",
-    seoTitle: "Redovisning för mindre företag",
+      "Boka ett första samtal så går vi igenom nuläge, arbetssätt och vilket redovisningsupplägg som skapar bäst effekt i er verksamhet.",
+    seoTitle: "Redovisning för växande företag",
     seoDescription:
-      "Redovisning för mindre företag i Linköping och Sverige med fokus på bokföring, moms, struktur och tydlig ekonomisk kontroll.",
+      "Redovisning för växande och ägarledda bolag i Linköping och Sverige med fokus på bokföring, moms, struktur och tydlig ekonomisk kontroll.",
   },
   {
     slug: "rapportering",
@@ -95,8 +95,8 @@ export const services: Service[] = [
     summary:
       "Tydlig ekonomisk rapportering och uppföljning som gör siffrorna användbara i vardagen och lättare att agera på.",
     overview:
-      "Altura Nova hjälper företag att följa upp sin ekonomi löpande genom tydlig rapportering som fokuserar på det som faktiskt spelar roll. Du får bättre överblick, snabbare förståelse för utvecklingen och ett starkare stöd inför beslut.",
-    includedTitle: "Det här ingår i en rapportering som går att använda",
+      `${SITE_CONFIG.name} hjälper företag att följa upp sin ekonomi löpande genom tydlig rapportering som fokuserar på det som faktiskt spelar roll. Du får bättre överblick, snabbare förståelse för utvecklingen och ett starkare stöd inför beslut.`,
+    includedTitle: "Det här ingår i en rapportering som går att agera på",
     includedLead:
       "Rapporteringen ska inte bara visa siffror, utan hjälpa dig att förstå vad som händer i verksamheten och var du behöver agera.",
     included: [
@@ -109,7 +109,7 @@ export const services: Service[] = [
       "Det gör att rapporteringen blir ett verktyg i styrningen, inte bara en återblick på det som redan har hänt.",
     secondaryTitle: "Vad bättre rapportering ger dig",
     secondaryLead:
-      "När uppföljningen blir regelbunden och tydlig blir det lättare att styra verksamheten med mindre osäkerhet.",
+      "När uppföljningen blir regelbunden och tydlig blir det lättare att styra verksamheten med bättre tajming och mindre osäkerhet.",
     secondary: [
       "Snabbare beslut med bättre ekonomiskt underlag",
       "Tidigare signaler när marginaler eller kostnader förändras",
@@ -131,34 +131,34 @@ export const services: Service[] = [
     ],
     ctaTitle: "Vill du ha rapportering som ger bättre beslutsunderlag månad för månad?",
     ctaDescription:
-      "Boka ett första samtal så går vi igenom hur du följer upp ekonomin idag och vilket rapporteringsupplägg som skulle ge mest värde i din verksamhet.",
+      "Boka ett första samtal så går vi igenom hur ni följer upp ekonomin idag och vilket rapporteringsupplägg som skulle ge mest värde i verksamheten.",
     seoTitle: "Månadsrapportering och uppföljning",
     seoDescription:
-      "Månadsrapportering och uppföljning för mindre företag som vill förstå siffrorna bättre och få bättre kontroll över ekonomin.",
+      "Månadsrapportering och uppföljning för växande företag som vill förstå siffrorna bättre och få bättre kontroll över ekonomin.",
   },
   {
     slug: "radgivning",
     title: "Rådgivning",
-    detailTitle: "Ekonomisk rådgivning för bättre beslut",
+    detailTitle: "Ekonomisk rådgivning för företag som vill fatta tydligare och mer lönsamma beslut",
     label: "Rådgivning",
     href: "/tjanster/radgivning",
     summary:
-      "Ekonomisk rådgivning som hjälper dig att förstå siffrorna och använda dem för bättre beslut i företaget.",
+      "Ekonomisk rådgivning som gör siffrorna till praktiskt beslutsstöd för lönsamhet, prioriteringar och utveckling.",
     overview:
-      "Jag hjälper företag att förstå sin ekonomi och använda siffrorna som ett verktyg i verksamheten. Målet är att du ska kunna fatta bättre beslut och utveckla företaget i rätt riktning.",
-    includedTitle: "Vad innebär ekonomisk rådgivning?",
+      `${SITE_CONFIG.name} hjälper företag att förstå sin ekonomi och använda siffrorna som ett verktyg i verksamheten. Målet är bättre prioriteringar, starkare lönsamhet och tydligare vägval.`,
+    includedTitle: "Vad rådgivningen innehåller",
     includedLead:
-      "Ekonomisk rådgivning handlar om att gå från siffror till insikter.",
+      "Rådgivningen handlar om att gå från rapporterade siffror till konkreta beslut.",
     included: [
-      "Vad siffrorna betyder",
-      "Vad som påverkar lönsamheten",
-      "Var det finns förbättringspotential",
+      "Tydlig tolkning av vad siffrorna faktiskt visar",
+      "Identifiering av vad som driver eller pressar lönsamheten",
+      "Prioriterade förbättringsområden med praktisk relevans",
     ],
     includedOutro:
-      "Istället för att bara se resultatet får du hjälp att förstå vad siffrorna faktiskt säger om verksamheten.",
-    secondaryTitle: "Vad kan du få hjälp med?",
+      "I stället för att bara se utfallet i efterhand får ni stöd i vad som bör göras härnäst.",
+    secondaryTitle: "Exempel på områden ni kan få stöd i",
     secondaryLead:
-      "Rådgivningen anpassas efter din verksamhet, men kan till exempel handla om:",
+      "Rådgivningen anpassas efter verksamhetens situation, men kan till exempel handla om:",
     secondary: [
       "Lönsamhetsanalys",
       "Kostnadsstruktur",
@@ -167,22 +167,23 @@ export const services: Service[] = [
     ],
     workTitle: "Hur jag arbetar",
     workParagraphs: [
-      "Jag arbetar nära verksamheten och utgår från dina siffror och din situation.",
-      "Fokus ligger på att göra ekonomin konkret och användbar, så att du kan agera på den i vardagen.",
+      "Arbetet sker nära verksamheten och utgår från era siffror, mål och aktuella vägval.",
+      "Fokus ligger på att göra ekonomin konkret och användbar, så att ni kan agera snabbare och med större säkerhet.",
     ],
     fitTitle: "Vem det passar för",
     fitLead:
-      "Tjänsten passar företag som vill ta nästa steg och använda ekonomin mer aktivt.",
+      "Tjänsten passar företag som vill ta nästa steg och använda ekonomin mer aktivt i styrning och utveckling.",
     fit: [
       "Vill förbättra lönsamheten",
       "Vill få bättre beslutsunderlag",
       "Vill utveckla verksamheten",
     ],
-    ctaTitle: "Vill du använda ekonomin som ett verktyg i ditt företag?",
-    ctaDescription: "Hör av dig så berättar jag mer.",
+    ctaTitle: "Vill ni använda ekonomin som ett strategiskt verktyg i företaget?",
+    ctaDescription:
+      "Boka ett första samtal så går vi igenom nuläge, prioriteringar och vilket rådgivningsupplägg som kan skapa störst affärsnytta.",
     seoTitle: "Ekonomisk rådgivning för bättre beslut",
     seoDescription:
-      "Ekonomisk rådgivning för mindre företag som vill förstå siffrorna bättre, förbättra lönsamheten och fatta bättre beslut.",
+      "Ekonomisk rådgivning för ägarledda bolag som vill förstå siffrorna bättre, förbättra lönsamheten och fatta bättre beslut.",
   },
 ];
 
@@ -205,7 +206,7 @@ export const workSteps = [
 ];
 
 export const companyTypes = [
-  "Mindre och medelstora företag som vill ha bättre ekonomisk struktur",
+  "Växande företag som vill ha bättre ekonomisk struktur",
   "Entreprenörsdrivna bolag med behov av tydligare beslutsunderlag",
   "Konsultbolag och företag i tillväxt med höjda krav på kontroll",
   "Företag i Linköping och i övriga Sverige som söker en mer analytisk ekonomipartner",

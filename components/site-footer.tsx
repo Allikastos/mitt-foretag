@@ -22,7 +22,7 @@ export function SiteFooter() {
 
           <div>
             <p className="text-xs font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
-              Navigation
+              Navigering
             </p>
             <ul className="mt-6 space-y-3 text-sm text-white/72">
               {navigationItems.map((item) => (

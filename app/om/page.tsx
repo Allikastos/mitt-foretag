@@ -7,7 +7,8 @@ import { values, workSteps } from "@/lib/site";
 
 export const metadata = createMetadata(
   `Om ${SITE_CONFIG.name}`,
-  `Lär känna ${SITE_CONFIG.name}, varför verksamheten finns och hur samarbetet är utformat för företag som vill ha tydligare ekonomisk struktur och bättre beslutsstöd.`
+  `Lär känna ${SITE_CONFIG.name}, varför verksamheten finns och hur samarbetet är utformat för företag som vill ha tydligare ekonomisk struktur och bättre beslutsstöd.`,
+  { pathname: "/om" }
 );
 
 export default function AboutPage() {
@@ -16,7 +17,7 @@ export default function AboutPage() {
       <PageIntro
         eyebrow="Om"
         title={`${SITE_CONFIG.name} finns för företag som vill göra ekonomin mer användbar i vardagen.`}
-        description="Målet är inte bara korrekt redovisning, utan ett lugnare arbetssätt, tydligare uppföljning och bättre beslutsunderlag för företag som vill arbeta mer genomtänkt."
+        description="Målet är inte bara korrekt redovisning, utan ett arbetssätt som ger tydligare uppföljning, bättre beslutsunderlag och större trygghet i den ekonomiska styrningen."
       />
 
       <section className="pb-8 pt-8 md:pb-12 md:pt-10">
@@ -34,7 +35,7 @@ export default function AboutPage() {
               </p>
               <p className="mt-6 text-lg leading-8 text-[#5F5F5F]">
                 Det innebär redovisning som håller kvalitet, rapportering som går
-                att agera på och ekonomiska samtal som skapar lugnare styrning
+                att agera på och ekonomiska samtal som skapar bättre styrning
                 över tid. Ambitionen är att göra ekonomifunktionen till en
                 tillgång i verksamheten, inte bara en administrativ nödvändighet.
               </p>
@@ -50,8 +51,8 @@ export default function AboutPage() {
               <p className="mt-4 text-sm leading-7 text-white/72">
                 Albin Holmberg arbetar med redovisning och ekonomisk analys för
                 företag som vill ha större tydlighet i vardagen. Fokus ligger på
-                att skapa struktur, relevanta underlag och ett samarbete som känns
-                lugnt, precist och förtroendeingivande.
+                struktur, relevanta underlag och ett samarbete som är lugnt,
+                precist och förtroendeingivande.
               </p>
               <div className="mt-8 text-sm leading-7 text-white/72">
                 <p>{SITE_CONFIG.contact.email}</p>
@@ -73,7 +74,7 @@ export default function AboutPage() {
             </h2>
             <p className="mt-6 text-lg leading-8 text-[#5F5F5F]">
               Upplägget ska vara tydligt från början. Ni ska veta vad som händer,
-              vad som prioriteras och hur ekonomiarbetet ska skapa värde i
+              vad som prioriteras och hur ekonomiarbetet skapar värde i
               verksamheten.
             </p>
           </div>
@@ -128,8 +129,8 @@ export default function AboutPage() {
       <CTABlock
         title={`Vill du veta hur ett samarbete med ${SITE_CONFIG.name} kan se ut?`}
         description="Boka ett första samtal om verksamheten, nuläget och vilka delar av ekonomin som behöver mest struktur, tydlighet eller uppföljning."
-        primary={{ href: "/kontakt", label: "Boka ett första samtal" }}
-        secondary={{ href: "/tjanster", label: "Se tjänster" }}
+        primary={{ href: "/kontakt", label: SITE_CONFIG.cta.primary }}
+        secondary={{ href: "/tjanster", label: SITE_CONFIG.cta.services }}
       />
     </>
   );

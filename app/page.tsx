@@ -6,14 +6,15 @@ import { SectionContainer } from "@/components/section-container";
 import { createMetadata } from "@/lib/metadata";
 
 export const metadata = createMetadata(
-  "Redovisning och ekonomisk rådgivning",
-  `Redovisning och ekonomisk rådgivning för mindre företag. ${SITE_CONFIG.name} hjälper företag med bokföring, rapportering och analys för bättre kontroll på ekonomin och bättre beslut.`
+  "Redovisning, rapportering och rådgivning",
+  `${SITE_CONFIG.name} hjälper växande och ägarledda bolag med redovisning, rapportering och rådgivning för bättre kontroll, tydligare siffror och snabbare beslut.`,
+  { pathname: "/" }
 );
 
 const helpItems = [
-  "Löpande redovisning och bokföring",
-  "Månadsrapportering och uppföljning",
-  "Ekonomisk analys och rådgivning",
+  "Redovisning som skapar ordning och minskar friktion",
+  "Rapportering som visar vad som påverkar resultatet",
+  "Rådgivning som gör besluten mer träffsäkra",
 ];
 
 const serviceSections = [
@@ -22,8 +23,8 @@ const serviceSections = [
     title: "Redovisning",
     href: "/tjanster/redovisning",
     paragraphs: [
-      "Jag hjälper dig med löpande bokföring, moms och grundläggande redovisning. Målet är att du ska ha ordning på siffrorna utan att behöva lägga tid på det själv.",
-      "Du får en struktur som fungerar över tid och en tydlig bild av företagets ekonomi.",
+      "Löpande bokföring, moms och avstämningar byggs upp i ett tydligt arbetssätt som fungerar över tid.",
+      "Resultatet är uppdaterade siffror, lägre risk för fel och mer tid till verksamheten.",
     ],
   },
   {
@@ -31,8 +32,8 @@ const serviceSections = [
     title: "Rapportering",
     href: "/tjanster/rapportering",
     paragraphs: [
-      "Genom löpande rapportering får du en tydlig bild av hur verksamheten går. Jag sammanställer siffror på ett sätt som gör dem enkla att förstå och använda.",
-      "Du ser vad som fungerar, vad som kan förbättras och hur du ligger till över tid.",
+      "Löpande rapportering visar utveckling, avvikelser och nyckeltal som är relevanta för styrningen.",
+      "Ni får bättre överblick och snabbare underlag för prioriteringar och beslut.",
     ],
   },
   {
@@ -40,17 +41,17 @@ const serviceSections = [
     title: "Rådgivning",
     href: "/tjanster/radgivning",
     paragraphs: [
-      "Jag hjälper dig att förstå siffrorna bakom verksamheten och vad de faktiskt betyder. Det kan handla om lönsamhet, kostnader eller hur du planerar framåt.",
-      "Målet är att du ska kunna fatta bättre beslut med ett tydligt ekonomiskt underlag.",
+      "Rådgivningen utgår från era siffror och fokuserar på lönsamhet, kostnadsstruktur och nästa steg framåt.",
+      "Målet är tydliga rekommendationer som stärker beslutsförmågan i ledning och ägararbete.",
     ],
   },
 ];
 
 const workItems = [
-  "Tydlig struktur i redovisningen",
-  "Löpande uppföljning av siffror",
-  "Enkelt och direkt samarbete",
-  "Fokus på att göra ekonomin användbar",
+  "Tydlig struktur i redovisning och underlag",
+  "Regelbunden uppföljning av ekonomi och avvikelser",
+  "Direkt dialog med fokus på affärsnytta",
+  "Siffror som går att använda i beslut",
 ];
 
 export default function HomePage() {
@@ -68,12 +69,12 @@ export default function HomePage() {
                   {SITE_CONFIG.name}
                 </p>
                 <h1 className="mt-7 text-4xl font-semibold tracking-[-0.055em] text-[#0B0B0C] text-balance md:text-5xl lg:text-[4.2rem] lg:leading-[0.98]">
-                  Redovisning och ekonomisk rådgivning för mindre företag
+                  Redovisning, rapportering och rådgivning för företag som vill styra med bättre siffror
                 </h1>
                 <p className="mt-7 max-w-2xl text-lg leading-8 text-[#5F5F5F] md:text-[1.125rem]">
-                  Jag hjälper företag med bokföring, rapportering och analys, så
-                  att du får bättre kontroll på ekonomin och kan fatta bättre
-                  beslut.
+                  {SITE_CONFIG.name} hjälper växande och ägarledda bolag att få
+                  bättre kontroll, tydligare uppföljning och ett starkare
+                  beslutsunderlag i vardagen.
                 </p>
 
                 <div className="mt-12 flex flex-col gap-4 sm:flex-row">
@@ -81,13 +82,13 @@ export default function HomePage() {
                     href="/kontakt"
                     className="inline-flex items-center justify-center rounded-2xl bg-[#0B0B0C] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
                   >
-                    Kontakta {SITE_CONFIG.name}
+                    {SITE_CONFIG.cta.primary}
                   </Link>
                   <Link
                     href="/tjanster"
                     className="inline-flex items-center justify-center rounded-2xl border border-black/10 px-6 py-3 text-sm font-medium text-[#0B0B0C] transition hover:bg-[#F7F7F5]"
                   >
-                    Se tjänster
+                    {SITE_CONFIG.cta.services}
                   </Link>
                 </div>
               </div>
@@ -107,8 +108,8 @@ export default function HomePage() {
                       Fokus
                     </p>
                     <p className="mt-3 text-sm leading-7 text-[#5F5F5F]">
-                      Struktur och tydlighet i ekonomin för företag som vill arbeta
-                      mer genomtänkt.
+                      Struktur, kontroll och tydlighet för företag som vill
+                      arbeta mer analytiskt med ekonomin.
                     </p>
                   </div>
                   <div className="rounded-[1.6rem] border border-black/8 bg-[#F7F7F5] p-6">
@@ -116,8 +117,8 @@ export default function HomePage() {
                       Inriktning
                     </p>
                     <p className="mt-3 text-sm leading-7 text-[#5F5F5F]">
-                      Bättre kontroll, tydligare uppföljning och användbara
-                      beslutsunderlag.
+                      Beslutsunderlag som går att agera på i ledning och
+                      planering.
                     </p>
                   </div>
                 </div>
@@ -132,16 +133,15 @@ export default function HomePage() {
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] lg:items-start lg:gap-12">
             <div className="max-w-[48rem]">
               <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
-                Vad jag hjälper till med
+                Tjänsteområden
               </p>
               <h2 className="mt-5 text-3xl font-semibold tracking-[-0.045em] text-[#0B0B0C] text-balance md:text-4xl">
-                Vad jag hjälper till med
+                Tre tjänsteområden som stärker den ekonomiska styrningen
               </h2>
               <p className="mt-6 text-lg leading-8 text-[#5F5F5F]">
-                Jag arbetar med redovisning, rapportering och ekonomisk rådgivning
-                för mindre företag. Fokus ligger på att skapa struktur och tydlighet
-                i ekonomin, så att du som företagare vet hur verksamheten faktiskt
-                går.
+                Arbetet fokuserar på att göra ekonomin mer användbar i vardagen.
+                Ni får ordning i redovisningen, tydligare rapportering och bättre
+                stöd i beslut som påverkar lönsamhet och utveckling.
               </p>
             </div>
 
@@ -184,7 +184,7 @@ export default function HomePage() {
                   href={service.href}
                   className="mt-8 inline-flex items-center gap-2 rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium text-[#0B0B0C] transition duration-200 hover:border-[#0B0B0C] hover:bg-[#F7F7F5]"
                 >
-                  Läs mer
+                  {SITE_CONFIG.cta.serviceDetails}
                   <span aria-hidden="true">→</span>
                 </Link>
               </article>
@@ -199,14 +199,15 @@ export default function HomePage() {
             <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] lg:items-start lg:gap-12">
               <div className="max-w-[46rem]">
                 <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
-                  Hur jag arbetar
+                  Arbetssätt
                 </p>
                 <h2 className="mt-5 text-3xl font-semibold tracking-[-0.045em] text-balance md:text-4xl">
-                  Hur jag arbetar
+                  Så byggs ett samarbete som ger kontroll och kontinuitet
                 </h2>
                 <p className="mt-6 text-lg leading-8 text-white/72">
-                  Mitt arbetssätt är enkelt och strukturerat. Du ska alltid veta
-                  vad som händer och vad du får.
+                  Upplägget är tydligt från start. Ni vet vad som prioriteras,
+                  hur uppföljningen sker och vilket nästa steg som skapar mest
+                  värde.
                 </p>
               </div>
 
@@ -233,15 +234,16 @@ export default function HomePage() {
                 För vilka företag
               </p>
               <h2 className="mt-5 text-3xl font-semibold tracking-[-0.045em] text-[#0B0B0C] text-balance md:text-4xl">
-                För vilka företag
+                För vilka företag upplägget passar bäst
               </h2>
               <p className="mt-6 text-lg leading-8 text-[#5F5F5F]">
-                Jag arbetar främst med mindre företag, konsulter och tjänstebolag
-                som vill få bättre kontroll på sin ekonomi.
+                {SITE_CONFIG.name} arbetar främst med ägarledda och
+                entreprenörsdrivna företag, konsulter och tjänstebolag som vill
+                styra med bättre ekonomiska underlag.
               </p>
               <p className="mt-5 text-base leading-7 text-[#5F5F5F]">
-                Det passar dig som vill ha en enkel och tydlig lösning utan onödig
-                komplexitet, men ändå ha koll på hur verksamheten faktiskt går.
+                Upplägget passar er som vill minska osäkerheten i ekonomin och
+                fatta snabbare beslut med större precision.
               </p>
             </div>
 
@@ -254,11 +256,11 @@ export default function HomePage() {
               </h2>
               <p className="mt-6 text-base leading-7 text-[#5F5F5F]">
                 {SITE_CONFIG.name} arbetar med redovisning och ekonomisk
-                rådgivning för mindre företag.
+                rådgivning för växande företag.
               </p>
               <p className="mt-5 text-base leading-7 text-[#5F5F5F]">
                 Fokus ligger på att skapa tydlighet i ekonomin, inte bara leverera
-                siffror, utan göra dem användbara i verksamheten.
+                siffror utan att göra dem användbara i verksamheten.
               </p>
             </div>
           </div>
@@ -274,10 +276,11 @@ export default function HomePage() {
                   Kontakt
                 </p>
                 <h2 className="mt-5 text-3xl font-semibold tracking-[-0.04em] text-balance md:text-4xl lg:text-[2.9rem] lg:leading-[1.05]">
-                  Vill du få bättre kontroll på ditt företag?
+                  Vill ni få bättre kontroll, tydligare siffror och tryggare beslut?
                 </h2>
                 <p className="mt-6 text-lg leading-8 text-white/72">
-                  Hör av dig så bokar vi ett första samtal.
+                  Hör av er så återkommer vi normalt inom en arbetsdag med ett
+                  tydligt nästa steg.
                 </p>
               </div>
 

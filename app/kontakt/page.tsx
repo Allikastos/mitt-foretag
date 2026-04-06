@@ -13,7 +13,7 @@ const contactSteps = [
   {
     title: "Första avstämning",
     description:
-      "Jag återkommer personligen för att förstå behov, prioriteringar och om det finns ett bra upplägg att gå vidare med.",
+      "Ni får en personlig återkoppling för att gå igenom behov, prioriteringar och om det finns ett bra upplägg att gå vidare med.",
   },
   {
     title: "Tydligt nästa steg",
@@ -24,7 +24,8 @@ const contactSteps = [
 
 export const metadata = createMetadata(
   "Kontakt",
-  `Boka ett första samtal med ${SITE_CONFIG.name} om redovisning, rapportering eller ekonomisk rådgivning. Möten kan hållas digitalt eller i Linköping.`
+  `Boka ett första samtal med ${SITE_CONFIG.name} om redovisning, rapportering eller ekonomisk rådgivning. Ni får ett tydligt nästa steg utifrån ert nuläge.`,
+  { pathname: "/kontakt" }
 );
 
 export default function ContactPage() {
@@ -33,7 +34,7 @@ export default function ContactPage() {
       <PageIntro
         eyebrow="Kontakt"
         title="Boka ett första samtal om redovisning, rapportering eller ekonomisk rådgivning."
-        description={`Du behöver inte ha ett färdigt upplägg. Beskriv nuläge, frågor eller vad som känns oklart, så återkommer ${SITE_CONFIG.name} med ett tydligt nästa steg.`}
+        description={`Du behöver inte ha ett färdigt upplägg. Beskriv nuläge, frågor eller vad som känns oklart, så återkommer ${SITE_CONFIG.name} normalt inom en arbetsdag med ett tydligt nästa steg.`}
       />
 
       <section className="pb-8 pt-8 md:pb-12 md:pt-10">
@@ -48,7 +49,7 @@ export default function ContactPage() {
                   {SITE_CONFIG.name}
                 </h2>
                 <div className="mt-6 space-y-3 text-base leading-7 text-white/72">
-                  <p>Du kan höra av dig via formuläret, mejl eller telefon.</p>
+                  <p>Ni kan höra av er via formuläret, mejl eller telefon.</p>
                   <p>{SITE_CONFIG.contact.email}</p>
                   <p>{SITE_CONFIG.contact.phoneDisplay}</p>
                   <p>
@@ -80,7 +81,8 @@ export default function ContactPage() {
                   Möten kan hållas digitalt eller på plats beroende på vad som
                   passar bäst. För företag i Linköping är det naturligt att ses
                   lokalt, men samarbeten fungerar lika väl med företag i övriga
-                  Sverige.
+                  Sverige. Normalt får ni en första återkoppling inom en
+                  arbetsdag.
                 </p>
               </div>
             </div>
@@ -90,9 +92,9 @@ export default function ContactPage() {
                 Boka ett första samtal
               </h2>
               <p className="mt-4 text-base leading-7 text-[#5F5F5F]">
-                Det räcker med några meningar om verksamheten, nuläget och vad ni
-                vill få bättre ordning i. Ni behöver inte ha alla svar klara innan
-                ni hör av er.
+                Det räcker med några meningar om verksamheten, nuläget och vad
+                ni vill få bättre ordning i. Ni behöver inte ha alla svar klara
+                innan ni hör av er.
               </p>
               <div className="mt-8">
                 <ContactForm />
