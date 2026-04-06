@@ -1,12 +1,4 @@
-export const siteConfig = {
-  name: "Bidewind Consulting",
-  tagline: "Ekonomisk styrning och redovisning",
-  email: "albinholmberg@icloud.com",
-  phoneDisplay: "076-0218499",
-  phoneHref: "tel:+46760218499",
-  city: "Linköping",
-  country: "Sverige",
-};
+import { SITE_CONFIG } from "@/config/site";
 
 export const navigationItems = [
   { href: "/", label: "Hem" },
@@ -47,48 +39,49 @@ export const services: Service[] = [
   {
     slug: "redovisning",
     title: "Redovisning",
-    detailTitle: "Redovisning för mindre företag",
+    detailTitle: "Redovisning för företag som vill ha ordning, kontroll och mindre administration",
     label: "Redovisning",
     href: "/tjanster/redovisning",
     summary:
-      "Löpande redovisning, bokföring och moms för mindre företag som vill ha ordning på siffrorna utan att lägga tid på det själva.",
+      "Löpande redovisning, bokföring och moms för företag som vill frigöra tid, minska risken för fel och få bättre kontroll över ekonomin.",
     overview:
-      "Jag hjälper mindre företag med löpande redovisning, bokföring och moms. Målet är att du ska ha ordning på siffrorna och en tydlig bild av hur verksamheten går, utan att behöva lägga tid på det själv.",
-    includedTitle: "Vad ingår i redovisning?",
+      "Altura Nova hjälper mindre företag med löpande redovisning, bokföring och moms på ett sätt som skapar ordning i vardagen. Du får en struktur som fungerar löpande, tillförlitliga siffror och mindre tid som försvinner till administration.",
+    includedTitle: "Det här ingår i ett stabilt redovisningsupplägg",
     includedLead:
-      "Redovisning handlar om att löpande registrera och strukturera företagets ekonomi. Det är grunden för att kunna följa upp verksamheten och fatta rätt beslut.",
+      "Målet är inte bara att bokföra rätt, utan att skapa ett arbetssätt där ekonomin är uppdaterad, spårbar och enkel att följa upp.",
     included: [
       "Löpande bokföring",
-      "Hantering av moms",
-      "Avstämningar",
-      "Underlag inför bokslut",
+      "Momsredovisning och löpande rapportering till rätt tid",
+      "Avstämningar som minskar risken för överraskningar",
+      "Ordning i underlag inför bokslut och fortsatt uppföljning",
     ],
     includedOutro:
-      "Allt görs på ett strukturerat sätt så att siffrorna alltid går att lita på.",
-    secondaryTitle: "Varför är redovisning viktigt?",
+      "Det ger dig en trygg grund i ekonomin och gör det lättare att agera i tid när något förändras.",
+    secondaryTitle: "Vad tjänsten skapar i praktiken",
     secondaryLead:
-      "En fungerande redovisning är avgörande för att ha kontroll på företagets ekonomi. Utan tydliga siffror blir det svårt att veta hur verksamheten faktiskt går.",
+      "När redovisningen fungerar som den ska blir ekonomin mindre av ett stressmoment och mer av ett pålitligt beslutsunderlag.",
     secondary: [
-      "Kontroll på intäkter och kostnader",
-      "Underlag för beslut",
-      "Mindre risk för fel",
-      "En stabil grund att bygga vidare på",
+      "Bättre kontroll över intäkter, kostnader och likviditet",
+      "Mindre risk för fel, förseningar och dubbelarbete",
+      "En tydligare grund för rapportering och uppföljning",
+      "Mer tid för att driva verksamheten framåt",
     ],
     workTitle: "Hur jag arbetar",
     workParagraphs: [
-      "Jag arbetar löpande och strukturerat, med fokus på enkelhet och tydlighet. Du ska inte behöva fundera på hur redovisningen fungerar, den ska bara fungera.",
-      "Samarbetet anpassas efter din verksamhet, men målet är alltid detsamma: att du ska ha ordning på ekonomin och veta vad siffrorna visar.",
+      "Arbetet läggs upp så att ansvar, underlag och återkommande moment blir tydliga från början. Det ska vara enkelt att veta vad som behöver göras och när.",
+      "Samarbetet anpassas efter verksamheten, men målet är alltid detsamma: att du ska känna lugn i att redovisningen fungerar och att siffrorna går att lita på.",
     ],
     fitTitle: "Vem det passar för",
     fitLead:
-      "Tjänsten passar mindre företag och konsulter som vill ha en enkel och pålitlig lösning för sin redovisning.",
+      "Tjänsten passar företag som vill ha ett tryggt och professionellt upplägg utan att bygga upp en tung intern administration.",
     fit: [
-      "Vill slippa lägga tid på bokföring",
-      "Vill ha bättre struktur",
-      "Vill känna trygghet i siffrorna",
+      "Vill lägga mindre tid på bokföring och administration",
+      "Vill ha bättre struktur i underlag, rutiner och ansvar",
+      "Vill kunna lita på att ekonomin är uppdaterad",
     ],
-    ctaTitle: "Vill du ha hjälp med redovisningen?",
-    ctaDescription: "Hör av dig så berättar jag mer.",
+    ctaTitle: "Vill du ha redovisning som ger ordning utan att ta onödig tid?",
+    ctaDescription:
+      "Boka ett första samtal så går vi igenom nuläge, arbetssätt och hur ett stabilt redovisningsupplägg kan se ut för ditt företag.",
     seoTitle: "Redovisning för mindre företag",
     seoDescription:
       "Redovisning för mindre företag i Linköping och Sverige med fokus på bokföring, moms, struktur och tydlig ekonomisk kontroll.",
@@ -96,48 +89,49 @@ export const services: Service[] = [
   {
     slug: "rapportering",
     title: "Rapportering",
-    detailTitle: "Månadsrapportering och uppföljning",
+    detailTitle: "Ekonomisk rapportering för företag som vill fatta bättre beslut snabbare",
     label: "Rapportering",
     href: "/tjanster/rapportering",
     summary:
-      "Tydlig månadsrapportering och uppföljning som gör ekonomin enkel att förstå och använda i vardagen.",
+      "Tydlig ekonomisk rapportering och uppföljning som gör siffrorna användbara i vardagen och lättare att agera på.",
     overview:
-      "Jag hjälper företag att följa upp sin ekonomi löpande genom tydlig och enkel rapportering. Du får en klar bild av hur verksamheten går och vad du behöver agera på.",
-    includedTitle: "Vad är rapportering?",
+      "Altura Nova hjälper företag att följa upp sin ekonomi löpande genom tydlig rapportering som fokuserar på det som faktiskt spelar roll. Du får bättre överblick, snabbare förståelse för utvecklingen och ett starkare stöd inför beslut.",
+    includedTitle: "Det här ingår i en rapportering som går att använda",
     includedLead:
-      "Rapportering handlar om att sammanställa företagets ekonomi på ett sätt som är lätt att förstå.",
+      "Rapporteringen ska inte bara visa siffror, utan hjälpa dig att förstå vad som händer i verksamheten och var du behöver agera.",
     included: [
-      "Intäkter",
-      "Kostnader",
-      "Resultat",
-      "Utveckling över tid",
+      "Tydlig överblick över intäkter, kostnader och resultat",
+      "Uppföljning av utveckling över tid",
+      "Fokus på avvikelser, trender och relevanta nyckeltal",
+      "Genomgång som gör siffrorna begripliga och användbara",
     ],
     includedOutro:
-      "Istället för att bara ha siffror i ett system får du en tydlig överblick över företagets ekonomi.",
-    secondaryTitle: "Varför är det viktigt?",
+      "Det gör att rapporteringen blir ett verktyg i styrningen, inte bara en återblick på det som redan har hänt.",
+    secondaryTitle: "Vad bättre rapportering ger dig",
     secondaryLead:
-      "Många företag tittar på siffrorna för sällan. Då blir det svårt att upptäcka problem i tid eller förstå vad som fungerar bra.",
+      "När uppföljningen blir regelbunden och tydlig blir det lättare att styra verksamheten med mindre osäkerhet.",
     secondary: [
-      "Fatta bättre beslut",
-      "Följa utvecklingen i företaget",
-      "Upptäcka problem tidigt",
-      "Få bättre kontroll över ekonomin",
+      "Snabbare beslut med bättre ekonomiskt underlag",
+      "Tidigare signaler när marginaler eller kostnader förändras",
+      "Bättre förståelse för vad som driver lönsamheten",
+      "Mer kontroll i ledning, planering och prioritering",
     ],
     workTitle: "Hur jag arbetar",
     workParagraphs: [
-      "Jag tar fram rapporter löpande och går igenom dem på ett enkelt och tydligt sätt.",
-      "Fokus ligger på att du ska förstå siffrorna, inte bara få dem presenterade. Det innebär att rapporteringen anpassas efter vad som är relevant för just din verksamhet.",
+      "Rapporterna tas fram löpande och byggs kring de frågor som är viktigast för verksamheten, inte kring onödig detaljrikedom.",
+      "Fokus ligger på att du ska förstå vad siffrorna betyder, vad som har förändrats och vilka beslut som bör prioriteras framåt.",
     ],
     fitTitle: "Vem det passar för",
     fitLead:
-      "Tjänsten passar företag som vill ha bättre koll på hur verksamheten går, utan att behöva analysera allt själva.",
+      "Tjänsten passar företag som har redovisningen på plats men vill använda ekonomin mer aktivt i styrningen.",
     fit: [
-      "Vill följa upp ekonomin varje månad",
-      "Vill förstå vad siffrorna betyder",
-      "Vill fatta mer välgrundade beslut",
+      "Vill följa upp ekonomi och utveckling mer regelbundet",
+      "Vill förstå vad siffrorna säger om verksamheten",
+      "Vill fatta mer välgrundade beslut i rätt tid",
     ],
-    ctaTitle: "Vill du få bättre koll på hur ditt företag går?",
-    ctaDescription: "Hör av dig så berättar jag mer.",
+    ctaTitle: "Vill du ha rapportering som ger bättre beslutsunderlag månad för månad?",
+    ctaDescription:
+      "Boka ett första samtal så går vi igenom hur du följer upp ekonomin idag och vilket rapporteringsupplägg som skulle ge mest värde i din verksamhet.",
     seoTitle: "Månadsrapportering och uppföljning",
     seoDescription:
       "Månadsrapportering och uppföljning för mindre företag som vill förstå siffrorna bättre och få bättre kontroll över ekonomin.",
@@ -211,9 +205,9 @@ export const workSteps = [
 ];
 
 export const companyTypes = [
-  "Små och medelstora företag som vill ha bättre ekonomisk struktur",
-  "Entreprenörer och ägarledda bolag med behov av tydligare beslutsunderlag",
-  "Konsultbolag och växande serviceverksamheter med höjda krav på kontroll",
+  "Mindre och medelstora företag som vill ha bättre ekonomisk struktur",
+  "Entreprenörsdrivna bolag med behov av tydligare beslutsunderlag",
+  "Konsultbolag och företag i tillväxt med höjda krav på kontroll",
   "Företag i Linköping och i övriga Sverige som söker en mer analytisk ekonomipartner",
 ];
 
@@ -243,3 +237,5 @@ export const values = [
 export function getServiceBySlug(slug: string) {
   return services.find((service) => service.slug === slug);
 }
+
+export { SITE_CONFIG };

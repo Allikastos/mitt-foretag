@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { navigationItems, siteConfig } from "@/lib/site";
+import { SITE_CONFIG } from "@/config/site";
+import { navigationItems } from "@/lib/site";
 import { SectionContainer } from "./section-container";
 
 function isActivePath(pathname: string, href: string) {
@@ -13,6 +14,8 @@ function isActivePath(pathname: string, href: string) {
 export function SiteHeader() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [wordmarkFirstLine, ...wordmarkRest] = SITE_CONFIG.name.split(" ");
+  const wordmarkSecondLine = wordmarkRest.join(" ");
 
   return (
     <header className="sticky top-0 z-40 border-b border-black/6 bg-[#F7F7F5]/88 backdrop-blur-xl">
@@ -20,11 +23,13 @@ export function SiteHeader() {
         <div className="flex items-center justify-between gap-3 md:gap-8">
           <Link href="/" className="flex min-w-0 flex-col leading-none">
             <span className="text-[1rem] font-medium tracking-[0.19em] text-[#0B0B0C] uppercase sm:text-[1.05rem] md:text-lg md:tracking-[0.24em]">
-              Bidewind
+              {wordmarkFirstLine}
             </span>
-            <span className="mt-1.5 text-[9px] tracking-[0.22em] text-[#6B6B6B] uppercase md:mt-2 md:text-[10px] md:tracking-[0.28em]">
-              Consulting
-            </span>
+            {wordmarkSecondLine ? (
+              <span className="mt-1.5 text-[9px] tracking-[0.22em] text-[#6B6B6B] uppercase md:mt-2 md:text-[10px] md:tracking-[0.28em]">
+                {wordmarkSecondLine}
+              </span>
+            ) : null}
           </Link>
 
           <div className="hidden md:flex md:items-center md:gap-6 lg:gap-8">
@@ -94,19 +99,19 @@ export function SiteHeader() {
         </div>
 
         <div className="mt-4 hidden border-t border-black/6 pt-3 text-[11px] uppercase tracking-[0.18em] text-[#6B6B6B] md:flex md:items-center md:justify-between">
-          <span>{siteConfig.tagline}</span>
+          <span>{SITE_CONFIG.tagline}</span>
           <div className="flex flex-wrap items-center gap-4">
             <a
-              href={`mailto:${siteConfig.email}`}
+              href={`mailto:${SITE_CONFIG.contact.email}`}
               className="transition duration-200 hover:text-[#0B0B0C]"
             >
-              {siteConfig.email}
+              {SITE_CONFIG.contact.email}
             </a>
             <a
-              href={siteConfig.phoneHref}
+              href={SITE_CONFIG.contact.phoneHref}
               className="transition duration-200 hover:text-[#0B0B0C]"
             >
-              {siteConfig.phoneDisplay}
+              {SITE_CONFIG.contact.phoneDisplay}
             </a>
           </div>
         </div>

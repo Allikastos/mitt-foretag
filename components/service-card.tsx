@@ -5,6 +5,7 @@ type ServiceCardProps = {
   summary: string;
   href: string;
   label?: string;
+  ctaLabel?: string;
   variant?: "compact" | "feature";
 };
 
@@ -13,6 +14,7 @@ export function ServiceCard({
   summary,
   href,
   label = "Tjänst",
+  ctaLabel = "Läs mer",
   variant = "compact",
 }: ServiceCardProps) {
   const isFeature = variant === "feature";
@@ -35,7 +37,7 @@ export function ServiceCard({
         href={href}
         className="mt-8 inline-flex items-center gap-2 rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium text-[#0B0B0C] transition duration-200 hover:border-[#0B0B0C] hover:bg-[#F7F7F5]"
       >
-        Läs mer
+        {ctaLabel}
         <span aria-hidden="true">→</span>
       </Link>
     </article>

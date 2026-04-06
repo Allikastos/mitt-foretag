@@ -1,13 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 
 import Link from "next/link";
+import { SITE_CONFIG } from "@/config/site";
 import { SectionContainer } from "@/components/section-container";
 import { createMetadata } from "@/lib/metadata";
-import { siteConfig } from "@/lib/site";
 
 export const metadata = createMetadata(
   "Redovisning och ekonomisk rådgivning",
-  "Redovisning och ekonomisk rådgivning för mindre företag. Bidewind Consulting hjälper företag med bokföring, rapportering och analys för bättre kontroll på ekonomin och bättre beslut."
+  `Redovisning och ekonomisk rådgivning för mindre företag. ${SITE_CONFIG.name} hjälper företag med bokföring, rapportering och analys för bättre kontroll på ekonomin och bättre beslut.`
 );
 
 const helpItems = [
@@ -62,10 +62,10 @@ export default function HomePage() {
             <div className="grid gap-12 px-8 py-10 md:px-12 md:py-14 lg:grid-cols-[minmax(0,1.06fr)_minmax(18rem,0.94fr)] lg:items-center lg:gap-14 lg:px-14 lg:py-16">
               <div className="max-w-[39rem]">
                 <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
-                  {siteConfig.tagline}
+                  {SITE_CONFIG.tagline}
                 </p>
                 <p className="mt-6 text-sm font-medium tracking-[0.18em] text-[#6B6B6B] uppercase">
-                  {siteConfig.name}
+                  {SITE_CONFIG.name}
                 </p>
                 <h1 className="mt-7 text-4xl font-semibold tracking-[-0.055em] text-[#0B0B0C] text-balance md:text-5xl lg:text-[4.2rem] lg:leading-[0.98]">
                   Redovisning och ekonomisk rådgivning för mindre företag
@@ -81,7 +81,7 @@ export default function HomePage() {
                     href="/kontakt"
                     className="inline-flex items-center justify-center rounded-2xl bg-[#0B0B0C] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
                   >
-                    Kontakta Bidewind
+                    Kontakta {SITE_CONFIG.name}
                   </Link>
                   <Link
                     href="/tjanster"
@@ -247,13 +247,13 @@ export default function HomePage() {
 
             <div className="rounded-[2rem] border border-black/8 bg-[#F7F7F5] p-8 md:p-10">
               <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
-                Om Bidewind Consulting
+                Om {SITE_CONFIG.name}
               </p>
               <h2 className="mt-5 text-3xl font-semibold tracking-[-0.045em] text-[#0B0B0C] text-balance">
-                Om Bidewind Consulting
+                Om {SITE_CONFIG.name}
               </h2>
               <p className="mt-6 text-base leading-7 text-[#5F5F5F]">
-                Bidewind Consulting arbetar med redovisning och ekonomisk
+                {SITE_CONFIG.name} arbetar med redovisning och ekonomisk
                 rådgivning för mindre företag.
               </p>
               <p className="mt-5 text-base leading-7 text-[#5F5F5F]">
@@ -283,16 +283,16 @@ export default function HomePage() {
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 lg:justify-items-end">
                 <a
-                  href={`mailto:${siteConfig.email}`}
+                  href={`mailto:${SITE_CONFIG.contact.email}`}
                   className="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3 text-sm font-medium text-[#0B0B0C] transition duration-200 hover:opacity-90"
                 >
-                  {siteConfig.email}
+                  {SITE_CONFIG.contact.email}
                 </a>
                 <a
-                  href={siteConfig.phoneHref}
+                  href={SITE_CONFIG.contact.phoneHref}
                   className="inline-flex items-center justify-center rounded-2xl border border-white/12 px-6 py-3 text-sm font-medium text-white transition duration-200 hover:bg-white/8"
                 >
-                  {siteConfig.phoneDisplay}
+                  {SITE_CONFIG.contact.phoneDisplay}
                 </a>
               </div>
             </div>

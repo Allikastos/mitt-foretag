@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { SITE_CONFIG } from "@/config/site";
 import { AdminLoginForm } from "@/components/admin-login-form";
 import { SectionContainer } from "@/components/section-container";
 import { createMetadata } from "@/lib/metadata";
@@ -10,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   ...createMetadata(
     "Admin login",
-    "Logga in till Bidewind Consultings admin för att hantera blogginlägg."
+    `Logga in till ${SITE_CONFIG.name}s admin för att hantera blogginlägg.`
   ),
   robots: {
     index: false,

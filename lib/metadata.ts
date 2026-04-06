@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { siteConfig } from "./site";
+import { SITE_CONFIG } from "@/config/site";
 
 export function createMetadata(title: string, description: string): Metadata {
   return {
     title,
     description,
     openGraph: {
-      title: `${title} | ${siteConfig.name}`,
+      title: `${title} | ${SITE_CONFIG.name}`,
       description,
       locale: "sv_SE",
       type: "website",
-      siteName: siteConfig.name,
+      siteName: SITE_CONFIG.name,
     },
   };
 }

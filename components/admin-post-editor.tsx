@@ -7,6 +7,7 @@ import {
   type ChangeEvent,
 } from "react";
 import { useRouter } from "next/navigation";
+import { SITE_CONFIG } from "@/config/site";
 import { AdminRichTextEditor } from "@/components/admin-rich-text-editor";
 import { BlogRichText } from "@/components/blog-rich-text";
 import {
@@ -144,8 +145,8 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
     form.excerpt.trim() ||
     "Meta-beskrivning visas här när du fyller i utdrag eller SEO-beskrivning.";
   const googleUrl = form.slug
-    ? `bidewindconsulting.se/blogg/${form.slug}`
-    : "bidewindconsulting.se/blogg/din-slug";
+    ? `${SITE_CONFIG.domain}/blogg/${form.slug}`
+    : `${SITE_CONFIG.domain}/blogg/din-slug`;
   const seoTitleLength = form.seoTitle.trim().length;
   const seoDescriptionLength = form.seoDescription.trim().length;
 

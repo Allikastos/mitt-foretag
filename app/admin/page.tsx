@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { SITE_CONFIG } from "@/config/site";
 import { AdminPostEditor } from "@/components/admin-post-editor";
 import { AdminSignOutButton } from "@/components/admin-sign-out-button";
 import { SectionContainer } from "@/components/section-container";
@@ -12,7 +13,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   ...createMetadata(
     "Admin",
-    "Adminpanel för att hantera blogg och innehåll i Bidewind Consulting."
+    `Adminpanel för att hantera blogg och innehåll i ${SITE_CONFIG.name}.`
   ),
   robots: {
     index: false,

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
+import { SITE_CONFIG } from "@/config/site";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -13,11 +13,11 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: `${siteConfig.name} | ${siteConfig.tagline}`,
-    template: `%s | ${siteConfig.name}`,
+    default: `${SITE_CONFIG.name} | ${SITE_CONFIG.tagline}`,
+    template: `%s | ${SITE_CONFIG.name}`,
   },
-  description:
-    "Bidewind Consulting hjälper mindre företag med redovisning, finansiell rapportering och ekonomisk analys för bättre kontroll, tydligare beslutsunderlag och långsiktigt hållbar styrning.",
+  description: SITE_CONFIG.description,
+  metadataBase: new URL(SITE_CONFIG.url),
 };
 
 export default function RootLayout({

@@ -78,7 +78,7 @@ export function ContactForm() {
             onChange={(event) =>
               setForm((current) => ({ ...current, name: event.target.value }))
             }
-            placeholder="Ditt namn"
+            placeholder="För- och efternamn"
             className="min-h-12 w-full rounded-2xl border border-black/10 bg-[#F7F7F5] px-4 py-3 text-sm text-[#0B0B0C] outline-none transition duration-200 placeholder:text-[#8A8A8A] focus:border-[#C6A15B]"
             required
           />
@@ -94,7 +94,7 @@ export function ContactForm() {
             onChange={(event) =>
               setForm((current) => ({ ...current, company: event.target.value }))
             }
-            placeholder="Företagsnamn"
+            placeholder="Bolagsnamn"
             className="min-h-12 w-full rounded-2xl border border-black/10 bg-[#F7F7F5] px-4 py-3 text-sm text-[#0B0B0C] outline-none transition duration-200 placeholder:text-[#8A8A8A] focus:border-[#C6A15B]"
           />
         </label>
@@ -145,7 +145,7 @@ export function ContactForm() {
           onChange={(event) =>
             setForm((current) => ({ ...current, message: event.target.value }))
           }
-          placeholder="Berätta kort om er verksamhet och vad ni vill ha hjälp med."
+          placeholder="Beskriv kort er verksamhet, nuläget och vad ni vill få bättre kontroll på."
           className="w-full rounded-[1.5rem] border border-black/10 bg-[#F7F7F5] px-4 py-3.5 text-sm text-[#0B0B0C] outline-none transition duration-200 placeholder:text-[#8A8A8A] focus:border-[#C6A15B]"
           required
         />
@@ -170,8 +170,13 @@ export function ContactForm() {
         disabled={isSubmitting}
         className="rounded-2xl bg-[#0B0B0C] px-6 py-3 text-sm font-medium text-white transition duration-200 hover:opacity-90"
       >
-        {isSubmitting ? "Skickar..." : "Skicka förfrågan"}
+        {isSubmitting ? "Skickar..." : "Skicka och boka första samtal"}
       </button>
+
+      <p className="text-sm leading-6 text-[#5F5F5F]">
+        Det räcker med några meningar. Du får ett tydligt nästa steg utifrån din
+        situation.
+      </p>
 
       {errorMessage ? (
         <p

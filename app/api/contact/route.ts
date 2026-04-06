@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { siteConfig } from "@/lib/site";
+import { SITE_CONFIG } from "@/config/site";
 
 type ContactPayload = {
   name?: string;
@@ -45,7 +45,10 @@ export async function POST(request: Request) {
 
   if (website) {
     return Response.json(
-      { message: "Tack för din förfrågan. Jag återkommer så snart jag kan." },
+      {
+        message:
+          "Tack. Din förfrågan är skickad. Jag återkommer för en första avstämning och förslag på nästa steg.",
+      },
       { status: 200 }
     );
   }
@@ -69,14 +72,14 @@ export async function POST(request: Request) {
   if (!resendApiKey) {
     return Response.json(
       {
-        error: `Kontaktformuläret är inte kopplat till e-post ännu. Mejla direkt på ${siteConfig.email}.`,
+        error: `Kontaktformuläret är inte kopplat till e-post ännu. Mejla direkt på ${SITE_CONFIG.contact.email}.`,
       },
       { status: 500 }
     );
   }
 
   const resend = new Resend(resendApiKey);
-  const toEmail = process.env.CONTACT_TO_EMAIL || siteConfig.email;
+  const toEmail = process.env.CONTACT_TO_EMAIL || SITE_CONFIG.contact.email;
   const fromEmail = process.env.CONTACT_FROM_EMAIL || "onboarding@resend.dev";
 
   const safeName = escapeHtml(name);
@@ -120,14 +123,17 @@ export async function POST(request: Request) {
 
       return Response.json(
         {
-          error: `Förfrågan kunde inte skickas just nu. Mejla direkt på ${siteConfig.email}.`,
+          error: `Förfrågan kunde inte skickas just nu. Mejla direkt på ${SITE_CONFIG.contact.email}.`,
         },
         { status: 500 }
       );
     }
 
     return Response.json(
-      { message: "Tack för din förfrågan. Jag återkommer så snart jag kan." },
+      {
+        message:
+          "Tack. Din förfrågan är skickad. Jag återkommer för en första avstämning och förslag på nästa steg.",
+      },
       { status: 200 }
     );
   } catch (error) {
@@ -135,7 +141,7 @@ export async function POST(request: Request) {
 
     return Response.json(
       {
-        error: `Förfrågan kunde inte skickas just nu. Mejla direkt på ${siteConfig.email}.`,
+        error: `Förfrågan kunde inte skickas just nu. Mejla direkt på ${SITE_CONFIG.contact.email}.`,
       },
       { status: 500 }
     );

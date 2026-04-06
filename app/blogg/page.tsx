@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SITE_CONFIG } from "@/config/site";
 import { PageIntro } from "@/components/page-intro";
 import { SectionContainer } from "@/components/section-container";
 import { createMetadata } from "@/lib/metadata";
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = createMetadata(
   "Blogg",
-  "Artiklar från Bidewind Consulting om redovisning, finansiell rapportering och ekonomisk rådgivning för mindre företag."
+  `Artiklar från ${SITE_CONFIG.name} om redovisning, finansiell rapportering och ekonomisk rådgivning för mindre företag.`
 );
 
 function formatDate(value: string | null, fallback: string) {
@@ -29,7 +30,7 @@ export default async function BlogPage() {
       <PageIntro
         eyebrow="Blogg"
         title="Perspektiv på redovisning, rapportering och ekonomisk styrning."
-        description="Här samlas artiklar och insikter från Bidewind Consulting om redovisning, rapportering och ekonomisk styrning."
+        description={`Här samlas artiklar och insikter från ${SITE_CONFIG.name} om redovisning, rapportering och ekonomisk styrning.`}
       />
 
       <section className="pb-24 pt-4 md:pb-24 md:pt-8">

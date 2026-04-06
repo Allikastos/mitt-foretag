@@ -1,12 +1,30 @@
 import { ContactForm } from "@/components/contact-form";
+import { SITE_CONFIG } from "@/config/site";
 import { PageIntro } from "@/components/page-intro";
 import { SectionContainer } from "@/components/section-container";
 import { createMetadata } from "@/lib/metadata";
-import { siteConfig } from "@/lib/site";
+
+const contactSteps = [
+  {
+    title: "Ni beskriver nuläget",
+    description:
+      "Berätta kort om verksamheten, vad ni vill få bättre ordning i och vilka frågor som är viktigast just nu.",
+  },
+  {
+    title: "Första avstämning",
+    description:
+      "Jag återkommer personligen för att förstå behov, prioriteringar och om det finns ett bra upplägg att gå vidare med.",
+  },
+  {
+    title: "Tydligt nästa steg",
+    description:
+      "Ni får en tydlig bild av hur ett samarbete kan se ut, eller vad som är mest rimligt att prioritera först.",
+  },
+];
 
 export const metadata = createMetadata(
   "Kontakt",
-  "Kontakta Bidewind Consulting för redovisning, finansiell rapportering och ekonomisk rådgivning. Möten kan hållas digitalt eller i Linköping."
+  `Boka ett första samtal med ${SITE_CONFIG.name} om redovisning, rapportering eller ekonomisk rådgivning. Möten kan hållas digitalt eller i Linköping.`
 );
 
 export default function ContactPage() {
@@ -14,8 +32,8 @@ export default function ContactPage() {
     <>
       <PageIntro
         eyebrow="Kontakt"
-        title="Ett första samtal om redovisning, rapportering eller ekonomisk rådgivning."
-        description="Ta kontakt om du vill diskutera hur Bidewind Consulting kan hjälpa din verksamhet med bättre struktur, tydligare siffror och lugnare ekonomisk styrning."
+        title="Boka ett första samtal om redovisning, rapportering eller ekonomisk rådgivning."
+        description={`Du behöver inte ha ett färdigt upplägg. Beskriv nuläge, frågor eller vad som känns oklart, så återkommer ${SITE_CONFIG.name} med ett tydligt nästa steg.`}
       />
 
       <section className="pb-8 pt-8 md:pb-12 md:pt-10">
@@ -27,36 +45,54 @@ export default function ContactPage() {
                   Kontaktuppgifter
                 </p>
                 <h2 className="mt-5 text-2xl font-semibold tracking-[-0.03em]">
-                  {siteConfig.name}
+                  {SITE_CONFIG.name}
                 </h2>
                 <div className="mt-6 space-y-3 text-base leading-7 text-white/72">
-                  <p>{siteConfig.email}</p>
-                  <p>{siteConfig.phoneDisplay}</p>
+                  <p>Du kan höra av dig via formuläret, mejl eller telefon.</p>
+                  <p>{SITE_CONFIG.contact.email}</p>
+                  <p>{SITE_CONFIG.contact.phoneDisplay}</p>
                   <p>
-                    {siteConfig.city}, {siteConfig.country}
+                    {SITE_CONFIG.contact.city}, {SITE_CONFIG.contact.country}
                   </p>
                 </div>
               </div>
 
               <div className="rounded-[2.15rem] border border-black/8 bg-white p-8 shadow-[0_24px_60px_-55px_rgba(0,0,0,0.18)]">
                 <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
-                  Mötesform
+                  Så går det till
                 </p>
-                <p className="mt-5 text-lg leading-8 text-[#5F5F5F]">
-                  Möten kan hållas digitalt eller på plats beroende på vad som passar
-                  bäst. För företag i Linköping är det naturligt att ses lokalt, men
-                  samarbeten fungerar lika väl med företag i övriga Sverige.
+                <div className="mt-5 space-y-4">
+                  {contactSteps.map((step) => (
+                    <div
+                      key={step.title}
+                      className="rounded-[1.5rem] border border-black/8 bg-[#F7F7F5] p-5"
+                    >
+                      <h2 className="text-lg font-semibold tracking-[-0.02em] text-[#0B0B0C]">
+                        {step.title}
+                      </h2>
+                      <p className="mt-3 text-sm leading-7 text-[#5F5F5F]">
+                        {step.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-6 text-sm leading-7 text-[#5F5F5F]">
+                  Möten kan hållas digitalt eller på plats beroende på vad som
+                  passar bäst. För företag i Linköping är det naturligt att ses
+                  lokalt, men samarbeten fungerar lika väl med företag i övriga
+                  Sverige.
                 </p>
               </div>
             </div>
 
             <div className="rounded-[2.15rem] border border-black/8 bg-white p-8 shadow-[0_24px_60px_-55px_rgba(0,0,0,0.18)] md:p-10">
               <h2 className="text-balance text-2xl font-semibold tracking-[-0.035em] text-[#0B0B0C] md:text-3xl">
-                Skicka en förfrågan
+                Boka ett första samtal
               </h2>
               <p className="mt-4 text-base leading-7 text-[#5F5F5F]">
-                Beskriv kort vad ni behöver hjälp med, så återkommer jag så snart
-                jag kan.
+                Det räcker med några meningar om verksamheten, nuläget och vad ni
+                vill få bättre ordning i. Ni behöver inte ha alla svar klara innan
+                ni hör av er.
               </p>
               <div className="mt-8">
                 <ContactForm />

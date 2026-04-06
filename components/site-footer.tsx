@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { navigationItems, siteConfig } from "@/lib/site";
+import { SITE_CONFIG } from "@/config/site";
+import { navigationItems } from "@/lib/site";
 import { SectionContainer } from "./section-container";
 
 export function SiteFooter() {
@@ -9,11 +10,13 @@ export function SiteFooter() {
         <div className="grid gap-12 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-start">
           <div className="max-w-lg">
             <p className="text-xs font-medium tracking-[0.24em] text-[#C6A15B] uppercase">
-              {siteConfig.name}
+              {SITE_CONFIG.name}
             </p>
             <p className="mt-5 text-lg leading-8 text-white/72">
-              Redovisning, finansiell rapportering och ekonomisk rådgivning för
-              mindre företag i Linköping och i övriga Sverige.
+              {SITE_CONFIG.description}
+            </p>
+            <p className="mt-5 max-w-md text-xs leading-6 text-white/44">
+              {SITE_CONFIG.legalNotice}
             </p>
           </div>
 
@@ -42,29 +45,29 @@ export function SiteFooter() {
             <ul className="mt-6 space-y-3 text-sm text-white/72">
               <li>
                 <a
-                  href={`mailto:${siteConfig.email}`}
+                  href={`mailto:${SITE_CONFIG.contact.email}`}
                   className="transition duration-200 hover:text-white"
                 >
-                  {siteConfig.email}
+                  {SITE_CONFIG.contact.email}
                 </a>
               </li>
               <li>
                 <a
-                  href={siteConfig.phoneHref}
+                  href={SITE_CONFIG.contact.phoneHref}
                   className="transition duration-200 hover:text-white"
                 >
-                  {siteConfig.phoneDisplay}
+                  {SITE_CONFIG.contact.phoneDisplay}
                 </a>
               </li>
               <li>
-                {siteConfig.city}, {siteConfig.country}
+                {SITE_CONFIG.contact.city}, {SITE_CONFIG.contact.country}
               </li>
             </ul>
           </div>
         </div>
 
         <div className="mt-14 border-t border-white/8 pt-6 text-xs tracking-[0.18em] text-white/40 uppercase">
-          Ekonomisk styrning, redovisning och rådgivning för mindre företag
+          {SITE_CONFIG.tagline}
         </div>
       </SectionContainer>
     </footer>

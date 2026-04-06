@@ -1,4 +1,5 @@
 import { CTABlock } from "@/components/cta-block";
+import { SITE_CONFIG } from "@/config/site";
 import { PageIntro } from "@/components/page-intro";
 import { SectionContainer } from "@/components/section-container";
 import { ServiceCard } from "@/components/service-card";
@@ -15,13 +16,13 @@ export default function ServicesPage() {
     <>
       <PageIntro
         eyebrow="Tjänster"
-        title="Redovisning, rapportering och rådgivning för företag som vill arbeta mer strukturerat."
-        description="Bidewind Consulting erbjuder ett sammanhållet ekonomiskt stöd för mindre företag som vill ha bättre kontroll, tydligare siffror och ett mer användbart beslutsunderlag."
+        title="Ekonomitjänster för företag som vill ha bättre kontroll, tydligare siffror och starkare beslutsunderlag."
+        description={`${SITE_CONFIG.name} erbjuder redovisning, rapportering och rådgivning för företag som vill få mer ordning i vardagen och använda ekonomin mer aktivt i verksamheten.`}
         aside={
           <div className="rounded-[1.75rem] border border-black/8 bg-white p-6 text-sm leading-7 text-[#5F5F5F] shadow-[0_20px_50px_-45px_rgba(0,0,0,0.2)]">
-            Med bas i Linköping och med uppdrag i hela Sverige passar erbjudandet
-            verksamheter som vill ha ett lugnare och mer genomtänkt ekonomiskt
-            arbete.
+            Med bas i Linköping och med uppdrag i hela Sverige passar upplägget
+            verksamheter som vill minska den ekonomiska friktionen i vardagen och
+            få ett mer professionellt stöd i styrningen.
           </div>
         }
       />
@@ -36,6 +37,7 @@ export default function ServicesPage() {
                 summary={service.summary}
                 href={service.href}
                 label={service.label}
+                ctaLabel="Se upplägg"
                 variant="feature"
               />
             ))}
@@ -51,12 +53,13 @@ export default function ServicesPage() {
                 Passar för
               </p>
               <h2 className="mt-5 text-balance text-3xl font-semibold tracking-[-0.045em] text-[#0B0B0C] md:text-4xl">
-                För företag som vill kombinera ordning i ekonomin med bättre kontroll i vardagen.
+                För företag som vill kombinera ordning i ekonomin med tydligare styrning i vardagen.
               </h2>
               <p className="mt-6 text-lg leading-8 text-[#5F5F5F]">
-                Upplägget passar särskilt bra för mindre företag och växande
-                tjänsteverksamheter som vill ha mer än traditionell bokföring och
-                behöver siffror som går att använda i praktiken.
+                Upplägget passar särskilt bra för mindre och medelstora företag,
+                konsultbolag och entreprenörsdrivna bolag i tillväxt som vill ha
+                mer än traditionell bokföring och behöver siffror som går att
+                använda i praktiken.
               </p>
             </div>
 
@@ -75,9 +78,10 @@ export default function ServicesPage() {
       </section>
 
       <CTABlock
-        title="Vill du diskutera vilket upplägg som passar ditt företag bäst?"
-        description="Ta kontakt så går vi igenom nuläge, behov och vilken kombination av redovisning, rapportering och rådgivning som skapar mest värde."
-        primary={{ href: "/kontakt", label: "Kontakta Bidewind" }}
+        title="Vill du diskutera vilket upplägg som skulle skapa mest värde i ditt företag?"
+        description="Boka ett första samtal så går vi igenom nuläge, arbetssätt och vilken kombination av redovisning, rapportering och rådgivning som passar bäst."
+        primary={{ href: "/kontakt", label: "Boka ett första samtal" }}
+        secondary={{ href: "/blogg", label: "Läs artiklar inom ekonomi" }}
       />
     </>
   );

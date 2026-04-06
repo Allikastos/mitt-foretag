@@ -3,6 +3,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SITE_CONFIG } from "@/config/site";
 import { BlogRichText } from "@/components/blog-rich-text";
 import { SectionContainer } from "@/components/section-container";
 import { createMetadata } from "@/lib/metadata";
@@ -31,7 +32,7 @@ export async function generateMetadata({
   if (!post) {
     return createMetadata(
       "Blogg",
-      "Artikel från Bidewind Consulting om redovisning och ekonomisk rådgivning."
+      `Artikel från ${SITE_CONFIG.name} om redovisning och ekonomisk rådgivning.`
     );
   }
 
@@ -43,14 +44,14 @@ export async function generateMetadata({
         post.content.replace(/<[^>]+>/g, "").slice(0, 140)
     ),
     openGraph: {
-      title: `${post.seo_title || post.title} | Bidewind Consulting`,
+      title: `${post.seo_title || post.title} | ${SITE_CONFIG.name}`,
       description:
         post.seo_description ||
         post.excerpt ||
         post.content.replace(/<[^>]+>/g, "").slice(0, 140),
       locale: "sv_SE",
       type: "article",
-      siteName: "Bidewind Consulting",
+      siteName: SITE_CONFIG.name,
       images: post.image_url ? [{ url: post.image_url }] : undefined,
     },
   };
