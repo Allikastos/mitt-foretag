@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { SITE_CONFIG } from "@/config/site";
 import { navigationItems } from "@/lib/site";
@@ -9,9 +10,13 @@ export function SiteFooter() {
       <SectionContainer>
         <div className="grid gap-12 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-start">
           <div className="max-w-lg">
-            <p className="text-xs font-medium tracking-[0.24em] text-[#C6A15B] uppercase">
-              {SITE_CONFIG.name}
-            </p>
+            <Image
+              src={SITE_CONFIG.footerLogoPath}
+              alt={SITE_CONFIG.name}
+              width={260}
+              height={64}
+              className="h-8 w-auto md:h-9"
+            />
             <p className="mt-5 text-lg leading-8 text-white/72">
               {SITE_CONFIG.description}
             </p>
