@@ -2,6 +2,7 @@ const BRAND_NAME = "Altura Nova";
 
 export const SITE_CONFIG = {
   name: BRAND_NAME,
+  logoPath: "/loggor/Altura Nova (3).png",
   description:
     "Redovisning, rapportering och ekonomisk rådgivning för företag som vill ha bättre kontroll, tydligare siffror och bättre beslutsunderlag.",
   domain: "alturanova.se",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SITE_CONFIG } from "@/config/site";
@@ -14,22 +15,21 @@ function isActivePath(pathname: string, href: string) {
 export function SiteHeader() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [wordmarkFirstLine, ...wordmarkRest] = SITE_CONFIG.name.split(" ");
-  const wordmarkSecondLine = wordmarkRest.join(" ");
 
   return (
     <header className="sticky top-0 z-40 border-b border-black/6 bg-[#F7F7F5]/88 backdrop-blur-xl">
       <SectionContainer className="py-3.5 md:py-5 lg:py-6">
         <div className="flex items-center justify-between gap-3 md:gap-8">
-          <Link href="/" className="flex min-w-0 flex-col leading-none">
-            <span className="text-[1rem] font-medium tracking-[0.19em] text-[#0B0B0C] uppercase sm:text-[1.05rem] md:text-lg md:tracking-[0.24em]">
-              {wordmarkFirstLine}
-            </span>
-            {wordmarkSecondLine ? (
-              <span className="mt-1.5 text-[9px] tracking-[0.22em] text-[#6B6B6B] uppercase md:mt-2 md:text-[10px] md:tracking-[0.28em]">
-                {wordmarkSecondLine}
-              </span>
-            ) : null}
+          <Link href="/" className="flex min-w-0 items-center leading-none">
+            <Image
+              src={SITE_CONFIG.logoPath}
+              alt={SITE_CONFIG.name}
+              width={224}
+              height={56}
+              priority
+              className="h-8 w-auto sm:h-9 md:h-10"
+            />
+            <span className="sr-only">{SITE_CONFIG.name}</span>
           </Link>
 
           <div className="hidden md:flex md:items-center md:gap-6 lg:gap-8">
