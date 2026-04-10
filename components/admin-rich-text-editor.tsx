@@ -7,6 +7,7 @@ import StarterKit from "@tiptap/starter-kit";
 import { Placeholder } from "@tiptap/extensions";
 import { DOMParser as ProseMirrorDOMParser } from "@tiptap/pm/model";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
+import MarkdownIt from "markdown-it";
 
 type AdminRichTextEditorProps = {
   value: string;
@@ -42,6 +43,13 @@ const initialToolbarState: ToolbarState = {
 
 const panelInputClassName =
   "min-h-11 w-full rounded-[1.1rem] border border-black/10 bg-[#F7F7F5] px-4 py-3 text-sm text-[#0B0B0C] outline-none transition focus:border-[#C6A15B]";
+const panelTextareaClassName =
+  "min-h-[15rem] w-full rounded-[1.1rem] border border-black/10 bg-[#F7F7F5] px-4 py-3 text-sm leading-6 text-[#0B0B0C] outline-none transition focus:border-[#C6A15B]";
+const markdown = new MarkdownIt({
+  html: true,
+  linkify: true,
+  breaks: false,
+});
 
 function normalizeHref(value: string) {
   const trimmed = value.trim();
@@ -78,6 +86,21 @@ function looksLikeHtmlSnippet(value: string) {
   }
 
   return /<\/?(h1|h2|h3|p|ul|ol|li|a|strong|em|img)\b/i.test(trimmed);
+}
+
+function getPastedHtml(event: ClipboardEvent) {
+  const html = event.clipboardData?.getData("text/html")?.trim() ?? "";
+  const text = event.clipboardData?.getData("text/plain")?.trim() ?? "";
+
+  if (looksLikeHtmlSnippet(html)) {
+    return html;
+  }
+
+  if (looksLikeHtmlSnippet(text)) {
+    return text;
+  }
+
+  return "";
 }
 
 function normalizePastedHtml(value: string) {
@@ -123,7 +146,11 @@ export function AdminRichTextEditor({
   onUploadImage,
 }: AdminRichTextEditorProps) {
   const uploadInputId = useId();
-  const [activePanel, setActivePanel] = useState<"link" | "image" | null>(null);
+  const [activePanel, setActivePanel] = useState<
+    "link" | "image" | "import" | null
+  >(null);
+  const [importFormat, setImportFormat] = useState<"html" | "markdown">("html");
+  const [importValue, setImportValue] = useState("");
   const [panelError, setPanelError] = useState<string | null>(null);
   const [linkUrl, setLinkUrl] = useState("https://");
   const [linkText, setLinkText] = useState("");
@@ -139,13 +166,13 @@ export function AdminRichTextEditor({
           "min-h-[22rem] px-4 py-4 text-[15px] leading-8 text-[#0B0B0C] outline-none sm:min-h-[26rem] sm:px-5 sm:py-5 md:min-h-[28rem]",
       },
       handlePaste(view, event) {
-        const text = event.clipboardData?.getData("text/plain") ?? "";
+        const pastedHtml = getPastedHtml(event);
 
-        if (!looksLikeHtmlSnippet(text)) {
+        if (!pastedHtml) {
           return false;
         }
 
-        const normalizedHtml = normalizePastedHtml(text);
+        const normalizedHtml = normalizePastedHtml(pastedHtml);
 
         if (!normalizedHtml) {
           return false;
@@ -295,6 +322,81 @@ export function AdminRichTextEditor({
     setActivePanel((current) => (current === "image" ? null : "image"));
   }
 
+  function openImportPanel() {
+    setPanelError(null);
+    setActivePanel((current) => (current === "import" ? null : "import"));
+  }
+
+  function insertHtmlAtSelection(html: string) {
+    if (!editor) {
+      return false;
+    }
+
+    const normalizedHtml = normalizePastedHtml(html);
+
+    if (!normalizedHtml) {
+      return false;
+    }
+
+    const wrapper = window.document.createElement("div");
+    wrapper.innerHTML = normalizedHtml;
+
+    const slice = ProseMirrorDOMParser.fromSchema(
+      editor.view.state.schema
+    ).parseSlice(wrapper);
+
+    editor.view.focus();
+    editor.view.dispatch(
+      editor.view.state.tr.replaceSelection(slice).scrollIntoView()
+    );
+
+    return true;
+  }
+
+  function getImportHtml() {
+    const trimmed = importValue.trim();
+
+    if (!trimmed) {
+      setPanelError("Klistra in HTML eller Markdown först.");
+      return null;
+    }
+
+    if (importFormat === "markdown") {
+      return markdown.render(trimmed);
+    }
+
+    return trimmed;
+  }
+
+  function importContent(mode: "insert" | "replace") {
+    if (!editor) {
+      return;
+    }
+
+    const html = getImportHtml();
+
+    if (!html) {
+      return;
+    }
+
+    const normalizedHtml = normalizePastedHtml(html);
+
+    if (!normalizedHtml) {
+      setPanelError("Det gick inte att tolka innehållet.");
+      return;
+    }
+
+    if (mode === "replace") {
+      editor.commands.setContent(normalizedHtml);
+    } else if (!insertHtmlAtSelection(normalizedHtml)) {
+      setPanelError("Det gick inte att infoga innehållet.");
+      return;
+    }
+
+    setImportValue("");
+    closePanel();
+  }
+
   async function handleImageUpload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
 
@@ -412,6 +514,11 @@ export function AdminRichTextEditor({
 
               <ToolbarGroup>
                 <ToolbarButton
+                  label="Import"
+                  isActive={activePanel === "import"}
+                  onClick={openImportPanel}
+                />
+                <ToolbarButton
                   label="Länk"
                   isActive={toolbarState.isLink || activePanel === "link"}
                   onClick={openLinkPanel}
@@ -429,6 +536,66 @@ export function AdminRichTextEditor({
             </div>
           </div>
         </div>
+
+        {activePanel === "import" ? (
+          <div className="rounded-[1.4rem] border border-black/10 bg-[#FCFCFA]/95 p-4 shadow-[0_18px_50px_-45px_rgba(0,0,0,0.18)] backdrop-blur-sm sm:p-5">
+            <div className="flex flex-wrap gap-2">
+              <SmallActionButton
+                label="HTML"
+                tone={importFormat === "html" ? "primary" : "secondary"}
+                onClick={() => setImportFormat("html")}
+              />
+              <SmallActionButton
+                label="Markdown"
+                tone={importFormat === "markdown" ? "primary" : "secondary"}
+                onClick={() => setImportFormat("markdown")}
+              />
+            </div>
+
+            <label className="mt-4 block">
+              <span className="mb-2 block text-sm font-medium text-[#0B0B0C]">
+                {importFormat === "html" ? "Klistra in HTML" : "Klistra in Markdown"}
+              </span>
+              <textarea
+                rows={12}
+                value={importValue}
+                onChange={(event) => setImportValue(event.target.value)}
+                placeholder={
+                  importFormat === "html"
+                    ? "<h1>Rubrik</h1>\n<p>Ingress...</p>"
+                    : "# Rubrik\n\nIngress...\n\n## Underrubrik"
+                }
+                className={panelTextareaClassName}
+              />
+            </label>
+
+            <p className="mt-3 text-xs leading-5 text-[#6B6B6B]">
+              HTML och Markdown omvandlas till editorns vanliga rubriker, stycken
+              och listor. H1 justeras till H2 för att passa strukturen här.
+            </p>
+
+            {panelError ? (
+              <p className="mt-3 text-sm text-red-700">{panelError}</p>
+            ) : null}
+
+            <div className="mt-4 flex flex-wrap gap-2.5">
+              <SmallActionButton
+                label="Infoga vid markör"
+                onClick={() => importContent("insert")}
+              />
+              <SmallActionButton
+                label="Ersätt innehåll"
+                tone="secondary"
+                onClick={() => importContent("replace")}
+              />
+              <SmallActionButton
+                label="Avbryt"
+                tone="secondary"
+                onClick={closePanel}
+              />
+            </div>
+          </div>
+        ) : null}
 
         {activePanel === "link" ? (
           <div className="rounded-[1.4rem] border border-black/10 bg-[#FCFCFA]/95 p-4 shadow-[0_18px_50px_-45px_rgba(0,0,0,0.18)] backdrop-blur-sm sm:p-5">
