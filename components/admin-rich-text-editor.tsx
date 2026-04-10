@@ -273,7 +273,7 @@ export function AdminRichTextEditor({
 
   return (
     <div className="space-y-4">
-      <div className="sticky top-20 z-30 space-y-4">
+      <div className="space-y-4">
         <div className="rounded-[1.45rem] border border-black/10 bg-[#FAFAF7]/95 p-2.5 shadow-[0_18px_45px_-42px_rgba(0,0,0,0.18)] backdrop-blur-sm">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-wrap gap-2">
@@ -490,7 +490,7 @@ export function AdminRichTextEditor({
         </div>
         <EditorContent
           editor={editor}
-          className="[&_.ProseMirror]:outline-none [&_.ProseMirror_a]:font-medium [&_.ProseMirror_a]:text-[#0B0B0C] [&_.ProseMirror_a]:underline [&_.ProseMirror_a]:underline-offset-4 [&_.ProseMirror_em]:italic [&_.ProseMirror_h2]:mt-8 [&_.ProseMirror_h2]:text-[1.75rem] [&_.ProseMirror_h2]:font-semibold [&_.ProseMirror_h2]:tracking-[-0.035em] [&_.ProseMirror_h2]:text-[#0B0B0C] [&_.ProseMirror_h3]:mt-7 [&_.ProseMirror_h3]:text-[1.35rem] [&_.ProseMirror_h3]:font-semibold [&_.ProseMirror_h3]:tracking-[-0.03em] [&_.ProseMirror_h3]:text-[#0B0B0C] [&_.ProseMirror_img]:w-full [&_.ProseMirror_img]:rounded-[1.25rem] [&_.ProseMirror_img]:border [&_.ProseMirror_img]:border-black/8 [&_.ProseMirror_img]:bg-[#F7F7F5] [&_.ProseMirror_li]:pl-1 [&_.ProseMirror_ol]:my-5 [&_.ProseMirror_ol]:space-y-2 [&_.ProseMirror_ol>li]:ml-5 [&_.ProseMirror_ol>li]:list-decimal [&_.ProseMirror_p]:my-4 [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0 [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-[#8A8A8A] [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_strong]:text-[#0B0B0C] [&_.ProseMirror_ul]:my-5 [&_.ProseMirror_ul]:space-y-2 [&_.ProseMirror_ul>li]:ml-5 [&_.ProseMirror_ul>li]:list-disc"
+          className="max-h-[70vh] overflow-y-auto overscroll-contain [&_.ProseMirror]:outline-none [&_.ProseMirror_a]:font-medium [&_.ProseMirror_a]:text-[#0B0B0C] [&_.ProseMirror_a]:underline [&_.ProseMirror_a]:underline-offset-4 [&_.ProseMirror_em]:italic [&_.ProseMirror_h2]:mt-8 [&_.ProseMirror_h2]:text-[1.75rem] [&_.ProseMirror_h2]:font-semibold [&_.ProseMirror_h2]:tracking-[-0.035em] [&_.ProseMirror_h2]:text-[#0B0B0C] [&_.ProseMirror_h3]:mt-7 [&_.ProseMirror_h3]:text-[1.35rem] [&_.ProseMirror_h3]:font-semibold [&_.ProseMirror_h3]:tracking-[-0.03em] [&_.ProseMirror_h3]:text-[#0B0B0C] [&_.ProseMirror_img]:w-full [&_.ProseMirror_img]:rounded-[1.25rem] [&_.ProseMirror_img]:border [&_.ProseMirror_img]:border-black/8 [&_.ProseMirror_img]:bg-[#F7F7F5] [&_.ProseMirror_li]:pl-1 [&_.ProseMirror_ol]:my-5 [&_.ProseMirror_ol]:space-y-2 [&_.ProseMirror_ol>li]:ml-5 [&_.ProseMirror_ol>li]:list-decimal [&_.ProseMirror_p]:my-4 [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0 [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-[#8A8A8A] [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_strong]:text-[#0B0B0C] [&_.ProseMirror_ul]:my-5 [&_.ProseMirror_ul]:space-y-2 [&_.ProseMirror_ul>li]:ml-5 [&_.ProseMirror_ul>li]:list-disc"
         />
       </div>
 
