@@ -273,205 +273,211 @@ export function AdminRichTextEditor({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[1.45rem] border border-black/10 bg-[#FAFAF7] p-2.5 shadow-[0_18px_45px_-42px_rgba(0,0,0,0.18)]">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap gap-2">
-            <ToolbarGroup>
-              <ToolbarButton
-                label="P"
-                title="Brödtext"
-                isActive={toolbarState.isParagraph}
-                onClick={() => editor?.chain().focus().setParagraph().run()}
-              />
-              <ToolbarButton
-                label="H2"
-                title="Rubrik nivå 2"
-                isActive={toolbarState.isHeading2}
-                onClick={() =>
-                  editor?.chain().focus().toggleHeading({ level: 2 }).run()
-                }
-              />
-              <ToolbarButton
-                label="H3"
-                title="Rubrik nivå 3"
-                isActive={toolbarState.isHeading3}
-                onClick={() =>
-                  editor?.chain().focus().toggleHeading({ level: 3 }).run()
-                }
-              />
-            </ToolbarGroup>
+      <div className="sticky top-20 z-30 space-y-4">
+        <div className="rounded-[1.45rem] border border-black/10 bg-[#FAFAF7]/95 p-2.5 shadow-[0_18px_45px_-42px_rgba(0,0,0,0.18)] backdrop-blur-sm">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap gap-2">
+              <ToolbarGroup>
+                <ToolbarButton
+                  label="P"
+                  title="Brödtext"
+                  isActive={toolbarState.isParagraph}
+                  onClick={() => editor?.chain().focus().setParagraph().run()}
+                />
+                <ToolbarButton
+                  label="H2"
+                  title="Rubrik nivå 2"
+                  isActive={toolbarState.isHeading2}
+                  onClick={() =>
+                    editor?.chain().focus().toggleHeading({ level: 2 }).run()
+                  }
+                />
+                <ToolbarButton
+                  label="H3"
+                  title="Rubrik nivå 3"
+                  isActive={toolbarState.isHeading3}
+                  onClick={() =>
+                    editor?.chain().focus().toggleHeading({ level: 3 }).run()
+                  }
+                />
+              </ToolbarGroup>
 
-            <ToolbarGroup>
-              <ToolbarButton
-                label="B"
-                title="Fetstil"
-                isActive={toolbarState.isBold}
-                onClick={() => editor?.chain().focus().toggleBold().run()}
-              />
-              <ToolbarButton
-                label="I"
-                title="Kursiv stil"
-                isActive={toolbarState.isItalic}
-                onClick={() => editor?.chain().focus().toggleItalic().run()}
-              />
-            </ToolbarGroup>
+              <ToolbarGroup>
+                <ToolbarButton
+                  label="B"
+                  title="Fetstil"
+                  isActive={toolbarState.isBold}
+                  onClick={() => editor?.chain().focus().toggleBold().run()}
+                />
+                <ToolbarButton
+                  label="I"
+                  title="Kursiv stil"
+                  isActive={toolbarState.isItalic}
+                  onClick={() => editor?.chain().focus().toggleItalic().run()}
+                />
+              </ToolbarGroup>
 
-            <ToolbarGroup>
-              <ToolbarButton
-                label="Lista"
-                title="Punktlista"
-                isActive={toolbarState.isBulletList}
-                onClick={() => editor?.chain().focus().toggleBulletList().run()}
-              />
-              <ToolbarButton
-                label="1."
-                title="Numrerad lista"
-                isActive={toolbarState.isOrderedList}
-                onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-              />
-            </ToolbarGroup>
+              <ToolbarGroup>
+                <ToolbarButton
+                  label="Lista"
+                  title="Punktlista"
+                  isActive={toolbarState.isBulletList}
+                  onClick={() =>
+                    editor?.chain().focus().toggleBulletList().run()
+                  }
+                />
+                <ToolbarButton
+                  label="1."
+                  title="Numrerad lista"
+                  isActive={toolbarState.isOrderedList}
+                  onClick={() =>
+                    editor?.chain().focus().toggleOrderedList().run()
+                  }
+                />
+              </ToolbarGroup>
 
-            <ToolbarGroup>
-              <ToolbarButton
-                label="Länk"
-                isActive={toolbarState.isLink || activePanel === "link"}
-                onClick={openLinkPanel}
-              />
-              <ToolbarButton
-                label="Bild"
-                isActive={activePanel === "image"}
-                onClick={openImagePanel}
-              />
-            </ToolbarGroup>
-          </div>
+              <ToolbarGroup>
+                <ToolbarButton
+                  label="Länk"
+                  isActive={toolbarState.isLink || activePanel === "link"}
+                  onClick={openLinkPanel}
+                />
+                <ToolbarButton
+                  label="Bild"
+                  isActive={activePanel === "image"}
+                  onClick={openImagePanel}
+                />
+              </ToolbarGroup>
+            </div>
 
-          <div className="inline-flex items-center rounded-full border border-black/10 bg-white px-3 py-2 text-[11px] font-medium tracking-[0.16em] text-[#6B6B6B] uppercase">
-            {toolbarState.wordCount} ord
+            <div className="inline-flex items-center rounded-full border border-black/10 bg-white px-3 py-2 text-[11px] font-medium tracking-[0.16em] text-[#6B6B6B] uppercase">
+              {toolbarState.wordCount} ord
+            </div>
           </div>
         </div>
-      </div>
 
-      {activePanel === "link" ? (
-        <div className="rounded-[1.4rem] border border-black/10 bg-[#FCFCFA] p-4 shadow-[0_18px_50px_-45px_rgba(0,0,0,0.18)] sm:p-5">
-          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,0.75fr)]">
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-[#0B0B0C]">
-                Länkadress
-              </span>
-              <input
-                type="url"
-                value={linkUrl}
-                onChange={(event) => setLinkUrl(event.target.value)}
-                placeholder="https://..."
-                className={panelInputClassName}
-              />
-            </label>
+        {activePanel === "link" ? (
+          <div className="rounded-[1.4rem] border border-black/10 bg-[#FCFCFA]/95 p-4 shadow-[0_18px_50px_-45px_rgba(0,0,0,0.18)] backdrop-blur-sm sm:p-5">
+            <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,0.75fr)]">
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-[#0B0B0C]">
+                  Länkadress
+                </span>
+                <input
+                  type="url"
+                  value={linkUrl}
+                  onChange={(event) => setLinkUrl(event.target.value)}
+                  placeholder="https://..."
+                  className={panelInputClassName}
+                />
+              </label>
 
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-[#0B0B0C]">
-                Länktext
-              </span>
-              <input
-                type="text"
-                value={linkText}
-                onChange={(event) => setLinkText(event.target.value)}
-                placeholder="Används när inget textstycke är markerat"
-                className={panelInputClassName}
-              />
-            </label>
-          </div>
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-[#0B0B0C]">
+                  Länktext
+                </span>
+                <input
+                  type="text"
+                  value={linkText}
+                  onChange={(event) => setLinkText(event.target.value)}
+                  placeholder="Används när inget textstycke är markerat"
+                  className={panelInputClassName}
+                />
+              </label>
+            </div>
 
-          <p className="mt-3 text-xs leading-5 text-[#6B6B6B]">
-            Markera gärna text i editorn först. Om inget är markerat infogas en ny
-            länk med texten ovan.
-          </p>
+            <p className="mt-3 text-xs leading-5 text-[#6B6B6B]">
+              Markera gärna text i editorn först. Om inget är markerat infogas en
+              ny länk med texten ovan.
+            </p>
 
-          {panelError ? (
-            <p className="mt-3 text-sm text-red-700">{panelError}</p>
-          ) : null}
-
-          <div className="mt-4 flex flex-wrap gap-2.5">
-            <SmallActionButton label="Infoga länk" onClick={applyLink} />
-            {toolbarState.isLink ? (
-              <SmallActionButton
-                label="Ta bort länk"
-                tone="secondary"
-                onClick={removeLink}
-              />
+            {panelError ? (
+              <p className="mt-3 text-sm text-red-700">{panelError}</p>
             ) : null}
-            <SmallActionButton
-              label="Avbryt"
-              tone="secondary"
-              onClick={closePanel}
-            />
-          </div>
-        </div>
-      ) : null}
 
-      {activePanel === "image" ? (
-        <div className="rounded-[1.4rem] border border-black/10 bg-[#FCFCFA] p-4 shadow-[0_18px_50px_-45px_rgba(0,0,0,0.18)] sm:p-5">
-          <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,0.75fr)]">
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-[#0B0B0C]">
-                Bild-URL
-              </span>
-              <input
-                type="url"
-                value={imageUrl}
-                onChange={(event) => setImageUrl(event.target.value)}
-                placeholder="https://..."
-                className={panelInputClassName}
+            <div className="mt-4 flex flex-wrap gap-2.5">
+              <SmallActionButton label="Infoga länk" onClick={applyLink} />
+              {toolbarState.isLink ? (
+                <SmallActionButton
+                  label="Ta bort länk"
+                  tone="secondary"
+                  onClick={removeLink}
+                />
+              ) : null}
+              <SmallActionButton
+                label="Avbryt"
+                tone="secondary"
+                onClick={closePanel}
               />
-            </label>
+            </div>
+          </div>
+        ) : null}
 
-            <label className="block">
-              <span className="mb-2 block text-sm font-medium text-[#0B0B0C]">
-                Alt-text
-              </span>
-              <input
-                type="text"
-                value={imageAlt}
-                onChange={(event) => setImageAlt(event.target.value)}
-                placeholder="Beskriv vad bilden visar"
-                className={panelInputClassName}
+        {activePanel === "image" ? (
+          <div className="rounded-[1.4rem] border border-black/10 bg-[#FCFCFA]/95 p-4 shadow-[0_18px_50px_-45px_rgba(0,0,0,0.18)] backdrop-blur-sm sm:p-5">
+            <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,0.75fr)]">
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-[#0B0B0C]">
+                  Bild-URL
+                </span>
+                <input
+                  type="url"
+                  value={imageUrl}
+                  onChange={(event) => setImageUrl(event.target.value)}
+                  placeholder="https://..."
+                  className={panelInputClassName}
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-[#0B0B0C]">
+                  Alt-text
+                </span>
+                <input
+                  type="text"
+                  value={imageAlt}
+                  onChange={(event) => setImageAlt(event.target.value)}
+                  placeholder="Beskriv vad bilden visar"
+                  className={panelInputClassName}
+                />
+              </label>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2.5">
+              <SmallActionButton label="Infoga bild" onClick={insertImage} />
+              <label
+                htmlFor={uploadInputId}
+                className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-[1rem] border border-black/10 bg-white px-4 py-2.5 text-sm font-medium text-[#0B0B0C] transition hover:bg-[#F7F7F5]"
+              >
+                {isUploadingImage ? "Laddar upp..." : "Ladda upp bild"}
+              </label>
+              <SmallActionButton
+                label="Avbryt"
+                tone="secondary"
+                onClick={closePanel}
               />
-            </label>
-          </div>
+            </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-2.5">
-            <SmallActionButton label="Infoga bild" onClick={insertImage} />
-            <label
-              htmlFor={uploadInputId}
-              className="inline-flex min-h-10 cursor-pointer items-center justify-center rounded-[1rem] border border-black/10 bg-white px-4 py-2.5 text-sm font-medium text-[#0B0B0C] transition hover:bg-[#F7F7F5]"
-            >
-              {isUploadingImage ? "Laddar upp..." : "Ladda upp bild"}
-            </label>
-            <SmallActionButton
-              label="Avbryt"
-              tone="secondary"
-              onClick={closePanel}
+            <input
+              id={uploadInputId}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="sr-only"
+              disabled={isUploadingImage}
             />
+
+            <p className="mt-3 text-xs leading-5 text-[#6B6B6B]">
+              Bilder i artikeln kan läggas in via URL eller laddas upp till
+              Supabase Storage och infogas direkt här.
+            </p>
+
+            {panelError ? (
+              <p className="mt-3 text-sm text-red-700">{panelError}</p>
+            ) : null}
           </div>
-
-          <input
-            id={uploadInputId}
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="sr-only"
-            disabled={isUploadingImage}
-          />
-
-          <p className="mt-3 text-xs leading-5 text-[#6B6B6B]">
-            Bilder i artikeln kan läggas in via URL eller laddas upp till Supabase
-            Storage och infogas direkt här.
-          </p>
-
-          {panelError ? (
-            <p className="mt-3 text-sm text-red-700">{panelError}</p>
-          ) : null}
-        </div>
-      ) : null}
+        ) : null}
+      </div>
 
       <div className="overflow-hidden rounded-[1.7rem] border border-black/10 bg-white shadow-[0_24px_60px_-54px_rgba(0,0,0,0.18)] transition focus-within:border-[#C6A15B]">
         <div className="flex items-center justify-between border-b border-black/8 bg-[#FCFCFA] px-4 py-3">

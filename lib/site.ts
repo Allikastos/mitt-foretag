@@ -67,7 +67,7 @@ export const services: Service[] = [
       "En tydligare grund för rapportering och uppföljning",
       "Mer tid för att driva verksamheten framåt",
     ],
-    workTitle: "Hur jag arbetar",
+    workTitle: "Hur vi arbetar",
     workParagraphs: [
       "Arbetet läggs upp så att ansvar, underlag och återkommande moment blir tydliga från början. Det ska vara enkelt att veta vad som behöver göras och när.",
       "Samarbetet anpassas efter verksamheten, men målet är alltid detsamma: att du ska känna lugn i att redovisningen fungerar och att siffrorna går att lita på.",
@@ -117,7 +117,7 @@ export const services: Service[] = [
       "Bättre förståelse för vad som driver lönsamheten",
       "Mer kontroll i ledning, planering och prioritering",
     ],
-    workTitle: "Hur jag arbetar",
+    workTitle: "Hur vi arbetar",
     workParagraphs: [
       "Rapporterna tas fram löpande och byggs kring de frågor som är viktigast för verksamheten, inte kring onödig detaljrikedom.",
       "Fokus ligger på att du ska förstå vad siffrorna betyder, vad som har förändrats och vilka beslut som bör prioriteras framåt.",
@@ -166,7 +166,7 @@ export const services: Service[] = [
       "Prissättning",
       "Planering framåt",
     ],
-    workTitle: "Hur jag arbetar",
+    workTitle: "Hur vi arbetar",
     workParagraphs: [
       "Arbetet sker nära verksamheten och utgår från era siffror, mål och aktuella vägval.",
       "Fokus ligger på att göra ekonomin konkret och användbar, så att ni kan agera snabbare och med större säkerhet.",
