@@ -5,6 +5,7 @@ import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import StarterKit from "@tiptap/starter-kit";
 import { Placeholder } from "@tiptap/extensions";
+import { DOMParser as ProseMirrorDOMParser } from "@tiptap/pm/model";
 import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 
 type AdminRichTextEditorProps = {
@@ -69,6 +70,53 @@ function escapeHtml(value: string) {
     .replaceAll("'", "&#39;");
 }
 
+function looksLikeHtmlSnippet(value: string) {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return false;
+  }
+
+  return /<\/?(h1|h2|h3|p|ul|ol|li|a|strong|em|img)\b/i.test(trimmed);
+}
+
+function normalizePastedHtml(value: string) {
+  const parser = new DOMParser();
+  const document = parser.parseFromString(value, "text/html");
+
+  document.querySelectorAll("script, style").forEach((element) => {
+    element.remove();
+  });
+
+  document.querySelectorAll("h1").forEach((element) => {
+    const replacement = document.createElement("h2");
+    replacement.innerHTML = element.innerHTML;
+    element.replaceWith(replacement);
+  });
+
+  document.querySelectorAll("h4, h5, h6").forEach((element) => {
+    const replacement = document.createElement("h3");
+    replacement.innerHTML = element.innerHTML;
+    element.replaceWith(replacement);
+  });
+
+  document.querySelectorAll("*").forEach((element) => {
+    for (const attribute of [...element.attributes]) {
+      const name = attribute.name.toLowerCase();
+      const tagName = element.tagName.toLowerCase();
+      const isAllowedLinkAttribute = tagName === "a" && name === "href";
+      const isAllowedImageAttribute =
+        tagName === "img" && (name === "src" || name === "alt");
+
+      if (!isAllowedLinkAttribute && !isAllowedImageAttribute) {
+        element.removeAttribute(attribute.name);
+      }
+    }
+  });
+
+  return document.body.innerHTML.trim();
+}
+
 export function AdminRichTextEditor({
   value,
   onChange,
@@ -89,6 +137,32 @@ export function AdminRichTextEditor({
       attributes: {
         class:
           "min-h-[22rem] px-4 py-4 text-[15px] leading-8 text-[#0B0B0C] outline-none sm:min-h-[26rem] sm:px-5 sm:py-5 md:min-h-[28rem]",
+      },
+      handlePaste(view, event) {
+        const text = event.clipboardData?.getData("text/plain") ?? "";
+
+        if (!looksLikeHtmlSnippet(text)) {
+          return false;
+        }
+
+        const normalizedHtml = normalizePastedHtml(text);
+
+        if (!normalizedHtml) {
+          return false;
+        }
+
+        event.preventDefault();
+        const wrapper = window.document.createElement("div");
+        wrapper.innerHTML = normalizedHtml;
+
+        const slice = ProseMirrorDOMParser.fromSchema(view.state.schema).parseSlice(
+          wrapper
+        );
+
+        view.focus();
+        view.dispatch(view.state.tr.replaceSelection(slice).scrollIntoView());
+
+        return true;
       },
     },
     extensions: [
@@ -488,10 +562,12 @@ export function AdminRichTextEditor({
             Rubriker, listor, länkar och bilder
           </p>
         </div>
-        <EditorContent
-          editor={editor}
-          className="max-h-[70vh] overflow-y-auto overscroll-contain [&_.ProseMirror]:outline-none [&_.ProseMirror_a]:font-medium [&_.ProseMirror_a]:text-[#0B0B0C] [&_.ProseMirror_a]:underline [&_.ProseMirror_a]:underline-offset-4 [&_.ProseMirror_em]:italic [&_.ProseMirror_h2]:mt-8 [&_.ProseMirror_h2]:text-[1.75rem] [&_.ProseMirror_h2]:font-semibold [&_.ProseMirror_h2]:tracking-[-0.035em] [&_.ProseMirror_h2]:text-[#0B0B0C] [&_.ProseMirror_h3]:mt-7 [&_.ProseMirror_h3]:text-[1.35rem] [&_.ProseMirror_h3]:font-semibold [&_.ProseMirror_h3]:tracking-[-0.03em] [&_.ProseMirror_h3]:text-[#0B0B0C] [&_.ProseMirror_img]:w-full [&_.ProseMirror_img]:rounded-[1.25rem] [&_.ProseMirror_img]:border [&_.ProseMirror_img]:border-black/8 [&_.ProseMirror_img]:bg-[#F7F7F5] [&_.ProseMirror_li]:pl-1 [&_.ProseMirror_ol]:my-5 [&_.ProseMirror_ol]:space-y-2 [&_.ProseMirror_ol>li]:ml-5 [&_.ProseMirror_ol>li]:list-decimal [&_.ProseMirror_p]:my-4 [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0 [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-[#8A8A8A] [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_strong]:text-[#0B0B0C] [&_.ProseMirror_ul]:my-5 [&_.ProseMirror_ul]:space-y-2 [&_.ProseMirror_ul>li]:ml-5 [&_.ProseMirror_ul>li]:list-disc"
-        />
+        <div className="max-h-[70vh] overflow-y-auto overscroll-contain">
+          <EditorContent
+            editor={editor}
+            className="[&_.ProseMirror]:outline-none [&_.ProseMirror_a]:font-medium [&_.ProseMirror_a]:text-[#0B0B0C] [&_.ProseMirror_a]:underline [&_.ProseMirror_a]:underline-offset-4 [&_.ProseMirror_em]:italic [&_.ProseMirror_h2]:mt-8 [&_.ProseMirror_h2]:text-[1.75rem] [&_.ProseMirror_h2]:font-semibold [&_.ProseMirror_h2]:tracking-[-0.035em] [&_.ProseMirror_h2]:text-[#0B0B0C] [&_.ProseMirror_h3]:mt-7 [&_.ProseMirror_h3]:text-[1.35rem] [&_.ProseMirror_h3]:font-semibold [&_.ProseMirror_h3]:tracking-[-0.03em] [&_.ProseMirror_h3]:text-[#0B0B0C] [&_.ProseMirror_img]:w-full [&_.ProseMirror_img]:rounded-[1.25rem] [&_.ProseMirror_img]:border [&_.ProseMirror_img]:border-black/8 [&_.ProseMirror_img]:bg-[#F7F7F5] [&_.ProseMirror_li]:pl-1 [&_.ProseMirror_ol]:my-5 [&_.ProseMirror_ol]:space-y-2 [&_.ProseMirror_ol>li]:ml-5 [&_.ProseMirror_ol>li]:list-decimal [&_.ProseMirror_p]:my-4 [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none [&_.ProseMirror_p.is-editor-empty:first-child::before]:float-left [&_.ProseMirror_p.is-editor-empty:first-child::before]:h-0 [&_.ProseMirror_p.is-editor-empty:first-child::before]:text-[#8A8A8A] [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)] [&_.ProseMirror_strong]:text-[#0B0B0C] [&_.ProseMirror_ul]:my-5 [&_.ProseMirror_ul]:space-y-2 [&_.ProseMirror_ul>li]:ml-5 [&_.ProseMirror_ul>li]:list-disc"
+          />
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.2rem] border border-black/8 bg-[#FCFCFA] px-4 py-3">
