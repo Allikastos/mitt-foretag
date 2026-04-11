@@ -21,6 +21,21 @@ export const metadata: Metadata = {
   },
 };
 
+function isLiveByPublishDate(
+  status: "draft" | "scheduled" | "published",
+  publishAt: string | null
+) {
+  if (!publishAt) {
+    return status === "published";
+  }
+
+  if (status !== "published" && status !== "scheduled") {
+    return false;
+  }
+
+  return new Date(publishAt).getTime() <= Date.now();
+}
+
 export default async function AdminPage() {
   const user = await getLoggedInUser();
 
@@ -29,8 +44,14 @@ export default async function AdminPage() {
   }
 
   const posts = await getAdminPosts();
-  const publishedCount = posts.filter((post) => post.status === "published").length;
-  const scheduledCount = posts.filter((post) => post.status === "scheduled").length;
+  const publishedCount = posts.filter((post) =>
+    isLiveByPublishDate(post.status, post.publish_at)
+  ).length;
+  const scheduledCount = posts.filter(
+    (post) =>
+      post.status === "scheduled" &&
+      !isLiveByPublishDate(post.status, post.publish_at)
+  ).length;
   const draftCount = posts.filter((post) => post.status === "draft").length;
 
   return (

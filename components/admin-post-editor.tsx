@@ -88,6 +88,26 @@ function getStatusLabel(status: PostStatus) {
   }
 }
 
+function isLiveByPublishDate(status: PostStatus, publishAt: string | null) {
+  if (!publishAt) {
+    return status === "published";
+  }
+
+  if (status !== "published" && status !== "scheduled") {
+    return false;
+  }
+
+  return new Date(publishAt).getTime() <= Date.now();
+}
+
+function getDisplayStatusLabel(status: PostStatus, publishAt: string | null) {
+  if (isLiveByPublishDate(status, publishAt)) {
+    return "Publicerad";
+  }
+
+  return getStatusLabel(status);
+}
+
 function createFormState(post?: PostRow): PostFormState {
   if (!post) {
     return initialFormState;
@@ -504,7 +524,7 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
                 Nuvarande status
               </p>
               <p className="mt-2 text-sm font-medium text-[#0B0B0C]">
-                {getStatusLabel(form.status)}
+                {getDisplayStatusLabel(form.status, form.publishAt || null)}
               </p>
             </div>
 
@@ -750,7 +770,7 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
                       /blogg/{post.slug}
                     </p>
                     <p className="mt-2 text-[11px] font-medium tracking-[0.15em] text-[#6B6B6B] uppercase">
-                      {getStatusLabel(post.status)}
+                      {getDisplayStatusLabel(post.status, post.publish_at)}
                     </p>
                   </button>
                 ))}

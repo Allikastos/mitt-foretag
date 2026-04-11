@@ -41,14 +41,22 @@ execute function public.set_posts_updated_at();
 
 alter table public.posts enable row level security;
 
+drop policy if exists "Public can read public posts" on public.posts;
 drop policy if exists "Public can read published posts" on public.posts;
-create policy "Public can read published posts"
+create policy "Public can read public posts"
 on public.posts
 for select
 to public
 using (
-  status = 'published'
-  and (publish_at is null or publish_at <= timezone('utc', now()))
+  (
+    status = 'published'
+    and (publish_at is null or publish_at <= timezone('utc', now()))
+  )
+  or (
+    status = 'scheduled'
+    and publish_at is not null
+    and publish_at <= timezone('utc', now())
+  )
 );
 
 drop policy if exists "Authenticated users can manage posts" on public.posts;
