@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import Script from "next/script";
 import { SITE_CONFIG } from "@/config/site";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -47,7 +41,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="sv" className={`${inter.variable} h-full antialiased`}>
+    <html lang="sv" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <div className="flex min-h-screen flex-col bg-[#F7F7F5] text-[#1A1A1A]">
           <SiteHeader />

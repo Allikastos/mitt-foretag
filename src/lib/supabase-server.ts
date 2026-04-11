@@ -12,7 +12,7 @@ import {
 } from "./supabase";
 import { LOCAL_SEO_POSTS } from "./local-posts";
 
-const publicPostStatuses = ["published", "scheduled"] as const;
+const publicPostStatuses: PostRow["status"][] = ["published", "scheduled"];
 
 function isPostPublic(post: PostRow) {
   if (!publicPostStatuses.includes(post.status)) {
