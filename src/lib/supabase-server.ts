@@ -12,13 +12,15 @@ import {
 } from "./supabase";
 import { LOCAL_SEO_POSTS } from "./local-posts";
 
+const publicPostStatuses = ["published", "scheduled"] as const;
+
 function isPostPublic(post: PostRow) {
-  if (post.status !== "published") {
+  if (!publicPostStatuses.includes(post.status)) {
     return false;
   }
 
   if (!post.publish_at) {
-    return true;
+    return post.status === "published";
   }
 
   return new Date(post.publish_at).getTime() <= Date.now();
@@ -130,7 +132,7 @@ export async function getPublishedPosts(): Promise<PostRow[]> {
   const { data, error } = await supabase
     .from("posts")
     .select("*")
-    .eq("status", "published")
+    .in("status", [...publicPostStatuses])
     .order("publish_at", { ascending: false });
 
   if (error) {
