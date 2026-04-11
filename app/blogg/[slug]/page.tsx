@@ -12,6 +12,8 @@ import {
   getPublishedPosts,
 } from "@/src/lib/supabase-server";
 
+export const dynamic = "force-dynamic";
+
 type BlogPostPageProps = {
   params: Promise<{ slug: string }>;
 };
