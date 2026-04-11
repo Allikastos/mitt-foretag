@@ -13,6 +13,7 @@ import {
 } from "@/src/lib/supabase-server";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type BlogPostPageProps = {
   params: Promise<{ slug: string }>;
@@ -47,11 +48,6 @@ function formatDate(value: string | null, fallback: string) {
     month: "long",
     day: "numeric",
   }).format(new Date(date));
-}
-
-export async function generateStaticParams() {
-  const posts = await getPublishedPosts();
-  return posts.map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({
