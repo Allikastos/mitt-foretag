@@ -338,6 +338,20 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
         return;
       }
 
+      try {
+        await fetch("/api/revalidate-content", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            slug: data.slug,
+          }),
+        });
+      } catch (revalidationError) {
+        console.error("Failed to revalidate blog content", revalidationError);
+      }
+
       const updatedPosts = selectedPostId
         ? posts.map((post) => (post.id === data.id ? data : post))
         : [data, ...posts];
