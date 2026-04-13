@@ -1,5 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
-
+import Image from "next/image";
 import Link from "next/link";
 import { SITE_CONFIG } from "@/config/site";
 import { SectionContainer } from "@/components/section-container";
@@ -97,9 +96,14 @@ export default function HomePage() {
 
               <div className="space-y-6 lg:pl-2">
                 <div className="overflow-hidden rounded-[2.1rem] bg-[#0B0B0C] shadow-[0_26px_60px_-44px_rgba(0,0,0,0.35)]">
-                  <img
-                    src="https://images.pexels.com/photos/20251480/pexels-photo-20251480.jpeg?cs=srgb&dl=pexels-jakubzerdzicki-20251480.jpg&fm=jpg"
+                  <Image
+                    src="https://images.pexels.com/photos/20251480/pexels-photo-20251480.jpeg?auto=compress&cs=tinysrgb&w=1200&h=1500&fit=crop"
                     alt="Finansiella rapporter, kalkylator och anteckningar på skrivbord"
+                    width={1200}
+                    height={1500}
+                    priority
+                    quality={70}
+                    sizes="(max-width: 1023px) 100vw, 42vw"
                     className="h-[24rem] w-full object-cover opacity-92 md:h-[30rem]"
                   />
                 </div>
