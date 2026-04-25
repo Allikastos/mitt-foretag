@@ -12,6 +12,12 @@ export const metadata: Metadata = {
   },
   description: SITE_CONFIG.description,
   metadataBase: new URL(SITE_CONFIG.url),
+  icons: {
+    icon: '/favicon_io/favicon.ico',
+    shortcut: '/favicon_io/favicon.ico',
+    apple: '/favicon_io/apple-touch-icon.png',
+  },
+  manifest: '/favicon_io/site.webmanifest',
 };
 
 export default function RootLayout({
