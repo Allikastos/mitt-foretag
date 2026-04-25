@@ -13,8 +13,8 @@ export const metadata: Metadata = {
   description: SITE_CONFIG.description,
   metadataBase: new URL(SITE_CONFIG.url),
   icons: {
-    icon: '/favicon_io/favicon.ico',
-    shortcut: '/favicon_io/favicon.ico',
+    icon: '/favicon_io/android-chrome-192x192.png',
+    shortcut: '/favicon_io/favicon-32x32.png',
     apple: '/favicon_io/apple-touch-icon.png',
   },
   manifest: '/favicon_io/site.webmanifest',
