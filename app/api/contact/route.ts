@@ -17,6 +17,13 @@ function getSafeString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function getConfiguredSender() {
+  return (
+    getSafeString(process.env.CONTACT_FROM_EMAIL) ||
+    `${SITE_CONFIG.name} <${SITE_CONFIG.contact.email}>`
+  );
+}
+
 export async function POST(request: Request) {
   let payload: ContactPayload;
 
@@ -71,12 +78,11 @@ export async function POST(request: Request) {
   }
 
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const from =
-    process.env.CONTACT_FROM_EMAIL || "Kontaktformulär <onboarding@resend.dev>";
+  const from = getConfiguredSender();
   const to = process.env.CONTACT_TO_EMAIL || SITE_CONFIG.contact.email;
 
   try {
-    await resend.emails.send({
+    const result = await resend.emails.send({
       from,
       to,
       subject: `Ny kontaktförfrågan från ${name}`,
@@ -90,6 +96,28 @@ export async function POST(request: Request) {
         message,
       ].join("\n"),
       replyTo: email,
+    });
+
+    if (result.error) {
+      console.error("Resend rejected contact email", {
+        error: result.error,
+        from,
+        to,
+      });
+
+      return NextResponse.json(
+        {
+          error:
+            "Förfrågan kunde inte skickas just nu. Försök igen eller mejla direkt till oss.",
+        },
+        { status: 500 }
+      );
+    }
+
+    console.info("Contact email sent", {
+      emailId: result.data?.id ?? null,
+      from,
+      to,
     });
 
     return NextResponse.json({

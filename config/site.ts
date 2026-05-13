@@ -20,7 +20,7 @@ export const SITE_CONFIG = {
   legalNotice:
     `${BRAND_NAME} är ett varumärke under etablering. Under uppstartsperioden kan bolaget vara registrerat under ett annat namn.`,
   contact: {
-    email: "albinholmberg@icloud.com",
+    email: "kontakt@alturanova.se",
     phoneDisplay: "076-0218499",
     phoneHref: "tel:+46760218499",
     city: "Linköping",
