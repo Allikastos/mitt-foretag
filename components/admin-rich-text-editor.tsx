@@ -108,7 +108,7 @@ function extractStructuredContentFromMarkdown(value: string) {
       : lines;
   const markdownBody = contentLines.join("\n").trim();
   const renderedHtml = markdown.render(markdownBody);
-  const paragraphs = [...renderedHtml.matchAll(/<p>(.*?)<\/p>/gis)];
+  const paragraphs = [...renderedHtml.matchAll(/<p>([\s\S]*?)<\/p>/gi)];
   const excerpt = stripHtml(paragraphs[0]?.[1] ?? "");
 
   return {
