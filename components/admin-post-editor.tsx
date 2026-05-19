@@ -120,7 +120,7 @@ function createFormState(post?: PostRow): PostFormState {
     content: post.content,
     imageUrl: post.image_url ?? "",
     seoTitle: post.seo_title ?? "",
-    seoDescription: post.seo_description ?? "",
+    seoDescription: post.seo_description ?? post.excerpt ?? "",
     status: post.status,
     publishAt: toDateTimeLocalValue(post.publish_at),
   };
@@ -140,6 +140,16 @@ function getErrorMessage(error: unknown, fallback: string) {
   }
 
   return fallback;
+}
+
+function truncateText(value: string, maxLength: number) {
+  const normalized = value.replace(/\s+/g, " ").trim();
+
+  if (normalized.length <= maxLength) {
+    return normalized;
+  }
+
+  return `${normalized.slice(0, maxLength).trimEnd()}…`;
 }
 
 export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
@@ -194,6 +204,54 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
       ...current,
       [key]: value,
     }));
+  }
+
+  function handleExcerptChange(event: ChangeEvent<HTMLTextAreaElement>) {
+    const excerpt = event.target.value;
+
+    setForm((current) => {
+      const currentSeoDescription = current.seoDescription.trim();
+      const previousExcerpt = current.excerpt.trim();
+      const shouldSyncSeoDescription =
+        !currentSeoDescription || currentSeoDescription === previousExcerpt;
+
+      return {
+        ...current,
+        excerpt,
+        seoDescription: shouldSyncSeoDescription
+          ? truncateText(excerpt, 160)
+          : current.seoDescription,
+      };
+    });
+  }
+
+  function handleStructuredImport(payload: {
+    title?: string;
+    excerpt?: string;
+    seoDescription?: string;
+  }) {
+    setForm((current) => {
+      const nextTitle = payload.title?.trim() || current.title;
+      const nextExcerpt = payload.excerpt?.trim() || current.excerpt;
+      const nextSeoDescription =
+        payload.seoDescription?.trim() || payload.excerpt?.trim() || "";
+      const shouldReplaceSeoDescription =
+        !current.seoDescription.trim() ||
+        current.seoDescription.trim() === current.excerpt.trim();
+
+      return {
+        ...current,
+        title: nextTitle,
+        slug:
+          !slugTouched && nextTitle
+            ? slugify(nextTitle)
+            : current.slug,
+        excerpt: nextExcerpt,
+        seoDescription: shouldReplaceSeoDescription
+          ? truncateText(nextSeoDescription || nextExcerpt, 160)
+          : current.seoDescription,
+      };
+    });
   }
 
   function handleTitleChange(event: ChangeEvent<HTMLInputElement>) {
@@ -310,7 +368,8 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
         content: form.content.trim(),
         image_url: form.imageUrl.trim() || null,
         seo_title: form.seoTitle.trim() || null,
-        seo_description: form.seoDescription.trim() || null,
+        seo_description:
+          form.seoDescription.trim() || form.excerpt.trim() || null,
         status: nextStatus,
         publish_at: publishAtIso,
       };
@@ -490,9 +549,7 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
                 <textarea
                   rows={4}
                   value={form.excerpt}
-                  onChange={(event) =>
-                    handleFieldChange("excerpt", event.target.value)
-                  }
+                  onChange={handleExcerptChange}
                   placeholder="Kort sammanfattning som visas i blogglistan och kan användas som grund för metadata."
                   className={textareaClassName}
                 />
@@ -519,6 +576,7 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
                 value={form.content}
                 onChange={(nextValue) => handleFieldChange("content", nextValue)}
                 onUploadImage={uploadImage}
+                onImportStructuredContent={handleStructuredImport}
               />
             </div>
           </section>

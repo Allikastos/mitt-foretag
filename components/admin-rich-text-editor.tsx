@@ -13,6 +13,11 @@ type AdminRichTextEditorProps = {
   value: string;
   onChange: (value: string) => void;
   onUploadImage?: (file: File) => Promise<string>;
+  onImportStructuredContent?: (payload: {
+    title?: string;
+    excerpt?: string;
+    seoDescription?: string;
+  }) => void;
 };
 
 type ToolbarState = {
@@ -50,6 +55,68 @@ const markdown = new MarkdownIt({
   linkify: true,
   breaks: false,
 });
+
+function decodeHtmlEntities(value: string) {
+  if (typeof window === "undefined") {
+    return value;
+  }
+
+  const textarea = window.document.createElement("textarea");
+  textarea.innerHTML = value;
+
+  return textarea.value;
+}
+
+function stripHtml(value: string) {
+  return decodeHtmlEntities(
+    value
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+  );
+}
+
+function extractStructuredContentFromMarkdown(value: string) {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return {
+      title: "",
+      excerpt: "",
+      markdownBody: "",
+    };
+  }
+
+  const lines = trimmed.split(/\r?\n/);
+  let title = "";
+  let titleLineIndex = -1;
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index]?.trim() ?? "";
+
+    if (/^#\s+/.test(line)) {
+      title = line.replace(/^#\s+/, "").trim();
+      titleLineIndex = index;
+      break;
+    }
+  }
+
+  const contentLines =
+    titleLineIndex >= 0
+      ? lines.filter((_, index) => index !== titleLineIndex)
+      : lines;
+  const markdownBody = contentLines.join("\n").trim();
+  const renderedHtml = markdown.render(markdownBody);
+  const paragraphs = [...renderedHtml.matchAll(/<p>(.*?)<\/p>/gis)];
+  const excerpt = stripHtml(paragraphs[0]?.[1] ?? "");
+
+  return {
+    title,
+    excerpt,
+    markdownBody,
+  };
+}
 
 function normalizeHref(value: string) {
   const trimmed = value.trim();
@@ -144,6 +211,7 @@ export function AdminRichTextEditor({
   value,
   onChange,
   onUploadImage,
+  onImportStructuredContent,
 }: AdminRichTextEditorProps) {
   const uploadInputId = useId();
   const [activePanel, setActivePanel] = useState<
@@ -362,7 +430,15 @@ export function AdminRichTextEditor({
     }
 
     if (importFormat === "markdown") {
-      return markdown.render(trimmed);
+      const structuredContent = extractStructuredContentFromMarkdown(trimmed);
+
+      onImportStructuredContent?.({
+        title: structuredContent.title || undefined,
+        excerpt: structuredContent.excerpt || undefined,
+        seoDescription: structuredContent.excerpt || undefined,
+      });
+
+      return markdown.render(structuredContent.markdownBody || trimmed);
     }
 
     return trimmed;
