@@ -5,6 +5,7 @@ export const navigationItems = [
   { href: "/tjanster", label: "Tjänster" },
   { href: "/om", label: "Om" },
   { href: "/kontakt", label: "Kontakt" },
+  { href: "/hub", label: "Hub" },
 ];
 
 export type ServiceSlug = "redovisning" | "rapportering" | "radgivning";

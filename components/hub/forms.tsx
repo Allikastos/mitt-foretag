@@ -1,0 +1,553 @@
+import {
+  customerStatuses,
+  documentCategories,
+  invoiceStatuses,
+  taskPriorities,
+  taskStatuses,
+} from "@/src/lib/hub";
+import type {
+  Customer,
+  Invoice,
+  InvoiceLine,
+  Organization,
+  Task,
+} from "@/src/lib/hub";
+import {
+  Field,
+  FormGrid,
+  HubCard,
+  SecondaryLink,
+  inputClassName,
+  textareaClassName,
+} from "./ui";
+import { SubmitButton } from "./submit-button";
+import {
+  saveContactAction,
+  saveCustomerAction,
+  saveInvoiceAction,
+  saveInvoiceLineAction,
+  saveTaskAction,
+  updateInvoiceStatusAction,
+  updateOrganizationSettingsAction,
+  uploadDocumentAction,
+} from "@/app/hub/actions";
+
+export function CustomerForm({ customer }: { customer?: Customer | null }) {
+  return (
+    <HubCard>
+      <form action={saveCustomerAction} className="space-y-4">
+        <input type="hidden" name="customer_id" defaultValue={customer?.id ?? ""} />
+        <FormGrid>
+          <Field label="Företagsnamn">
+            <input
+              name="company_name"
+              defaultValue={customer?.company_name ?? ""}
+              className={inputClassName}
+              required
+            />
+          </Field>
+          <Field label="Organisationsnummer">
+            <input
+              name="org_number"
+              defaultValue={customer?.org_number ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Kontaktperson">
+            <input
+              name="contact_name"
+              defaultValue={customer?.contact_name ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="E-post">
+            <input
+              type="email"
+              name="email"
+              defaultValue={customer?.email ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Telefon">
+            <input
+              name="phone"
+              defaultValue={customer?.phone ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Status">
+            <select
+              name="status"
+              defaultValue={customer?.status ?? "active"}
+              className={inputClassName}
+            >
+              {customerStatuses.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </FormGrid>
+        <Field label="Adress">
+          <input
+            name="address"
+            defaultValue={customer?.address ?? ""}
+            className={inputClassName}
+          />
+        </Field>
+        <Field label="Anteckningar">
+          <textarea
+            name="notes"
+            defaultValue={customer?.notes ?? ""}
+            className={textareaClassName}
+          />
+        </Field>
+        <div className="flex flex-wrap gap-3">
+          <SubmitButton>{customer ? "Uppdatera kund" : "Skapa kund"}</SubmitButton>
+          {customer ? <SecondaryLink href="/hub/kunder">Tillbaka</SecondaryLink> : null}
+        </div>
+      </form>
+    </HubCard>
+  );
+}
+
+export function ContactForm({ customerId }: { customerId: string }) {
+  return (
+    <HubCard>
+      <form action={saveContactAction} className="space-y-4">
+        <input type="hidden" name="customer_id" value={customerId} />
+        <FormGrid>
+          <Field label="Namn">
+            <input name="name" className={inputClassName} required />
+          </Field>
+          <Field label="Roll">
+            <input name="role_title" className={inputClassName} />
+          </Field>
+          <Field label="E-post">
+            <input type="email" name="email" className={inputClassName} />
+          </Field>
+          <Field label="Telefon">
+            <input name="phone" className={inputClassName} />
+          </Field>
+        </FormGrid>
+        <Field label="Anteckningar">
+          <textarea name="notes" className={textareaClassName} />
+        </Field>
+        <SubmitButton>Lägg till kontakt</SubmitButton>
+      </form>
+    </HubCard>
+  );
+}
+
+export function TaskForm({
+  task,
+  customers,
+}: {
+  task?: Task | null;
+  customers: Array<{ id: string; company_name: string }>;
+}) {
+  return (
+    <HubCard>
+      <form action={saveTaskAction} className="space-y-4">
+        <input type="hidden" name="task_id" defaultValue={task?.id ?? ""} />
+        <FormGrid>
+          <Field label="Titel">
+            <input
+              name="title"
+              defaultValue={task?.title ?? ""}
+              className={inputClassName}
+              required
+            />
+          </Field>
+          <Field label="Kund">
+            <select
+              name="customer_id"
+              defaultValue={task?.customer_id ?? ""}
+              className={inputClassName}
+            >
+              <option value="">Ingen kund kopplad</option>
+              {customers.map((customer) => (
+                <option key={customer.id} value={customer.id}>
+                  {customer.company_name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Status">
+            <select
+              name="status"
+              defaultValue={task?.status ?? "todo"}
+              className={inputClassName}
+            >
+              {taskStatuses.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Prioritet">
+            <select
+              name="priority"
+              defaultValue={task?.priority ?? "medium"}
+              className={inputClassName}
+            >
+              {taskPriorities.map((priority) => (
+                <option key={priority} value={priority}>
+                  {priority}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Förfallodatum">
+            <input
+              type="date"
+              name="due_date"
+              defaultValue={task?.due_date ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+        </FormGrid>
+        <Field label="Beskrivning">
+          <textarea
+            name="description"
+            defaultValue={task?.description ?? ""}
+            className={textareaClassName}
+          />
+        </Field>
+        <SubmitButton>{task ? "Uppdatera uppgift" : "Skapa uppgift"}</SubmitButton>
+      </form>
+    </HubCard>
+  );
+}
+
+export function InvoiceForm({
+  invoice,
+  customers,
+  organization,
+}: {
+  invoice?: Invoice | null;
+  customers: Array<{ id: string; company_name: string }>;
+  organization: Organization;
+}) {
+  return (
+    <HubCard>
+      <form action={saveInvoiceAction} className="space-y-4">
+        <input type="hidden" name="invoice_id" defaultValue={invoice?.id ?? ""} />
+        <input
+          type="hidden"
+          name="invoice_number"
+          defaultValue={invoice?.invoice_number ?? ""}
+        />
+        <FormGrid>
+          <Field label="Kund">
+            <select
+              name="customer_id"
+              defaultValue={invoice?.customer_id ?? ""}
+              className={inputClassName}
+            >
+              <option value="">Välj kund</option>
+              {customers.map((customer) => (
+                <option key={customer.id} value={customer.id}>
+                  {customer.company_name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Status">
+            <select
+              name="status"
+              defaultValue={invoice?.status ?? "draft"}
+              className={inputClassName}
+            >
+              {invoiceStatuses.map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Fakturadatum">
+            <input
+              type="date"
+              name="issue_date"
+              defaultValue={invoice?.issue_date ?? new Date().toISOString().slice(0, 10)}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Förfallodatum">
+            <input
+              type="date"
+              name="due_date"
+              defaultValue={invoice?.due_date ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Valuta">
+            <input
+              name="currency"
+              defaultValue={invoice?.currency ?? "SEK"}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Standardmoms">
+            <input
+              value={`${organization.default_vat_rate}`}
+              className={inputClassName}
+              disabled
+            />
+          </Field>
+        </FormGrid>
+        <Field label="Anteckningar">
+          <textarea
+            name="notes"
+            defaultValue={invoice?.notes ?? ""}
+            className={textareaClassName}
+          />
+        </Field>
+        <SubmitButton>{invoice ? "Uppdatera faktura" : "Skapa fakturautkast"}</SubmitButton>
+      </form>
+    </HubCard>
+  );
+}
+
+export function InvoiceLineForm({
+  invoiceId,
+  line,
+}: {
+  invoiceId: string;
+  line?: InvoiceLine | null;
+}) {
+  return (
+    <HubCard>
+      <form action={saveInvoiceLineAction} className="space-y-4">
+        <input type="hidden" name="invoice_id" value={invoiceId} />
+        <input type="hidden" name="line_id" defaultValue={line?.id ?? ""} />
+        <FormGrid>
+          <Field label="Beskrivning">
+            <input
+              name="description"
+              defaultValue={line?.description ?? ""}
+              className={inputClassName}
+              required
+            />
+          </Field>
+          <Field label="Sortering">
+            <input
+              type="number"
+              step="1"
+              name="sort_order"
+              defaultValue={line?.sort_order ?? 0}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Antal">
+            <input
+              type="number"
+              step="0.01"
+              name="quantity"
+              defaultValue={line?.quantity ?? 1}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Pris per enhet">
+            <input
+              type="number"
+              step="0.01"
+              name="unit_price"
+              defaultValue={line?.unit_price ?? 0}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Moms %">
+            <input
+              type="number"
+              step="0.01"
+              name="vat_rate"
+              defaultValue={line?.vat_rate ?? 25}
+              className={inputClassName}
+            />
+          </Field>
+        </FormGrid>
+        <SubmitButton>{line ? "Uppdatera rad" : "Lägg till rad"}</SubmitButton>
+      </form>
+    </HubCard>
+  );
+}
+
+export function InvoiceStatusForm({
+  invoiceId,
+  invoiceNumber,
+}: {
+  invoiceId: string;
+  invoiceNumber: string | null;
+}) {
+  return (
+    <HubCard>
+      <form action={updateInvoiceStatusAction} className="flex flex-wrap items-end gap-4">
+        <input type="hidden" name="invoice_id" value={invoiceId} />
+        <input type="hidden" name="invoice_number" value={invoiceNumber ?? ""} />
+        <Field label="Ändra status">
+          <select name="status" defaultValue="sent" className={inputClassName}>
+            {invoiceStatuses.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <SubmitButton>Uppdatera status</SubmitButton>
+      </form>
+      <div className="mt-5 flex flex-wrap gap-3">
+        <button
+          type="button"
+          className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-black/10 bg-white px-5 py-3 text-sm font-medium text-[#0B0B0C] opacity-60"
+        >
+          Generera PDF
+        </button>
+        <button
+          type="button"
+          className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-black/10 bg-white px-5 py-3 text-sm font-medium text-[#0B0B0C] opacity-60"
+        >
+          Skicka via e-post
+        </button>
+      </div>
+    </HubCard>
+  );
+}
+
+export function DocumentUploadForm({
+  customers,
+  invoices,
+}: {
+  customers: Array<{ id: string; company_name: string }>;
+  invoices: Array<{ id: string; invoice_number: string | null }>;
+}) {
+  return (
+    <HubCard>
+      <form action={uploadDocumentAction} className="space-y-4">
+        <FormGrid>
+          <Field label="Fil">
+            <input type="file" name="file" className={inputClassName} required />
+          </Field>
+          <Field label="Kategori">
+            <select name="category" defaultValue="other" className={inputClassName}>
+              {documentCategories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Koppla till kund">
+            <select name="customer_id" defaultValue="" className={inputClassName}>
+              <option value="">Ingen kund</option>
+              {customers.map((customer) => (
+                <option key={customer.id} value={customer.id}>
+                  {customer.company_name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Koppla till faktura">
+            <select name="invoice_id" defaultValue="" className={inputClassName}>
+              <option value="">Ingen faktura</option>
+              {invoices.map((invoice) => (
+                <option key={invoice.id} value={invoice.id}>
+                  {invoice.invoice_number ?? "Utan nummer"}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </FormGrid>
+        <Field label="Anteckningar">
+          <textarea name="notes" className={textareaClassName} />
+        </Field>
+        <SubmitButton>Ladda upp dokument</SubmitButton>
+      </form>
+    </HubCard>
+  );
+}
+
+export function SettingsForm({
+  organization,
+}: {
+  organization: Organization;
+}) {
+  return (
+    <HubCard>
+      <form action={updateOrganizationSettingsAction} className="space-y-4">
+        <FormGrid>
+          <Field label="Företagsnamn">
+            <input name="name" defaultValue={organization.name} className={inputClassName} />
+          </Field>
+          <Field label="Organisationsnummer">
+            <input
+              name="org_number"
+              defaultValue={organization.org_number ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="E-post">
+            <input
+              type="email"
+              name="email"
+              defaultValue={organization.email ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Telefon">
+            <input
+              name="phone"
+              defaultValue={organization.phone ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Adress">
+            <input
+              name="address"
+              defaultValue={organization.address ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Standardmoms %">
+            <input
+              type="number"
+              step="0.01"
+              name="default_vat_rate"
+              defaultValue={organization.default_vat_rate}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Betalningsvillkor (dagar)">
+            <input
+              type="number"
+              step="1"
+              name="payment_terms_days"
+              defaultValue={organization.payment_terms_days}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Fakturaprefix">
+            <input
+              name="invoice_prefix"
+              defaultValue={organization.invoice_prefix}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Nästa fakturanummer">
+            <input
+              type="number"
+              step="1"
+              name="next_invoice_number"
+              defaultValue={organization.next_invoice_number}
+              className={inputClassName}
+            />
+          </Field>
+        </FormGrid>
+        <SubmitButton>Spara inställningar</SubmitButton>
+      </form>
+    </HubCard>
+  );
+}
