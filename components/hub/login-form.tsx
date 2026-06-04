@@ -66,7 +66,7 @@ export function HubLoginForm() {
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="namn@foretag.se"
-          className={inputClassName()}
+          className={inputClassName}
           required
         />
       </label>
@@ -82,7 +82,7 @@ export function HubLoginForm() {
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           placeholder="Ditt lösenord"
-          className={inputClassName()}
+          className={inputClassName}
           required
         />
       </label>
