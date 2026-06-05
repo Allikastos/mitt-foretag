@@ -13,16 +13,16 @@ export function HubShell({
 }>) {
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-[2rem] border border-black/8 bg-[linear-gradient(180deg,#ffffff_0%,#fbfbf8_100%)] p-6 shadow-[0_28px_60px_-52px_rgba(0,0,0,0.18)] md:flex-row md:items-end md:justify-between md:p-8">
+      <div className="flex flex-col gap-4 rounded-[1.7rem] border border-black/8 bg-white p-6 shadow-[0_20px_52px_-44px_rgba(0,0,0,0.16)] md:flex-row md:items-end md:justify-between md:p-7">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.22em] text-[#C6A15B]">
+          <p className="text-xs font-medium uppercase tracking-[0.24em] text-[#8A6A2F]">
             Altura Nova Hub
           </p>
-          <h1 className="mt-3 text-[1.95rem] font-semibold tracking-[-0.045em] text-[#0B0B0C] md:text-[2.5rem]">
+          <h1 className="mt-3 text-[1.8rem] font-semibold tracking-[-0.04em] text-[#0B0B0C] md:text-[2.15rem]">
             {title}
           </h1>
           {description ? (
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-[#5F5F5F] md:text-base">
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-[#5F5F5F]">
               {description}
             </p>
           ) : null}

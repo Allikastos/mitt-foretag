@@ -20,18 +20,22 @@ export function HubNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-wrap gap-2">
+    <nav className="space-y-1.5" aria-label="Hub navigation">
       {navItems.map((item) => (
         <Link
           key={item.href}
           href={item.href}
-          className={`inline-flex min-h-10 items-center rounded-full px-4 py-2 text-sm font-medium transition ${
+          aria-current={isActive(pathname, item.href) ? "page" : undefined}
+          className={`flex min-h-11 items-center justify-between rounded-[1.15rem] px-4 py-3 text-sm font-medium transition ${
             isActive(pathname, item.href)
-              ? "bg-[#0B0B0C] text-white"
-              : "bg-white text-[#5F5F5F] hover:bg-[#F1EFE8] hover:text-[#0B0B0C]"
+              ? "bg-white text-[#111111] shadow-[0_14px_28px_-24px_rgba(255,255,255,0.45)]"
+              : "text-white/72 hover:bg-white/8 hover:text-white"
           }`}
         >
-          {item.label}
+          <span>{item.label}</span>
+          <span aria-hidden="true" className="text-white/32">
+            →
+          </span>
         </Link>
       ))}
     </nav>
