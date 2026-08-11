@@ -25,9 +25,13 @@
 }
 
 [data-hub-theme="forest"] {
-  --hub-page-bg: radial-gradient(circle at top, #eef4ea 0%, #e4ebdc 45%, #dbe3d4 100%);
+  --hub-page-bg: radial-gradient(circle at top left, #f3f8ed 0%, #dbe8cf 46%, #cbdcc0 100%);
   --hub-panel: #152218;
-  --hub-card-soft: #f7faf4;
+  --hub-card: #fcfff8;
+  --hub-card-soft: #eff7e8;
+  --hub-text: #132015;
+  --hub-muted: #586a50;
+  --hub-subtle: #7b8a73;
   --hub-input: #f4f8ef;
   --hub-chip: #e7efdd;
   --hub-accent: #9fbc77;
@@ -35,9 +39,13 @@
 }
 
 [data-hub-theme="coast"] {
-  --hub-page-bg: radial-gradient(circle at top, #edf7f8 0%, #dfeff1 44%, #d8e6ea 100%);
+  --hub-page-bg: radial-gradient(circle at top left, #f0fbfc 0%, #d6edf1 44%, #c8e1e8 100%);
   --hub-panel: #10242b;
-  --hub-card-soft: #f4fbfb;
+  --hub-card: #fbffff;
+  --hub-card-soft: #edf8fa;
+  --hub-text: #10242b;
+  --hub-muted: #536d73;
+  --hub-subtle: #789097;
   --hub-input: #eef8f8;
   --hub-chip: #dff0f2;
   --hub-accent: #7eb6c2;
@@ -45,9 +53,13 @@
 }
 
 [data-hub-theme="graphite"] {
-  --hub-page-bg: radial-gradient(circle at top, #eeeeec 0%, #dfdfdd 46%, #d3d2cf 100%);
+  --hub-page-bg: radial-gradient(circle at top left, #f2f2ef 0%, #dcdad4 46%, #c9c6bf 100%);
   --hub-panel: #191919;
-  --hub-card-soft: #f6f6f4;
+  --hub-card: #fbfbf8;
+  --hub-card-soft: #eceae5;
+  --hub-text: #151515;
+  --hub-muted: #66625b;
+  --hub-subtle: #87827a;
   --hub-input: #f1f1ef;
   --hub-chip: #e7e6e2;
   --hub-accent: #a7a39a;
