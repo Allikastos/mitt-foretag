@@ -6,7 +6,7 @@ export default function HubLayout({
   children: ReactNode;
 }>) {
   return (
-    <div className="min-h-screen bg-[var(--hub-page-bg)] text-[#161616]">
+    <div className="hub-theme-surface min-h-screen text-[#161616]">
       {children}
     </div>
   );

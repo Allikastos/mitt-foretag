@@ -66,6 +66,10 @@
   --hub-accent-strong: #5f5a51;
 }
 
+.hub-theme-surface {
+  background: var(--hub-page-bg);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
