@@ -117,29 +117,29 @@ export function HubAppShell({
             aria-label={
               isVisuallyCollapsed ? "Expandera sidomenyn" : "Fäll in sidomenyn"
             }
-            className="absolute right-4 top-4 z-10 hidden h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/8 text-sm font-medium text-white/78 transition hover:bg-white/14 hover:text-white xl:inline-flex"
+            className="absolute right-4 top-4 z-10 hidden h-10 w-10 items-center justify-center rounded-full border border-[color:var(--hub-panel-border)] bg-[var(--hub-panel-hover)] text-sm font-medium text-[var(--hub-panel-muted)] transition hover:bg-[var(--hub-panel-active)] hover:text-[var(--hub-panel-active-text)] xl:inline-flex"
           >
             {isVisuallyCollapsed ? ">" : "<"}
           </button>
 
-          <div className="flex h-full flex-col rounded-[2rem] border border-black/8 bg-[var(--hub-panel)] p-5 text-[var(--hub-panel-contrast)] shadow-[0_30px_80px_-52px_rgba(0,0,0,0.55)] md:p-6">
+          <div className="flex h-full flex-col rounded-[2rem] border border-[color:var(--hub-panel-border)] bg-[var(--hub-panel)] p-5 text-[var(--hub-panel-contrast)] shadow-[0_30px_80px_-52px_rgba(0,0,0,0.55)] md:p-6">
             <div className={isVisuallyCollapsed ? "pr-12" : "pr-16"}>
               <p className="text-xs font-medium uppercase tracking-[0.24em] text-[var(--hub-accent)]">
                 Hub
               </p>
               {isVisuallyCollapsed ? (
                 <div
-                  className="mt-4 flex h-12 w-12 items-center justify-center rounded-[1.1rem] bg-white/8 text-lg font-semibold text-white"
+                  className="mt-4 flex h-12 w-12 items-center justify-center rounded-[1.1rem] bg-[var(--hub-panel-hover)] text-lg font-semibold text-[var(--hub-panel-contrast)]"
                   title={organizationName}
                 >
                   {compactBadge(organizationName)}
                 </div>
               ) : (
                 <>
-                  <h1 className="mt-4 text-[1.7rem] font-semibold tracking-[-0.045em] text-white">
+                  <h1 className="mt-4 text-[1.7rem] font-semibold tracking-[-0.045em] text-[var(--hub-panel-contrast)]">
                     {organizationName}
                   </h1>
-                  <p className="mt-4 text-sm leading-6 text-white/68">
+                  <p className="mt-4 text-sm leading-6 text-[var(--hub-panel-muted)]">
                     Inloggad som {userEmail} med rollen {membershipRoleLabel}.
                   </p>
                 </>
@@ -150,20 +150,20 @@ export function HubAppShell({
               <HubNav isCollapsed={isVisuallyCollapsed} />
             </div>
 
-            <div className="mt-8 border-t border-white/10 pt-5">
+            <div className="mt-8 border-t border-[color:var(--hub-panel-border)] pt-5">
               {isVisuallyCollapsed ? (
                 <div className="space-y-2">
                   <a
                     href={`mailto:${supportEmail}`}
                     title="Support"
-                    className="flex h-11 items-center justify-center rounded-[1rem] text-sm font-medium text-white/72 transition hover:bg-white/8 hover:text-white"
+                    className="flex h-11 items-center justify-center rounded-[1rem] text-sm font-medium text-[var(--hub-panel-muted)] transition hover:bg-[var(--hub-panel-hover)] hover:text-[var(--hub-panel-contrast)]"
                   >
                     S
                   </a>
                   <Link
                     href="/"
                     title="Till Altura Nova"
-                    className="flex h-11 items-center justify-center rounded-[1rem] text-sm font-medium text-white/72 transition hover:bg-white/8 hover:text-white"
+                    className="flex h-11 items-center justify-center rounded-[1rem] text-sm font-medium text-[var(--hub-panel-muted)] transition hover:bg-[var(--hub-panel-hover)] hover:text-[var(--hub-panel-contrast)]"
                   >
                     AN
                   </Link>
@@ -171,19 +171,19 @@ export function HubAppShell({
                 </div>
               ) : (
                 <>
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-white/38">
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--hub-panel-subtle)]">
                     Snabblankar
                   </p>
                   <div className="mt-4 space-y-1.5">
                     <a
                       href={`mailto:${supportEmail}`}
-                      className="block text-sm text-white/72 transition hover:text-white"
+                      className="block text-sm text-[var(--hub-panel-muted)] transition hover:text-[var(--hub-panel-contrast)]"
                     >
                       Support
                     </a>
                     <Link
                       href="/"
-                      className="block text-sm text-white/72 transition hover:text-white"
+                      className="block text-sm text-[var(--hub-panel-muted)] transition hover:text-[var(--hub-panel-contrast)]"
                     >
                       Till Altura Nova
                     </Link>

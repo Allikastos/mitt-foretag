@@ -10,8 +10,6 @@ import {
   employeeCustomerScopes,
   formatTags,
   getCustomerFieldPreferences,
-  hubThemeLabel,
-  hubThemes,
   invoiceStatusLabel,
   invoiceStatuses,
   preferredContactMethodLabel,
@@ -37,6 +35,7 @@ import {
   textareaClassName,
 } from "./ui";
 import { SubmitButton } from "./submit-button";
+import { ThemePicker } from "./theme-picker";
 import {
   finalizeInvoiceAction,
   saveContactAction,
@@ -804,71 +803,7 @@ export function SettingsForm({
             Välj ett stilrent tema för hubbens bakgrund, sidomeny, kort och
             knappar. Temat gäller för hela företagets hubb.
           </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {hubThemes.map((theme) => (
-              <label
-                key={theme}
-                className="flex cursor-pointer items-center gap-3 rounded-2xl border border-black/8 bg-[var(--hub-card)] p-3 text-sm text-[var(--hub-text)] transition hover:border-black/16"
-              >
-                <input
-                  type="radio"
-                  name="hub_theme"
-                  value={theme}
-                  defaultChecked={organization.hub_theme === theme}
-                  className="size-4 accent-[var(--hub-panel)]"
-                />
-                <span className="flex min-w-0 flex-1 items-center justify-between gap-3">
-                  <span className="font-medium">{hubThemeLabel(theme)}</span>
-                  <span
-                    className={`flex gap-1 rounded-full border border-black/10 p-1 ${
-                      theme === "forest"
-                        ? "bg-[#E4EBDD]"
-                        : theme === "coast"
-                          ? "bg-[#DFEFF1]"
-                          : theme === "graphite"
-                            ? "bg-[#DFDFDD]"
-                            : "bg-[#F0EDE4]"
-                    }`}
-                    aria-hidden="true"
-                  >
-                    <span
-                      className={`size-4 rounded-full ${
-                        theme === "forest"
-                          ? "bg-[#152218]"
-                          : theme === "coast"
-                            ? "bg-[#10242B]"
-                            : theme === "graphite"
-                              ? "bg-[#191919]"
-                              : "bg-[#111111]"
-                      }`}
-                    />
-                    <span
-                      className={`size-4 rounded-full ${
-                        theme === "forest"
-                          ? "bg-[#9FBC77]"
-                          : theme === "coast"
-                            ? "bg-[#7EB6C2]"
-                            : theme === "graphite"
-                              ? "bg-[#A7A39A]"
-                              : "bg-[#C6A15B]"
-                      }`}
-                    />
-                    <span
-                      className={`size-4 rounded-full ${
-                        theme === "forest"
-                          ? "bg-[#F7FAF4]"
-                          : theme === "coast"
-                            ? "bg-[#F4FBFB]"
-                            : theme === "graphite"
-                              ? "bg-[#F6F6F4]"
-                              : "bg-white"
-                      }`}
-                    />
-                  </span>
-                </span>
-              </label>
-            ))}
-          </div>
+          <ThemePicker currentTheme={organization.hub_theme} />
         </div>
         <div className="rounded-[1.4rem] border border-black/8 bg-[#FBFBF9] p-4">
           <h3 className="text-base font-semibold text-[#0B0B0C]">
