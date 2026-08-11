@@ -48,6 +48,12 @@ create table if not exists public.organizations (
   payment_instructions text,
   late_fee_terms text,
   company_reference text,
+  hub_theme text not null default 'nova' check (hub_theme in ('nova', 'forest', 'coast', 'graphite')),
+  employee_customer_scope text not null default 'all_customers' check (employee_customer_scope in ('all_customers', 'assigned_only')),
+  billing_plan text not null default 'starter' check (billing_plan in ('starter', 'team', 'agency')),
+  billing_status text not null default 'trialing' check (billing_status in ('trialing', 'active', 'past_due', 'paused', 'canceled', 'unpaid')),
+  stripe_customer_id text,
+  stripe_subscription_id text,
   customer_field_preferences jsonb not null default '["org_number","contact_name","email","phone","address","preferred_contact_method","last_contacted_at","follow_up_date","relationship_owner","tags","notes"]'::jsonb,
   follow_up_email_alerts_enabled boolean not null default false,
   follow_up_alert_email text,
@@ -68,6 +74,9 @@ create table if not exists public.organization_members (
 create table if not exists public.customers (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references public.organizations(id) on delete cascade,
+  created_by uuid references auth.users(id) on delete set null,
+  owner_user_id uuid references auth.users(id) on delete set null,
+  visibility text not null default 'organization' check (visibility in ('organization', 'owners_only')),
   company_name text not null,
   org_number text,
   contact_name text,
@@ -156,17 +165,51 @@ alter table public.organizations
   add column if not exists payment_instructions text,
   add column if not exists late_fee_terms text,
   add column if not exists company_reference text,
+  add column if not exists hub_theme text not null default 'nova',
+  add column if not exists employee_customer_scope text not null default 'all_customers',
+  add column if not exists billing_plan text not null default 'starter',
+  add column if not exists billing_status text not null default 'trialing',
+  add column if not exists stripe_customer_id text,
+  add column if not exists stripe_subscription_id text,
   add column if not exists customer_field_preferences jsonb not null default '["org_number","contact_name","email","phone","address","preferred_contact_method","last_contacted_at","follow_up_date","relationship_owner","tags","notes"]'::jsonb,
   add column if not exists follow_up_email_alerts_enabled boolean not null default false,
   add column if not exists follow_up_alert_email text,
   add column if not exists follow_up_digest_weekday integer not null default 1;
 
 alter table public.customers
+  add column if not exists created_by uuid references auth.users(id) on delete set null,
+  add column if not exists owner_user_id uuid references auth.users(id) on delete set null,
+  add column if not exists visibility text not null default 'organization',
   add column if not exists preferred_contact_method text not null default 'email',
   add column if not exists last_contacted_at date,
   add column if not exists follow_up_date date,
   add column if not exists relationship_owner text,
   add column if not exists tags text[] not null default '{}';
+
+alter table public.organizations
+  drop constraint if exists organizations_hub_theme_check,
+  add constraint organizations_hub_theme_check
+  check (hub_theme in ('nova', 'forest', 'coast', 'graphite'));
+
+alter table public.organizations
+  drop constraint if exists organizations_employee_customer_scope_check,
+  add constraint organizations_employee_customer_scope_check
+  check (employee_customer_scope in ('all_customers', 'assigned_only'));
+
+alter table public.organizations
+  drop constraint if exists organizations_billing_plan_check,
+  add constraint organizations_billing_plan_check
+  check (billing_plan in ('starter', 'team', 'agency'));
+
+alter table public.organizations
+  drop constraint if exists organizations_billing_status_check,
+  add constraint organizations_billing_status_check
+  check (billing_status in ('trialing', 'active', 'past_due', 'paused', 'canceled', 'unpaid'));
+
+alter table public.customers
+  drop constraint if exists customers_visibility_check,
+  add constraint customers_visibility_check
+  check (visibility in ('organization', 'owners_only'));
 
 alter table public.invoices
   add column if not exists finalized_at timestamptz,
@@ -243,6 +286,8 @@ create index if not exists organization_members_user_idx on public.organization_
 create index if not exists customers_organization_idx on public.customers (organization_id, created_at desc);
 create index if not exists customers_status_idx on public.customers (organization_id, status);
 create index if not exists customers_follow_up_idx on public.customers (organization_id, follow_up_date) where follow_up_date is not null;
+create index if not exists customers_created_by_idx on public.customers (organization_id, created_by);
+create index if not exists customers_owner_user_idx on public.customers (organization_id, owner_user_id);
 create unique index if not exists customers_org_id_idx on public.customers (organization_id, id);
 create index if not exists contacts_customer_idx on public.contacts (customer_id);
 create index if not exists tasks_organization_status_idx on public.tasks (organization_id, status, due_date);

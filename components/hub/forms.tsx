@@ -6,8 +6,12 @@ import {
   customerStatuses,
   documentCategoryLabel,
   documentCategories,
+  employeeCustomerScopeLabel,
+  employeeCustomerScopes,
   formatTags,
   getCustomerFieldPreferences,
+  hubThemeLabel,
+  hubThemes,
   invoiceStatusLabel,
   invoiceStatuses,
   preferredContactMethodLabel,
@@ -112,6 +116,16 @@ export function CustomerForm({ customer }: { customer?: Customer | null }) {
                   {customerStatusLabel(status)}
                 </option>
               ))}
+            </select>
+          </Field>
+          <Field label="Synlighet">
+            <select
+              name="visibility"
+              defaultValue={customer?.visibility ?? "organization"}
+              className={inputClassName}
+            >
+              <option value="organization">Hela företaget</option>
+              <option value="owners_only">Endast ägare/admin</option>
             </select>
           </Field>
           <Field label="Senast kontaktad">
@@ -621,6 +635,32 @@ export function SettingsForm({
               defaultValue={organization.logo_url ?? ""}
               className={inputClassName}
             />
+          </Field>
+          <Field label="Färgtema">
+            <select
+              name="hub_theme"
+              defaultValue={organization.hub_theme}
+              className={inputClassName}
+            >
+              {hubThemes.map((theme) => (
+                <option key={theme} value={theme}>
+                  {hubThemeLabel(theme)}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Kundåtkomst för anställda">
+            <select
+              name="employee_customer_scope"
+              defaultValue={organization.employee_customer_scope}
+              className={inputClassName}
+            >
+              {employeeCustomerScopes.map((scope) => (
+                <option key={scope} value={scope}>
+                  {employeeCustomerScopeLabel(scope)}
+                </option>
+              ))}
+            </select>
           </Field>
           <Field label="Adress">
             <input

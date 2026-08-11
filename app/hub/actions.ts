@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type {
   CustomerStatus,
+  CustomerVisibility,
   DocumentCategory,
+  EmployeeCustomerScope,
+  HubTheme,
   InvoiceRow,
   InvoiceStatus,
   PreferredContactMethod,
@@ -80,10 +83,16 @@ function ensureInvoiceEditable(invoice: Pick<InvoiceRow, "status" | "locked_at">
 }
 
 export async function saveCustomerAction(formData: FormData) {
-  const { supabase, organization, user } = await requireHubContext();
+  const { supabase, organization, membership, user } = await requireHubContext();
   const customerId = parseOptionalString(formData.get("customer_id"));
+  const canSetPrivateVisibility = ["owner", "admin"].includes(membership.role);
+  const requestedVisibility =
+    (parseOptionalString(formData.get("visibility")) as CustomerVisibility | null) ??
+    "organization";
   const payload = {
     organization_id: organization.id,
+    owner_user_id: parseOptionalString(formData.get("owner_user_id")) ?? user.id,
+    visibility: canSetPrivateVisibility ? requestedVisibility : "organization",
     company_name: requireString(formData.get("company_name"), "Företagsnamn"),
     org_number: parseOptionalString(formData.get("org_number")),
     contact_name: parseOptionalString(formData.get("contact_name")),
@@ -104,9 +113,11 @@ export async function saveCustomerAction(formData: FormData) {
       "active",
   };
 
+  const writePayload = customerId ? payload : { ...payload, created_by: user.id };
+
   const query = customerId
-    ? supabase.from("customers").update(payload).eq("id", customerId)
-    : supabase.from("customers").insert(payload);
+    ? supabase.from("customers").update(writePayload).eq("id", customerId)
+    : supabase.from("customers").insert(writePayload);
 
   const { error, data } = customerId
     ? await query.select("id").single()
@@ -717,6 +728,13 @@ export async function updateOrganizationSettingsAction(formData: FormData) {
       invoice_footer: parseOptionalString(formData.get("invoice_footer")),
       late_fee_terms: parseOptionalString(formData.get("late_fee_terms")),
       company_reference: parseOptionalString(formData.get("company_reference")),
+      hub_theme:
+        (parseOptionalString(formData.get("hub_theme")) as HubTheme | null) ??
+        "nova",
+      employee_customer_scope:
+        (parseOptionalString(
+          formData.get("employee_customer_scope"),
+        ) as EmployeeCustomerScope | null) ?? "all_customers",
       customer_field_preferences: customerFieldKeys.filter((field) =>
         formData.getAll("customer_field_preferences").includes(field),
       ),

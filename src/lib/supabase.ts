@@ -28,6 +28,17 @@ export type ProfileRow = {
 
 export type OrganizationRole = "owner" | "admin" | "member" | "viewer";
 export type CustomerStatus = "lead" | "active" | "inactive";
+export type HubTheme = "nova" | "forest" | "coast" | "graphite";
+export type EmployeeCustomerScope = "all_customers" | "assigned_only";
+export type BillingPlan = "starter" | "team" | "agency";
+export type BillingStatus =
+  | "trialing"
+  | "active"
+  | "past_due"
+  | "paused"
+  | "canceled"
+  | "unpaid";
+export type CustomerVisibility = "organization" | "owners_only";
 export type PreferredContactMethod = "email" | "phone" | "meeting" | "none";
 export type TaskStatus = "todo" | "in_progress" | "waiting" | "done";
 export type TaskPriority = "low" | "medium" | "high";
@@ -75,6 +86,12 @@ export type OrganizationRow = {
   payment_instructions: string | null;
   late_fee_terms: string | null;
   company_reference: string | null;
+  hub_theme: HubTheme;
+  employee_customer_scope: EmployeeCustomerScope;
+  billing_plan: BillingPlan;
+  billing_status: BillingStatus;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
   customer_field_preferences: unknown;
   follow_up_email_alerts_enabled: boolean;
   follow_up_alert_email: string | null;
@@ -94,6 +111,9 @@ export type OrganizationMemberRow = {
 export type CustomerRow = {
   id: string;
   organization_id: string;
+  created_by: string | null;
+  owner_user_id: string | null;
+  visibility: CustomerVisibility;
   company_name: string;
   org_number: string | null;
   contact_name: string | null;
@@ -292,6 +312,12 @@ export type Database = {
           payment_instructions?: string | null;
           late_fee_terms?: string | null;
           company_reference?: string | null;
+          hub_theme?: HubTheme;
+          employee_customer_scope?: EmployeeCustomerScope;
+          billing_plan?: BillingPlan;
+          billing_status?: BillingStatus;
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
           customer_field_preferences?: unknown;
           follow_up_email_alerts_enabled?: boolean;
           follow_up_alert_email?: string | null;
@@ -319,6 +345,9 @@ export type Database = {
         Insert: {
           id?: string;
           organization_id: string;
+          created_by?: string | null;
+          owner_user_id?: string | null;
+          visibility?: CustomerVisibility;
           company_name: string;
           org_number?: string | null;
           contact_name?: string | null;

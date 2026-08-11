@@ -15,7 +15,10 @@ export default async function HubProtectedLayout({
   const { organization, membership, user } = await requireHubContext();
 
   return (
-    <section className="py-4 md:py-6">
+    <section
+      data-hub-theme={organization.hub_theme}
+      className="min-h-screen bg-[var(--hub-page-bg)] py-4 text-[var(--hub-text)] md:py-6"
+    >
       <SectionContainer className="max-w-[1440px]">
         <HubAppShell
           organizationName={organization.name}

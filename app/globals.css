@@ -6,6 +6,52 @@
   --muted: #6b6b6b;
   --primary: #0b0b0c;
   --accent: #c6a15b;
+  --hub-page-bg: radial-gradient(circle at top, #f7f4eb 0%, #f0ede4 42%, #ebe7dc 100%);
+}
+
+[data-hub-theme] {
+  --hub-page-bg: radial-gradient(circle at top, #f7f4eb 0%, #f0ede4 42%, #ebe7dc 100%);
+  --hub-panel: #111111;
+  --hub-panel-contrast: #ffffff;
+  --hub-card: #ffffff;
+  --hub-card-soft: #fbfbf9;
+  --hub-text: #0b0b0c;
+  --hub-muted: #6b6b6b;
+  --hub-subtle: #8a8a8a;
+  --hub-accent: #c6a15b;
+  --hub-accent-strong: #8a6a2f;
+  --hub-input: #f7f7f5;
+  --hub-chip: #f1efe8;
+}
+
+[data-hub-theme="forest"] {
+  --hub-page-bg: radial-gradient(circle at top, #eef4ea 0%, #e4ebdc 45%, #dbe3d4 100%);
+  --hub-panel: #152218;
+  --hub-card-soft: #f7faf4;
+  --hub-input: #f4f8ef;
+  --hub-chip: #e7efdd;
+  --hub-accent: #9fbc77;
+  --hub-accent-strong: #4c6a35;
+}
+
+[data-hub-theme="coast"] {
+  --hub-page-bg: radial-gradient(circle at top, #edf7f8 0%, #dfeff1 44%, #d8e6ea 100%);
+  --hub-panel: #10242b;
+  --hub-card-soft: #f4fbfb;
+  --hub-input: #eef8f8;
+  --hub-chip: #dff0f2;
+  --hub-accent: #7eb6c2;
+  --hub-accent-strong: #2e6f7c;
+}
+
+[data-hub-theme="graphite"] {
+  --hub-page-bg: radial-gradient(circle at top, #eeeeec 0%, #dfdfdd 46%, #d3d2cf 100%);
+  --hub-panel: #191919;
+  --hub-card-soft: #f6f6f4;
+  --hub-input: #f1f1ef;
+  --hub-chip: #e7e6e2;
+  --hub-accent: #a7a39a;
+  --hub-accent-strong: #5f5a51;
 }
 
 @theme inline {

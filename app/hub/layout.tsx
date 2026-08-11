@@ -6,7 +6,7 @@ export default function HubLayout({
   children: ReactNode;
 }>) {
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,#f7f4eb_0%,#f0ede4_42%,#ebe7dc_100%)] text-[#161616]">
+    <div className="min-h-screen bg-[var(--hub-page-bg)] text-[#161616]">
       {children}
     </div>
   );

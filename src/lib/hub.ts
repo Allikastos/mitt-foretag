@@ -21,6 +21,10 @@ export const documentCategories = [
   "other",
 ] as const;
 export const memberRoles = ["owner", "admin", "member", "viewer"] as const;
+export const hubThemes = ["nova", "forest", "coast", "graphite"] as const;
+export const employeeCustomerScopes = ["all_customers", "assigned_only"] as const;
+export const customerVisibilityOptions = ["organization", "owners_only"] as const;
+export const billingPlans = ["starter", "team", "agency"] as const;
 export const preferredContactMethods = ["email", "phone", "meeting", "none"] as const;
 export const customerFieldKeys = [
   "org_number",
@@ -50,6 +54,7 @@ export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type EmailConnection =
   Database["public"]["Tables"]["email_connections"]["Row"];
 export type CustomerFieldKey = (typeof customerFieldKeys)[number];
+export type HubTheme = (typeof hubThemes)[number];
 
 export function formatDate(dateValue: string | null | undefined) {
   if (!dateValue) {
@@ -80,6 +85,75 @@ export function formatCurrency(value: number | string | null | undefined) {
 
 export function formatTags(tags: string[] | null | undefined) {
   return tags?.length ? tags.join(", ") : "Ej angivet";
+}
+
+export function hubThemeLabel(theme: HubTheme | string) {
+  switch (theme) {
+    case "forest":
+      return "Skog";
+    case "coast":
+      return "Kust";
+    case "graphite":
+      return "Grafit";
+    case "nova":
+      return "Nova";
+    default:
+      return String(theme);
+  }
+}
+
+export function employeeCustomerScopeLabel(scope: string) {
+  switch (scope) {
+    case "assigned_only":
+      return "Anställda ser bara egna kunder";
+    case "all_customers":
+      return "Alla ser företagets kunder";
+    default:
+      return scope;
+  }
+}
+
+export function billingPlanLabel(plan: string) {
+  switch (plan) {
+    case "agency":
+      return "Byrå";
+    case "team":
+      return "Team";
+    case "starter":
+      return "Starter";
+    default:
+      return plan;
+  }
+}
+
+export function billingStatusLabel(status: string) {
+  switch (status) {
+    case "trialing":
+      return "Testperiod";
+    case "active":
+      return "Aktiv";
+    case "past_due":
+      return "Betalning krävs";
+    case "paused":
+      return "Pausad";
+    case "canceled":
+      return "Avslutad";
+    case "unpaid":
+      return "Obetald";
+    default:
+      return status;
+  }
+}
+
+export function customerVisibilityLabel(visibility: string) {
+  switch (visibility) {
+    case "owners_only":
+      return "Endast ägare/admin";
+    case "organization":
+      return "Hela företaget";
+    default:
+      return visibility;
+  }
 }
 
 export function taskStatusLabel(status: Task["status"]) {

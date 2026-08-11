@@ -13,16 +13,16 @@ export function HubShell({
 }>) {
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-4 rounded-[1.7rem] border border-black/8 bg-white p-6 shadow-[0_20px_52px_-44px_rgba(0,0,0,0.16)] md:flex-row md:items-end md:justify-between md:p-7">
+      <div className="flex flex-col gap-4 rounded-[1.7rem] border border-black/8 bg-[var(--hub-card)] p-6 shadow-[0_20px_52px_-44px_rgba(0,0,0,0.16)] md:flex-row md:items-end md:justify-between md:p-7">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.24em] text-[#8A6A2F]">
+          <p className="text-xs font-medium uppercase tracking-[0.24em] text-[var(--hub-accent-strong)]">
             Altura Nova Hub
           </p>
-          <h1 className="mt-3 text-[1.8rem] font-semibold tracking-[-0.04em] text-[#0B0B0C] md:text-[2.15rem]">
+          <h1 className="mt-3 text-[1.8rem] font-semibold tracking-[-0.04em] text-[var(--hub-text)] md:text-[2.15rem]">
             {title}
           </h1>
           {description ? (
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-[#5F5F5F]">
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--hub-muted)]">
               {description}
             </p>
           ) : null}
@@ -40,7 +40,7 @@ export function HubCard({
 }: PropsWithChildren<{ className?: string }>) {
   return (
     <div
-      className={`rounded-[1.6rem] border border-black/8 bg-white p-5 shadow-[0_20px_44px_-48px_rgba(0,0,0,0.18)] md:p-6 ${className}`}
+      className={`rounded-[1.6rem] border border-black/8 bg-[var(--hub-card)] p-5 shadow-[0_20px_44px_-48px_rgba(0,0,0,0.18)] md:p-6 ${className}`}
     >
       {children}
     </div>
@@ -58,13 +58,13 @@ export function StatCard({
 }) {
   return (
     <HubCard>
-      <p className="text-xs font-medium uppercase tracking-[0.12em] text-[#8A6A2F]">
+      <p className="text-xs font-medium uppercase tracking-[0.12em] text-[var(--hub-accent-strong)]">
         {label}
       </p>
-      <p className="mt-2 text-[1.85rem] font-semibold text-[#0B0B0C]">
+      <p className="mt-2 text-[1.85rem] font-semibold text-[var(--hub-text)]">
         {value}
       </p>
-      {hint ? <p className="mt-1 text-sm text-[#6B6B6B]">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-sm text-[var(--hub-muted)]">{hint}</p> : null}
     </HubCard>
   );
 }
@@ -77,9 +77,9 @@ export function EmptyState({
   description: string;
 }) {
   return (
-    <div className="rounded-[1.5rem] border border-dashed border-black/12 bg-[#FBFBF9] px-5 py-8 text-center">
-      <p className="text-base font-medium text-[#0B0B0C]">{title}</p>
-      <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-[#6B6B6B]">
+    <div className="rounded-[1.5rem] border border-dashed border-black/12 bg-[var(--hub-card-soft)] px-5 py-8 text-center">
+      <p className="text-base font-medium text-[var(--hub-text)]">{title}</p>
+      <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-[var(--hub-muted)]">
         {description}
       </p>
     </div>
@@ -120,7 +120,7 @@ export function Field({
 }: PropsWithChildren<{ label: string }>) {
   return (
     <label className="block">
-      <span className="mb-2 block text-sm font-medium text-[#0B0B0C]">
+      <span className="mb-2 block text-sm font-medium text-[var(--hub-text)]">
         {label}
       </span>
       {children}
@@ -129,7 +129,7 @@ export function Field({
 }
 
 export const inputClassName =
-  "min-h-12 w-full rounded-2xl border border-black/10 bg-[#F7F7F5] px-4 py-3 text-sm text-[#0B0B0C] outline-none transition duration-200 placeholder:text-[#8A8A8A] focus:border-[#C6A15B]";
+  "min-h-12 w-full rounded-2xl border border-black/10 bg-[var(--hub-input)] px-4 py-3 text-sm text-[var(--hub-text)] outline-none transition duration-200 placeholder:text-[var(--hub-subtle)] focus:border-[var(--hub-accent)]";
 
 export const textareaClassName = `${inputClassName} min-h-28 resize-y`;
 
@@ -140,7 +140,7 @@ export function SecondaryLink({
   return (
     <Link
       href={href}
-      className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-black/10 bg-white px-5 py-3 text-sm font-medium text-[#0B0B0C] transition duration-200 hover:bg-[#F7F7F5]"
+      className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-black/10 bg-[var(--hub-card)] px-5 py-3 text-sm font-medium text-[var(--hub-text)] transition duration-200 hover:bg-[var(--hub-input)]"
     >
       {children}
     </Link>

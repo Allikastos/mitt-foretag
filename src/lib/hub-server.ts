@@ -164,7 +164,29 @@ export async function logHubActivity(params: {
 }
 
 export async function getHubDashboardData() {
-  const { supabase, organization } = await requireHubContext();
+  const { supabase, organization, membership, user } = await requireHubContext();
+  const isOwnerLevel = ["owner", "admin"].includes(membership.role);
+  let followUpCustomersQuery = supabase
+    .from("customers")
+    .select("*")
+    .eq("organization_id", organization.id)
+    .not("follow_up_date", "is", null)
+    .lte("follow_up_date", new Date().toISOString().slice(0, 10))
+    .order("follow_up_date", { ascending: true })
+    .limit(5);
+
+  if (!isOwnerLevel) {
+    followUpCustomersQuery = followUpCustomersQuery.eq(
+      "visibility",
+      "organization",
+    );
+
+    if (organization.employee_customer_scope === "assigned_only") {
+      followUpCustomersQuery = followUpCustomersQuery.or(
+        `created_by.eq.${user.id},owner_user_id.eq.${user.id}`,
+      );
+    }
+  }
 
   const [
     openTasksResult,
@@ -225,14 +247,7 @@ export async function getHubDashboardData() {
       .eq("organization_id", organization.id)
       .order("created_at", { ascending: false })
       .limit(6),
-    supabase
-      .from("customers")
-      .select("*")
-      .eq("organization_id", organization.id)
-      .not("follow_up_date", "is", null)
-      .lte("follow_up_date", new Date().toISOString().slice(0, 10))
-      .order("follow_up_date", { ascending: true })
-      .limit(5),
+    followUpCustomersQuery,
   ]);
 
   const tasks = tasksResult.data ?? [];
@@ -260,13 +275,24 @@ export async function getHubDashboardData() {
 }
 
 export async function getCustomers() {
-  const { supabase, organization } = await requireHubContext();
-  const { data, error } = await supabase
+  const { supabase, organization, membership, user } = await requireHubContext();
+  const isOwnerLevel = ["owner", "admin"].includes(membership.role);
+  let query = supabase
     .from("customers")
     .select("*")
     .eq("organization_id", organization.id)
     .order("follow_up_date", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
+
+  if (!isOwnerLevel) {
+    query = query.eq("visibility", "organization");
+
+    if (organization.employee_customer_scope === "assigned_only") {
+      query = query.or(`created_by.eq.${user.id},owner_user_id.eq.${user.id}`);
+    }
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw error;
@@ -276,7 +302,7 @@ export async function getCustomers() {
 }
 
 export async function getCustomerDetail(customerId: string) {
-  const { supabase, organization } = await requireHubContext();
+  const { supabase, organization, membership, user } = await requireHubContext();
 
   const [customerResult, contactsResult, tasksResult, invoicesResult, documentsResult] =
     await Promise.all([
@@ -316,9 +342,22 @@ export async function getCustomerDetail(customerId: string) {
     throw customerResult.error;
   }
 
+  const isOwnerLevel = ["owner", "admin"].includes(membership.role);
+  const customer = customerResult.data;
+  const isOwnCustomer =
+    customer.created_by === user.id || customer.owner_user_id === user.id;
+
+  if (
+    !isOwnerLevel &&
+    (customer.visibility === "owners_only" ||
+      (organization.employee_customer_scope === "assigned_only" && !isOwnCustomer))
+  ) {
+    throw new Error("Du har inte behörighet till den här kunden.");
+  }
+
   return {
     organization,
-    customer: customerResult.data,
+    customer,
     contacts: contactsResult.data ?? [],
     tasks: tasksResult.data ?? [],
     invoices: invoicesResult.data ?? [],
