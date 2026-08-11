@@ -22,13 +22,31 @@ create table if not exists public.organizations (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   org_number text,
+  vat_number text,
   email text,
   phone text,
   address text,
+  address_line_1 text,
+  address_line_2 text,
+  postal_code text,
+  city text,
+  country text default 'Sverige',
+  website text,
+  logo_url text,
   default_vat_rate numeric not null default 25,
   payment_terms_days integer not null default 30,
   invoice_prefix text not null default 'AN',
   next_invoice_number integer not null default 1,
+  bankgiro text,
+  plusgiro text,
+  bank_account text,
+  iban text,
+  swift_bic text,
+  swish_number text,
+  invoice_footer text,
+  payment_instructions text,
+  late_fee_terms text,
+  company_reference text,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
@@ -100,9 +118,41 @@ create table if not exists public.invoices (
   subtotal numeric not null default 0,
   vat_total numeric not null default 0,
   total numeric not null default 0,
+  finalized_at timestamptz,
+  sent_at timestamptz,
+  paid_at timestamptz,
+  locked_at timestamptz,
+  pdf_document_id uuid,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
+
+alter table public.organizations
+  add column if not exists vat_number text,
+  add column if not exists address_line_1 text,
+  add column if not exists address_line_2 text,
+  add column if not exists postal_code text,
+  add column if not exists city text,
+  add column if not exists country text default 'Sverige',
+  add column if not exists website text,
+  add column if not exists logo_url text,
+  add column if not exists bankgiro text,
+  add column if not exists plusgiro text,
+  add column if not exists bank_account text,
+  add column if not exists iban text,
+  add column if not exists swift_bic text,
+  add column if not exists swish_number text,
+  add column if not exists invoice_footer text,
+  add column if not exists payment_instructions text,
+  add column if not exists late_fee_terms text,
+  add column if not exists company_reference text;
+
+alter table public.invoices
+  add column if not exists finalized_at timestamptz,
+  add column if not exists sent_at timestamptz,
+  add column if not exists paid_at timestamptz,
+  add column if not exists locked_at timestamptz,
+  add column if not exists pdf_document_id uuid;
 
 create table if not exists public.invoice_lines (
   id uuid primary key default gen_random_uuid(),
@@ -171,13 +221,16 @@ create table if not exists public.ai_events (
 create index if not exists organization_members_user_idx on public.organization_members (user_id);
 create index if not exists customers_organization_idx on public.customers (organization_id, created_at desc);
 create index if not exists customers_status_idx on public.customers (organization_id, status);
+create unique index if not exists customers_org_id_idx on public.customers (organization_id, id);
 create index if not exists contacts_customer_idx on public.contacts (customer_id);
 create index if not exists tasks_organization_status_idx on public.tasks (organization_id, status, due_date);
 create index if not exists tasks_customer_idx on public.tasks (customer_id);
 create index if not exists documents_organization_idx on public.documents (organization_id, created_at desc);
+create unique index if not exists documents_org_id_idx on public.documents (organization_id, id);
 create index if not exists documents_customer_idx on public.documents (customer_id);
 create index if not exists documents_invoice_idx on public.documents (invoice_id);
 create index if not exists invoices_organization_status_idx on public.invoices (organization_id, status, created_at desc);
+create unique index if not exists invoices_org_id_idx on public.invoices (organization_id, id);
 create index if not exists invoices_customer_idx on public.invoices (customer_id);
 create unique index if not exists invoices_org_invoice_number_idx on public.invoices (organization_id, invoice_number) where invoice_number is not null;
 create index if not exists invoice_lines_invoice_idx on public.invoice_lines (invoice_id, sort_order);
@@ -203,6 +256,109 @@ drop trigger if exists set_invoice_lines_updated_at on public.invoice_lines;
 create trigger set_invoice_lines_updated_at before update on public.invoice_lines for each row execute function public.set_updated_at();
 drop trigger if exists set_email_connections_updated_at on public.email_connections;
 create trigger set_email_connections_updated_at before update on public.email_connections for each row execute function public.set_updated_at();
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'customers_organization_id_id_key'
+  ) then
+    alter table public.customers
+      add constraint customers_organization_id_id_key unique (organization_id, id);
+  end if;
+
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'documents_organization_id_id_key'
+  ) then
+    alter table public.documents
+      add constraint documents_organization_id_id_key unique (organization_id, id);
+  end if;
+
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'invoices_organization_id_id_key'
+  ) then
+    alter table public.invoices
+      add constraint invoices_organization_id_id_key unique (organization_id, id);
+  end if;
+
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'tasks_org_customer_fk'
+  ) then
+    alter table public.tasks
+      add constraint tasks_org_customer_fk
+      foreign key (organization_id, customer_id)
+      references public.customers (organization_id, id)
+      on delete set null;
+  end if;
+
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'invoices_org_customer_fk'
+  ) then
+    alter table public.invoices
+      add constraint invoices_org_customer_fk
+      foreign key (organization_id, customer_id)
+      references public.customers (organization_id, id)
+      on delete set null;
+  end if;
+
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'invoice_lines_org_invoice_fk'
+  ) then
+    alter table public.invoice_lines
+      add constraint invoice_lines_org_invoice_fk
+      foreign key (organization_id, invoice_id)
+      references public.invoices (organization_id, id)
+      on delete cascade;
+  end if;
+
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'documents_org_customer_fk'
+  ) then
+    alter table public.documents
+      add constraint documents_org_customer_fk
+      foreign key (organization_id, customer_id)
+      references public.customers (organization_id, id)
+      on delete set null;
+  end if;
+
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'documents_org_invoice_fk'
+  ) then
+    alter table public.documents
+      add constraint documents_org_invoice_fk
+      foreign key (organization_id, invoice_id)
+      references public.invoices (organization_id, id)
+      on delete set null;
+  end if;
+
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'invoices_pdf_document_fk'
+  ) then
+    alter table public.invoices
+      add constraint invoices_pdf_document_fk
+      foreign key (pdf_document_id)
+      references public.documents (id)
+      on delete set null;
+  end if;
+end
+$$;
 
 create or replace function public.calculate_invoice_line_totals()
 returns trigger
@@ -401,6 +557,19 @@ create policy "Owners and admins can manage memberships" on public.organization_
 for all to authenticated
 using (public.can_manage_org_settings(organization_id))
 with check (public.can_manage_org_settings(organization_id));
+
+drop policy if exists "Users can create initial owner membership" on public.organization_members;
+create policy "Users can create initial owner membership" on public.organization_members
+for insert to authenticated
+with check (
+  user_id = auth.uid()
+  and role = 'owner'
+  and not exists (
+    select 1
+    from public.organization_members existing_members
+    where existing_members.organization_id = organization_members.organization_id
+  )
+);
 
 drop policy if exists "Members can read customers" on public.customers;
 create policy "Members can read customers" on public.customers

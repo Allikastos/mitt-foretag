@@ -68,7 +68,7 @@ export default async function AdminPage() {
               </h1>
               <p className="mt-4 max-w-3xl text-sm leading-7 text-[#5F5F5F] md:text-base">
                 Inloggad som {user.email ?? "okänd användare"}. Här hanterar du
-                utkast, schemaläggning, publicering, featured images och SEO för
+                utkast, schemaläggning, publicering, utvalda bilder och SEO för
                 varje artikel.
               </p>
             </div>

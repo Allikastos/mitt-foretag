@@ -7,6 +7,7 @@ import {
 } from "@/components/hub/forms";
 import { HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
 import {
+  canEditInvoice,
   formatCurrency,
   formatDate,
   invoiceStatusLabel,
@@ -32,6 +33,9 @@ export default async function HubInvoiceDetailPage({
   if (!detail?.invoice) {
     notFound();
   }
+
+  const isLocked = !canEditInvoice(detail.invoice);
+  const pdfHref = `/hub/fakturor/${detail.invoice.id}/pdf`;
 
   return (
     <HubShell
@@ -140,10 +144,13 @@ export default async function HubInvoiceDetailPage({
             customers={lists.customers}
             organization={context.organization}
           />
-          <InvoiceLineForm invoiceId={detail.invoice.id} />
+          <InvoiceLineForm invoiceId={detail.invoice.id} locked={isLocked} />
           <InvoiceStatusForm
             invoiceId={detail.invoice.id}
             invoiceNumber={detail.invoice.invoice_number}
+            currentStatus={detail.invoice.status}
+            locked={isLocked}
+            pdfHref={pdfHref}
           />
           <DocumentUploadForm customers={lists.customers} invoices={lists.invoices} />
         </div>

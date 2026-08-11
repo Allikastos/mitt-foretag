@@ -31,7 +31,7 @@ export function HubNav({
           href={item.href}
           aria-current={isActive(pathname, item.href) ? "page" : undefined}
           title={isCollapsed ? item.label : undefined}
-          className={`flex min-h-11 items-center rounded-[1.15rem] px-4 py-3 text-sm font-medium transition ${
+          className={`flex min-h-11 items-center rounded-[1.15rem] px-4 py-3 text-sm font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#111111] ${
             isActive(pathname, item.href)
               ? "bg-white text-[#111111] shadow-[0_14px_28px_-24px_rgba(255,255,255,0.45)]"
               : "text-white/72 hover:bg-white/8 hover:text-white"

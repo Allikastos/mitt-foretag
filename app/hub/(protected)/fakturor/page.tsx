@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { InvoiceForm } from "@/components/hub/forms";
+import { InvoiceTemplateGallery } from "@/components/hub/invoice-templates";
 import { EmptyState, HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
 import {
   formatCurrency,
@@ -25,8 +26,10 @@ export default async function HubInvoicesPage() {
   return (
     <HubShell
       title="Fakturor"
-      description="Skapa och följ upp fakturautkast med rader, moms och manuella statusändringar."
+      description="Skapa fakturautkast, granska mallar och följ upp betalstatus på svenska."
     >
+      <InvoiceTemplateGallery organization={organization} />
+
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <HubCard>
           <h2 className="text-lg font-semibold text-[#0B0B0C]">Fakturalista</h2>

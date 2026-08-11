@@ -38,12 +38,12 @@ export default async function HubDashboardPage() {
         </Link>
       }
     >
-      <div className="grid gap-3 md:grid-cols-5">
-        <StatCard label="Öppna uppgifter" value={stats.openTasks} />
-        <StatCard label="Fakturautkast" value={stats.draftInvoices} />
-        <StatCard label="Obetalda/skickade" value={stats.unpaidInvoices} />
-        <StatCard label="Uppladdade dokument" value={stats.documents} />
-        <StatCard label="Senaste aktivitet" value={stats.recentActivity} />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <StatCard label="Öppna" value={stats.openTasks} hint="uppgifter" />
+        <StatCard label="Utkast" value={stats.draftInvoices} hint="fakturor" />
+        <StatCard label="Obetalda" value={stats.unpaidInvoices} hint="fakturor" />
+        <StatCard label="Dokument" value={stats.documents} hint="uppladdade" />
+        <StatCard label="Aktivitet" value={stats.recentActivity} hint="händelser" />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">

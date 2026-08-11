@@ -6,6 +6,7 @@ import { randomUUID } from "node:crypto";
 import {
   HUB_DOCUMENTS_BUCKET,
   buildDocumentPath,
+  buildOrganizationAddressLines,
   type ActivityLog,
   type Contact,
   type Customer,
@@ -29,14 +30,17 @@ type HubContext = {
   membership: OrganizationMember;
 };
 
-async function bootstrapOrganizationForUser(context: {
+export async function createOrganizationForUser(context: {
   supabase: NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>>;
   userId: string;
   email: string | null;
   fullName: string | null;
+  organizationName?: string | null;
+  orgNumber?: string | null;
 }) {
   const organizationId = randomUUID();
   const organizationName =
+    context.organizationName?.trim() ||
     context.fullName?.trim() ||
     context.email?.split("@")[0]?.replace(/[._-]+/g, " ") ||
     "Mitt företag";
@@ -46,6 +50,7 @@ async function bootstrapOrganizationForUser(context: {
     .insert({
       id: organizationId,
       name: organizationName,
+      org_number: context.orgNumber ?? null,
       email: context.email,
     });
 
@@ -71,6 +76,8 @@ async function bootstrapOrganizationForUser(context: {
     action: "organization_bootstrapped",
     description: "Första hubborganisationen skapades automatiskt.",
   });
+
+  return organizationId;
 }
 
 export const requireHubContext = cache(async (): Promise<HubContext> => {
@@ -98,7 +105,7 @@ export const requireHubContext = cache(async (): Promise<HubContext> => {
       null,
   });
 
-  let membershipQuery = await supabase
+  const membershipQuery = await supabase
     .from("organization_members")
     .select("*, organizations(*)")
     .eq("user_id", user.id)
@@ -107,24 +114,7 @@ export const requireHubContext = cache(async (): Promise<HubContext> => {
     .maybeSingle();
 
   if (!membershipQuery.data) {
-    await bootstrapOrganizationForUser({
-      supabase,
-      userId: user.id,
-      email: user.email ?? null,
-      fullName:
-        user.user_metadata?.full_name ??
-        user.user_metadata?.name ??
-        user.email?.split("@")[0] ??
-        null,
-    });
-
-    membershipQuery = await supabase
-      .from("organization_members")
-      .select("*, organizations(*)")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: true })
-      .limit(1)
-      .single();
+    redirect("/hub/onboarding");
   }
 
   if (membershipQuery.error || !membershipQuery.data?.organizations) {
@@ -643,6 +633,48 @@ export async function uploadHubFile(params: {
   }
 
   return { fileId, filePath };
+}
+
+export async function uploadHubBuffer(params: {
+  bytes: Uint8Array<ArrayBufferLike>;
+  fileName: string;
+  contentType: string;
+  organizationId: string;
+  customerId?: string | null;
+}) {
+  const { supabase } = await requireHubContext();
+  const fileId = randomUUID();
+  const filePath = buildDocumentPath({
+    organizationId: params.organizationId,
+    customerId: params.customerId,
+    fileId,
+    fileName: params.fileName,
+  });
+
+  const { error } = await supabase.storage
+    .from(HUB_DOCUMENTS_BUCKET)
+    .upload(filePath, params.bytes, {
+      upsert: true,
+      contentType: params.contentType,
+    });
+
+  if (error) {
+    throw error;
+  }
+
+  return { fileId, filePath };
+}
+
+export async function getInvoicePdfData(invoiceId: string) {
+  const { organization } = await requireHubContext();
+  const detail = await getInvoiceDetail(invoiceId);
+
+  return {
+    organization,
+    organizationAddressLines: buildOrganizationAddressLines(organization),
+    invoice: detail.invoice,
+    lines: detail.lines,
+  };
 }
 
 export type HubInvoiceDetail = {

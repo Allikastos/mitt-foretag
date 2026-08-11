@@ -1,6 +1,10 @@
 import { SettingsForm } from "@/components/hub/forms";
 import { HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
-import { roleLabel } from "@/src/lib/hub";
+import {
+  emailConnectionStatusLabel,
+  emailProviderLabel,
+  roleLabel,
+} from "@/src/lib/hub";
 import { getSettingsData, requireHubContext } from "@/src/lib/hub-server";
 
 export default async function HubSettingsPage() {
@@ -60,9 +64,12 @@ export default async function HubSettingsPage() {
               {settings.emailConnections.length ? (
                 settings.emailConnections.map((connection) => (
                   <div key={connection.id} className="rounded-[1.25rem] border border-black/8 bg-[#FBFBF9] p-4">
-                    <p className="font-medium text-[#0B0B0C]">{connection.provider}</p>
+                    <p className="font-medium text-[#0B0B0C]">
+                      {emailProviderLabel(connection.provider)}
+                    </p>
                     <p className="mt-1 text-sm text-[#6B6B6B]">
-                      {connection.email_address || "Ingen adress kopplad"} • {connection.status}
+                      {connection.email_address || "Ingen adress kopplad"} •{" "}
+                      {emailConnectionStatusLabel(connection.status)}
                     </p>
                   </div>
                 ))

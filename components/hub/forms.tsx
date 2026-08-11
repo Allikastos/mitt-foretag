@@ -1,8 +1,14 @@
 import {
+  canEditInvoice,
+  customerStatusLabel,
   customerStatuses,
+  documentCategoryLabel,
   documentCategories,
+  invoiceStatusLabel,
   invoiceStatuses,
+  priorityLabel,
   taskPriorities,
+  taskStatusLabel,
   taskStatuses,
 } from "@/src/lib/hub";
 import type {
@@ -22,6 +28,7 @@ import {
 } from "./ui";
 import { SubmitButton } from "./submit-button";
 import {
+  finalizeInvoiceAction,
   saveContactAction,
   saveCustomerAction,
   saveInvoiceAction,
@@ -83,7 +90,7 @@ export function CustomerForm({ customer }: { customer?: Customer | null }) {
             >
               {customerStatuses.map((status) => (
                 <option key={status} value={status}>
-                  {status}
+                  {customerStatusLabel(status)}
                 </option>
               ))}
             </select>
@@ -182,7 +189,7 @@ export function TaskForm({
             >
               {taskStatuses.map((status) => (
                 <option key={status} value={status}>
-                  {status}
+                  {taskStatusLabel(status)}
                 </option>
               ))}
             </select>
@@ -195,7 +202,7 @@ export function TaskForm({
             >
               {taskPriorities.map((priority) => (
                 <option key={priority} value={priority}>
-                  {priority}
+                  {priorityLabel(priority)}
                 </option>
               ))}
             </select>
@@ -231,21 +238,19 @@ export function InvoiceForm({
   customers: Array<{ id: string; company_name: string }>;
   organization: Organization;
 }) {
+  const isLocked = invoice ? !canEditInvoice(invoice) : false;
+
   return (
     <HubCard>
       <form action={saveInvoiceAction} className="space-y-4">
         <input type="hidden" name="invoice_id" defaultValue={invoice?.id ?? ""} />
-        <input
-          type="hidden"
-          name="invoice_number"
-          defaultValue={invoice?.invoice_number ?? ""}
-        />
         <FormGrid>
           <Field label="Kund">
             <select
               name="customer_id"
               defaultValue={invoice?.customer_id ?? ""}
               className={inputClassName}
+              disabled={isLocked}
             >
               <option value="">Välj kund</option>
               {customers.map((customer) => (
@@ -260,10 +265,11 @@ export function InvoiceForm({
               name="status"
               defaultValue={invoice?.status ?? "draft"}
               className={inputClassName}
+              disabled={isLocked}
             >
               {invoiceStatuses.map((status) => (
                 <option key={status} value={status}>
-                  {status}
+                  {invoiceStatusLabel(status)}
                 </option>
               ))}
             </select>
@@ -274,6 +280,7 @@ export function InvoiceForm({
               name="issue_date"
               defaultValue={invoice?.issue_date ?? new Date().toISOString().slice(0, 10)}
               className={inputClassName}
+              disabled={isLocked}
             />
           </Field>
           <Field label="Förfallodatum">
@@ -282,6 +289,7 @@ export function InvoiceForm({
               name="due_date"
               defaultValue={invoice?.due_date ?? ""}
               className={inputClassName}
+              disabled={isLocked}
             />
           </Field>
           <Field label="Valuta">
@@ -289,6 +297,7 @@ export function InvoiceForm({
               name="currency"
               defaultValue={invoice?.currency ?? "SEK"}
               className={inputClassName}
+              disabled={isLocked}
             />
           </Field>
           <Field label="Standardmoms">
@@ -304,9 +313,17 @@ export function InvoiceForm({
             name="notes"
             defaultValue={invoice?.notes ?? ""}
             className={textareaClassName}
+            disabled={isLocked}
           />
         </Field>
-        <SubmitButton>{invoice ? "Uppdatera faktura" : "Skapa fakturautkast"}</SubmitButton>
+        <SubmitButton disabled={isLocked}>
+          {invoice ? "Uppdatera faktura" : "Skapa fakturautkast"}
+        </SubmitButton>
+        {isLocked ? (
+          <p className="text-sm text-[#6B6B6B]">
+            Fakturan är låst efter slutförande och kan inte längre redigeras.
+          </p>
+        ) : null}
       </form>
     </HubCard>
   );
@@ -315,9 +332,11 @@ export function InvoiceForm({
 export function InvoiceLineForm({
   invoiceId,
   line,
+  locked = false,
 }: {
   invoiceId: string;
   line?: InvoiceLine | null;
+  locked?: boolean;
 }) {
   return (
     <HubCard>
@@ -331,6 +350,7 @@ export function InvoiceLineForm({
               defaultValue={line?.description ?? ""}
               className={inputClassName}
               required
+              disabled={locked}
             />
           </Field>
           <Field label="Sortering">
@@ -340,6 +360,7 @@ export function InvoiceLineForm({
               name="sort_order"
               defaultValue={line?.sort_order ?? 0}
               className={inputClassName}
+              disabled={locked}
             />
           </Field>
           <Field label="Antal">
@@ -349,6 +370,7 @@ export function InvoiceLineForm({
               name="quantity"
               defaultValue={line?.quantity ?? 1}
               className={inputClassName}
+              disabled={locked}
             />
           </Field>
           <Field label="Pris per enhet">
@@ -358,6 +380,7 @@ export function InvoiceLineForm({
               name="unit_price"
               defaultValue={line?.unit_price ?? 0}
               className={inputClassName}
+              disabled={locked}
             />
           </Field>
           <Field label="Moms %">
@@ -367,10 +390,13 @@ export function InvoiceLineForm({
               name="vat_rate"
               defaultValue={line?.vat_rate ?? 25}
               className={inputClassName}
+              disabled={locked}
             />
           </Field>
         </FormGrid>
-        <SubmitButton>{line ? "Uppdatera rad" : "Lägg till rad"}</SubmitButton>
+        <SubmitButton disabled={locked}>
+          {line ? "Uppdatera rad" : "Lägg till rad"}
+        </SubmitButton>
       </form>
     </HubCard>
   );
@@ -379,39 +405,57 @@ export function InvoiceLineForm({
 export function InvoiceStatusForm({
   invoiceId,
   invoiceNumber,
+  currentStatus,
+  locked,
+  pdfHref,
 }: {
   invoiceId: string;
   invoiceNumber: string | null;
+  currentStatus: Invoice["status"];
+  locked: boolean;
+  pdfHref: string;
 }) {
   return (
     <HubCard>
-      <form action={updateInvoiceStatusAction} className="flex flex-wrap items-end gap-4">
-        <input type="hidden" name="invoice_id" value={invoiceId} />
-        <input type="hidden" name="invoice_number" value={invoiceNumber ?? ""} />
-        <Field label="Ändra status">
-          <select name="status" defaultValue="sent" className={inputClassName}>
-            {invoiceStatuses.map((status) => (
-              <option key={status} value={status}>
-                {status}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <SubmitButton>Uppdatera status</SubmitButton>
-      </form>
+      {locked ? (
+        <form action={updateInvoiceStatusAction} className="flex flex-wrap items-end gap-4">
+          <input type="hidden" name="invoice_id" value={invoiceId} />
+          <Field label="Ändra status">
+            <select name="status" defaultValue={currentStatus} className={inputClassName}>
+              {invoiceStatuses
+                .filter((status) => status !== "draft")
+                .map((status) => (
+                  <option key={status} value={status}>
+                    {invoiceStatusLabel(status)}
+                  </option>
+                ))}
+            </select>
+          </Field>
+          <SubmitButton>Uppdatera status</SubmitButton>
+        </form>
+      ) : (
+        <form action={finalizeInvoiceAction} className="space-y-4">
+          <input type="hidden" name="invoice_id" value={invoiceId} />
+          <div>
+            <p className="text-sm font-medium text-[#0B0B0C]">Slutför faktura</p>
+            <p className="mt-2 text-sm leading-6 text-[#6B6B6B]">
+              När fakturan slutförs får den ett skarpt nummer, låses för redigering
+              och en PDF sparas i dokumentarkivet.
+            </p>
+          </div>
+          <SubmitButton>Slutför faktura</SubmitButton>
+        </form>
+      )}
       <div className="mt-5 flex flex-wrap gap-3">
-        <button
-          type="button"
-          className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-black/10 bg-white px-5 py-3 text-sm font-medium text-[#0B0B0C] opacity-60"
+        <a
+          href={pdfHref}
+          target="_blank"
+          className={`inline-flex min-h-11 items-center justify-center rounded-2xl border border-black/10 bg-white px-5 py-3 text-sm font-medium text-[#0B0B0C] ${
+            !invoiceNumber ? "pointer-events-none opacity-60" : ""
+          }`}
         >
-          Generera PDF
-        </button>
-        <button
-          type="button"
-          className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-black/10 bg-white px-5 py-3 text-sm font-medium text-[#0B0B0C] opacity-60"
-        >
-          Skicka via e-post
-        </button>
+          {invoiceNumber ? "Öppna PDF" : "PDF skapas vid slutförande"}
+        </a>
       </div>
     </HubCard>
   );
@@ -435,7 +479,7 @@ export function DocumentUploadForm({
             <select name="category" defaultValue="other" className={inputClassName}>
               {documentCategories.map((category) => (
                 <option key={category} value={category}>
-                  {category}
+                  {documentCategoryLabel(category)}
                 </option>
               ))}
             </select>
@@ -489,6 +533,13 @@ export function SettingsForm({
               className={inputClassName}
             />
           </Field>
+          <Field label="VAT-nummer">
+            <input
+              name="vat_number"
+              defaultValue={organization.vat_number ?? ""}
+              className={inputClassName}
+            />
+          </Field>
           <Field label="E-post">
             <input
               type="email"
@@ -504,10 +555,59 @@ export function SettingsForm({
               className={inputClassName}
             />
           </Field>
+          <Field label="Webbplats">
+            <input
+              name="website"
+              defaultValue={organization.website ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Logotyp-URL">
+            <input
+              name="logo_url"
+              defaultValue={organization.logo_url ?? ""}
+              className={inputClassName}
+            />
+          </Field>
           <Field label="Adress">
             <input
               name="address"
               defaultValue={organization.address ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Adressrad 1">
+            <input
+              name="address_line_1"
+              defaultValue={organization.address_line_1 ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Adressrad 2">
+            <input
+              name="address_line_2"
+              defaultValue={organization.address_line_2 ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Postnummer">
+            <input
+              name="postal_code"
+              defaultValue={organization.postal_code ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Ort">
+            <input
+              name="city"
+              defaultValue={organization.city ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Land">
+            <input
+              name="country"
+              defaultValue={organization.country ?? "Sverige"}
               className={inputClassName}
             />
           </Field>
@@ -545,7 +645,77 @@ export function SettingsForm({
               className={inputClassName}
             />
           </Field>
+          <Field label="Bankgiro">
+            <input
+              name="bankgiro"
+              defaultValue={organization.bankgiro ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Plusgiro">
+            <input
+              name="plusgiro"
+              defaultValue={organization.plusgiro ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Bankkonto">
+            <input
+              name="bank_account"
+              defaultValue={organization.bank_account ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="IBAN">
+            <input
+              name="iban"
+              defaultValue={organization.iban ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="SWIFT/BIC">
+            <input
+              name="swift_bic"
+              defaultValue={organization.swift_bic ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Swish">
+            <input
+              name="swish_number"
+              defaultValue={organization.swish_number ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Företagsreferens">
+            <input
+              name="company_reference"
+              defaultValue={organization.company_reference ?? ""}
+              className={inputClassName}
+            />
+          </Field>
         </FormGrid>
+        <Field label="Betalningsinstruktioner">
+          <textarea
+            name="payment_instructions"
+            defaultValue={organization.payment_instructions ?? ""}
+            className={textareaClassName}
+          />
+        </Field>
+        <Field label="Fakturafot">
+          <textarea
+            name="invoice_footer"
+            defaultValue={organization.invoice_footer ?? ""}
+            className={textareaClassName}
+          />
+        </Field>
+        <Field label="Dröjsmålsränta / villkor">
+          <textarea
+            name="late_fee_terms"
+            defaultValue={organization.late_fee_terms ?? ""}
+            className={textareaClassName}
+          />
+        </Field>
         <SubmitButton>Spara inställningar</SubmitButton>
       </form>
     </HubCard>

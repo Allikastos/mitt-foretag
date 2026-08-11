@@ -58,13 +58,13 @@ export function StatCard({
 }) {
   return (
     <HubCard>
-      <p className="text-sm font-medium uppercase tracking-[0.18em] text-[#C6A15B]">
+      <p className="text-xs font-medium uppercase tracking-[0.12em] text-[#8A6A2F]">
         {label}
       </p>
-      <p className="mt-3 text-[1.85rem] font-semibold tracking-[-0.04em] text-[#0B0B0C]">
+      <p className="mt-2 text-[1.85rem] font-semibold text-[#0B0B0C]">
         {value}
       </p>
-      {hint ? <p className="mt-2 text-sm text-[#6B6B6B]">{hint}</p> : null}
+      {hint ? <p className="mt-1 text-sm text-[#6B6B6B]">{hint}</p> : null}
     </HubCard>
   );
 }

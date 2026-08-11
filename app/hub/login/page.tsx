@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { HubLoginForm } from "@/components/hub/login-form";
 import { SectionContainer } from "@/components/section-container";
-import { getLoggedInUser } from "@/src/lib/supabase-server";
+import { createSupabaseServerClient } from "@/src/lib/supabase-server";
 
 export const metadata: Metadata = {
-  title: "Hub login",
+  title: "Logga in till hubben",
   robots: {
     index: false,
     follow: false,
@@ -13,10 +13,22 @@ export const metadata: Metadata = {
 };
 
 export default async function HubLoginPage() {
-  const user = await getLoggedInUser();
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = supabase
+    ? await supabase.auth.getUser()
+    : { data: { user: null } };
 
   if (user) {
-    redirect("/hub");
+    const { data: membership } = await supabase!
+      .from("organization_members")
+      .select("id")
+      .eq("user_id", user.id)
+      .limit(1)
+      .maybeSingle();
+
+    redirect(membership ? "/hub" : "/hub/onboarding");
   }
 
   return (

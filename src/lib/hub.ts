@@ -91,6 +91,32 @@ export function priorityLabel(priority: Task["priority"]) {
   }
 }
 
+export function emailProviderLabel(provider: EmailConnection["provider"]) {
+  switch (provider) {
+    case "gmail":
+      return "Gmail";
+    case "outlook":
+      return "Outlook";
+    case "imap":
+      return "IMAP";
+    default:
+      return provider;
+  }
+}
+
+export function emailConnectionStatusLabel(status: EmailConnection["status"]) {
+  switch (status) {
+    case "not_connected":
+      return "Ej ansluten";
+    case "connected":
+      return "Ansluten";
+    case "error":
+      return "Fel";
+    default:
+      return status;
+  }
+}
+
 export function customerStatusLabel(status: Customer["status"]) {
   switch (status) {
     case "lead":
@@ -119,6 +145,37 @@ export function invoiceStatusLabel(status: Invoice["status"]) {
     default:
       return status;
   }
+}
+
+export function isInvoiceLocked(status: Invoice["status"]) {
+  return status !== "draft";
+}
+
+export function canEditInvoice(invoice: Pick<Invoice, "status" | "locked_at">) {
+  return !invoice.locked_at && !isInvoiceLocked(invoice.status);
+}
+
+export function buildOrganizationAddressLines(organization: Pick<
+  Organization,
+  | "address_line_1"
+  | "address_line_2"
+  | "postal_code"
+  | "city"
+  | "country"
+  | "address"
+>) {
+  const fallbackLine = organization.address?.trim() || null;
+  const cityLine = [organization.postal_code, organization.city]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+
+  return [
+    organization.address_line_1?.trim() || fallbackLine,
+    organization.address_line_2?.trim() || null,
+    cityLine || null,
+    organization.country?.trim() || null,
+  ].filter((line): line is string => Boolean(line));
 }
 
 export function documentCategoryLabel(category: DocumentRecord["category"]) {

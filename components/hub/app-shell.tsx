@@ -7,6 +7,7 @@ import { HubSignOutButton } from "@/components/hub/sign-out-button";
 
 const storageKey = "altura-hub-sidebar-collapsed";
 const storageEventName = "altura-hub-sidebar-changed";
+const collapsibleMediaQuery = "(min-width: 1280px)";
 
 type HubAppShellProps = {
   children: React.ReactNode;
@@ -55,6 +56,27 @@ function getSidebarSnapshot() {
   return window.localStorage.getItem(storageKey) === "true";
 }
 
+function subscribeToCollapsible(onStoreChange: () => void) {
+  if (typeof window === "undefined") {
+    return () => undefined;
+  }
+
+  const mediaQuery = window.matchMedia(collapsibleMediaQuery);
+  mediaQuery.addEventListener("change", onStoreChange);
+
+  return () => {
+    mediaQuery.removeEventListener("change", onStoreChange);
+  };
+}
+
+function getCollapsibleSnapshot() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return window.matchMedia(collapsibleMediaQuery).matches;
+}
+
 export function HubAppShell({
   children,
   organizationName,
@@ -67,6 +89,12 @@ export function HubAppShell({
     getSidebarSnapshot,
     () => false
   );
+  const canCollapse = useSyncExternalStore(
+    subscribeToCollapsible,
+    getCollapsibleSnapshot,
+    () => false
+  );
+  const isVisuallyCollapsed = canCollapse && isCollapsed;
 
   function handleToggle() {
     const nextValue = !isCollapsed;
@@ -75,29 +103,31 @@ export function HubAppShell({
   }
 
   return (
-    <div className="flex flex-col gap-4 xl:flex-row">
+    <div className="flex flex-col gap-4 lg:flex-row">
       <aside
-        className={`xl:sticky xl:top-6 xl:h-[calc(100vh-3rem)] xl:self-start ${
-          isCollapsed ? "xl:w-[5.75rem]" : "xl:w-[18.5rem]"
+        className={`lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)] lg:self-start ${
+          isVisuallyCollapsed ? "lg:w-[5.75rem]" : "lg:w-[16.75rem] xl:w-[18.5rem]"
         }`}
       >
         <div className="relative h-full">
           <button
             type="button"
             onClick={handleToggle}
-            aria-expanded={!isCollapsed}
-            aria-label={isCollapsed ? "Expandera sidomenyn" : "Fäll in sidomenyn"}
-            className="absolute right-4 top-4 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/8 text-sm font-medium text-white/78 transition hover:bg-white/14 hover:text-white"
+            aria-expanded={!isVisuallyCollapsed}
+            aria-label={
+              isVisuallyCollapsed ? "Expandera sidomenyn" : "Fäll in sidomenyn"
+            }
+            className="absolute right-4 top-4 z-10 hidden h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/8 text-sm font-medium text-white/78 transition hover:bg-white/14 hover:text-white xl:inline-flex"
           >
-            {isCollapsed ? ">" : "<"}
+            {isVisuallyCollapsed ? ">" : "<"}
           </button>
 
           <div className="flex h-full flex-col rounded-[2rem] border border-black/8 bg-[#111111] p-5 text-white shadow-[0_30px_80px_-52px_rgba(0,0,0,0.55)] md:p-6">
-            <div className={isCollapsed ? "pr-12" : "pr-16"}>
+            <div className={isVisuallyCollapsed ? "pr-12" : "pr-16"}>
               <p className="text-xs font-medium uppercase tracking-[0.24em] text-[#C6A15B]">
                 Hub
               </p>
-              {isCollapsed ? (
+              {isVisuallyCollapsed ? (
                 <div
                   className="mt-4 flex h-12 w-12 items-center justify-center rounded-[1.1rem] bg-white/8 text-lg font-semibold text-white"
                   title={organizationName}
@@ -117,11 +147,11 @@ export function HubAppShell({
             </div>
 
             <div className="mt-8 flex-1">
-              <HubNav isCollapsed={isCollapsed} />
+              <HubNav isCollapsed={isVisuallyCollapsed} />
             </div>
 
             <div className="mt-8 border-t border-white/10 pt-5">
-              {isCollapsed ? (
+              {isVisuallyCollapsed ? (
                 <div className="space-y-2">
                   <a
                     href={`mailto:${supportEmail}`}

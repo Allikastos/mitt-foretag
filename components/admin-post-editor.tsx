@@ -563,7 +563,7 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
                 Artikelinnehåll
               </p>
               <h3 className="mt-3 text-xl font-semibold tracking-[-0.03em] text-[#0B0B0C] md:text-[1.45rem]">
-                Rich text-editor
+                Textredigerare
               </h3>
               <p className="mt-3 text-sm leading-6 text-[#5F5F5F]">
                 Formatera texten direkt i editorn med rubriker, listor, länkar,
@@ -588,7 +588,7 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
               Publicering
             </p>
             <h3 className="mt-3 text-lg font-semibold tracking-[-0.025em] text-[#0B0B0C]">
-              Status och actions
+              Status och åtgärder
             </h3>
 
             <div className="mt-4 rounded-[1.15rem] border border-black/8 bg-[#FCFCFA] px-4 py-3">
