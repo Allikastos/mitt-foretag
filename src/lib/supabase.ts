@@ -28,6 +28,7 @@ export type ProfileRow = {
 
 export type OrganizationRole = "owner" | "admin" | "member" | "viewer";
 export type CustomerStatus = "lead" | "active" | "inactive";
+export type PreferredContactMethod = "email" | "phone" | "meeting" | "none";
 export type TaskStatus = "todo" | "in_progress" | "waiting" | "done";
 export type TaskPriority = "low" | "medium" | "high";
 export type DocumentCategory =
@@ -74,6 +75,10 @@ export type OrganizationRow = {
   payment_instructions: string | null;
   late_fee_terms: string | null;
   company_reference: string | null;
+  customer_field_preferences: unknown;
+  follow_up_email_alerts_enabled: boolean;
+  follow_up_alert_email: string | null;
+  follow_up_digest_weekday: number;
   created_at: string;
   updated_at: string;
 };
@@ -95,6 +100,11 @@ export type CustomerRow = {
   email: string | null;
   phone: string | null;
   address: string | null;
+  preferred_contact_method: PreferredContactMethod;
+  last_contacted_at: string | null;
+  follow_up_date: string | null;
+  relationship_owner: string | null;
+  tags: string[];
   notes: string | null;
   status: CustomerStatus;
   created_at: string;
@@ -282,6 +292,10 @@ export type Database = {
           payment_instructions?: string | null;
           late_fee_terms?: string | null;
           company_reference?: string | null;
+          customer_field_preferences?: unknown;
+          follow_up_email_alerts_enabled?: boolean;
+          follow_up_alert_email?: string | null;
+          follow_up_digest_weekday?: number;
           created_at?: string;
           updated_at?: string;
         };
@@ -311,6 +325,11 @@ export type Database = {
           email?: string | null;
           phone?: string | null;
           address?: string | null;
+          preferred_contact_method?: PreferredContactMethod;
+          last_contacted_at?: string | null;
+          follow_up_date?: string | null;
+          relationship_owner?: string | null;
+          tags?: string[];
           notes?: string | null;
           status?: CustomerStatus;
           created_at?: string;

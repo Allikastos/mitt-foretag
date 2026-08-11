@@ -25,6 +25,7 @@ create index if not exists posts_slug_idx on public.posts (slug);
 create or replace function public.set_posts_updated_at()
 returns trigger
 language plpgsql
+set search_path = public, pg_temp
 as $$
 begin
   new.updated_at = timezone('utc', now());

@@ -1,11 +1,17 @@
 import {
   canEditInvoice,
+  customerFieldKeys,
+  customerFieldLabel,
   customerStatusLabel,
   customerStatuses,
   documentCategoryLabel,
   documentCategories,
+  formatTags,
+  getCustomerFieldPreferences,
   invoiceStatusLabel,
   invoiceStatuses,
+  preferredContactMethodLabel,
+  preferredContactMethods,
   priorityLabel,
   taskPriorities,
   taskStatusLabel,
@@ -82,6 +88,19 @@ export function CustomerForm({ customer }: { customer?: Customer | null }) {
               className={inputClassName}
             />
           </Field>
+          <Field label="Föredragen kontaktkanal">
+            <select
+              name="preferred_contact_method"
+              defaultValue={customer?.preferred_contact_method ?? "email"}
+              className={inputClassName}
+            >
+              {preferredContactMethods.map((method) => (
+                <option key={method} value={method}>
+                  {preferredContactMethodLabel(method)}
+                </option>
+              ))}
+            </select>
+          </Field>
           <Field label="Status">
             <select
               name="status"
@@ -94,6 +113,38 @@ export function CustomerForm({ customer }: { customer?: Customer | null }) {
                 </option>
               ))}
             </select>
+          </Field>
+          <Field label="Senast kontaktad">
+            <input
+              type="date"
+              name="last_contacted_at"
+              defaultValue={customer?.last_contacted_at ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Nästa återkoppling">
+            <input
+              type="date"
+              name="follow_up_date"
+              defaultValue={customer?.follow_up_date ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+          <Field label="Relationsansvarig">
+            <input
+              name="relationship_owner"
+              defaultValue={customer?.relationship_owner ?? ""}
+              className={inputClassName}
+              placeholder="Ex. Albin"
+            />
+          </Field>
+          <Field label="Taggar">
+            <input
+              name="tags"
+              defaultValue={formatTags(customer?.tags).replace("Ej angivet", "")}
+              className={inputClassName}
+              placeholder="månadsrapport, prioritet, Q3"
+            />
           </Field>
         </FormGrid>
         <Field label="Adress">
@@ -519,6 +570,8 @@ export function SettingsForm({
 }: {
   organization: Organization;
 }) {
+  const selectedCustomerFields = getCustomerFieldPreferences(organization);
+
   return (
     <HubCard>
       <form action={updateOrganizationSettingsAction} className="space-y-4">
@@ -716,6 +769,73 @@ export function SettingsForm({
             className={textareaClassName}
           />
         </Field>
+        <div className="rounded-[1.4rem] border border-black/8 bg-[#FBFBF9] p-4">
+          <h3 className="text-base font-semibold text-[#0B0B0C]">
+            Kundkort och uppföljning
+          </h3>
+          <p className="mt-2 text-sm leading-6 text-[#6B6B6B]">
+            Välj vilka kunduppgifter som ska lyftas fram i kundkortet och om
+            hubben ska förbereda e-postpåminnelser för kommande återkopplingar.
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {customerFieldKeys.map((field) => (
+              <label
+                key={field}
+                className="flex items-center gap-3 rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-[#0B0B0C]"
+              >
+                <input
+                  type="checkbox"
+                  name="customer_field_preferences"
+                  value={field}
+                  defaultChecked={selectedCustomerFields.includes(field)}
+                  className="size-4 accent-[#0B0B0C]"
+                />
+                <span>{customerFieldLabel(field)}</span>
+              </label>
+            ))}
+          </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <Field label="Skicka uppföljningsdigest till">
+              <input
+                type="email"
+                name="follow_up_alert_email"
+                defaultValue={organization.follow_up_alert_email ?? ""}
+                className={inputClassName}
+                placeholder={organization.email ?? "namn@foretag.se"}
+              />
+            </Field>
+            <Field label="Veckodag för digest">
+              <select
+                name="follow_up_digest_weekday"
+                defaultValue={organization.follow_up_digest_weekday}
+                className={inputClassName}
+              >
+                <option value="1">Måndag</option>
+                <option value="2">Tisdag</option>
+                <option value="3">Onsdag</option>
+                <option value="4">Torsdag</option>
+                <option value="5">Fredag</option>
+                <option value="6">Lördag</option>
+                <option value="7">Söndag</option>
+              </select>
+            </Field>
+          </div>
+          <label className="mt-3 flex items-start gap-3 rounded-2xl border border-black/8 bg-white px-4 py-3 text-sm text-[#0B0B0C]">
+            <input
+              type="checkbox"
+              name="follow_up_email_alerts_enabled"
+              defaultChecked={organization.follow_up_email_alerts_enabled}
+              className="mt-1 size-4 accent-[#0B0B0C]"
+            />
+            <span>
+              Aktivera e-postpåminnelser när utskicksmotor är kopplad.
+              <span className="mt-1 block text-xs leading-5 text-[#6B6B6B]">
+                Just nu sparas inställningen och visas i hubben, men inget mejl
+                skickas automatiskt förrän integrationen aktiveras.
+              </span>
+            </span>
+          </label>
+        </div>
         <SubmitButton>Spara inställningar</SubmitButton>
       </form>
     </HubCard>

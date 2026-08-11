@@ -7,6 +7,7 @@ import type {
   DocumentCategory,
   InvoiceRow,
   InvoiceStatus,
+  PreferredContactMethod,
   TaskPriority,
   TaskStatus,
 } from "@/src/lib/supabase";
@@ -14,6 +15,7 @@ import { buildInvoicePdf } from "@/src/lib/invoice-pdf";
 import {
   HUB_MAX_FILE_SIZE_BYTES,
   buildOrganizationAddressLines,
+  customerFieldKeys,
   parseOptionalDate,
   parseOptionalNumber,
   parseOptionalString,
@@ -34,6 +36,22 @@ function requireString(value: FormDataEntryValue | null, label: string) {
   }
 
   return value.trim();
+}
+
+function parseTags(value: FormDataEntryValue | null) {
+  if (typeof value !== "string") {
+    return [];
+  }
+
+  return value
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean)
+    .slice(0, 12);
+}
+
+function parseCheckbox(value: FormDataEntryValue | null) {
+  return value === "on";
 }
 
 async function getInvoiceForMutation(params: {
@@ -72,6 +90,14 @@ export async function saveCustomerAction(formData: FormData) {
     email: parseOptionalString(formData.get("email")),
     phone: parseOptionalString(formData.get("phone")),
     address: parseOptionalString(formData.get("address")),
+    preferred_contact_method:
+      (parseOptionalString(
+        formData.get("preferred_contact_method"),
+      ) as PreferredContactMethod | null) ?? "email",
+    last_contacted_at: parseOptionalDate(formData.get("last_contacted_at")),
+    follow_up_date: parseOptionalDate(formData.get("follow_up_date")),
+    relationship_owner: parseOptionalString(formData.get("relationship_owner")),
+    tags: parseTags(formData.get("tags")),
     notes: parseOptionalString(formData.get("notes")),
     status:
       (parseOptionalString(formData.get("status")) as CustomerStatus | null) ??
@@ -691,6 +717,17 @@ export async function updateOrganizationSettingsAction(formData: FormData) {
       invoice_footer: parseOptionalString(formData.get("invoice_footer")),
       late_fee_terms: parseOptionalString(formData.get("late_fee_terms")),
       company_reference: parseOptionalString(formData.get("company_reference")),
+      customer_field_preferences: customerFieldKeys.filter((field) =>
+        formData.getAll("customer_field_preferences").includes(field),
+      ),
+      follow_up_email_alerts_enabled: parseCheckbox(
+        formData.get("follow_up_email_alerts_enabled"),
+      ),
+      follow_up_alert_email: parseOptionalString(
+        formData.get("follow_up_alert_email"),
+      ),
+      follow_up_digest_weekday:
+        Number(parseOptionalNumber(formData.get("follow_up_digest_weekday")) ?? 1),
     })
     .eq("id", organization.id);
 

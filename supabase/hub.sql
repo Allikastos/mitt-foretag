@@ -3,6 +3,7 @@ create extension if not exists pgcrypto;
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
+set search_path = public, pg_temp
 as $$
 begin
   new.updated_at = timezone('utc', now());
@@ -47,6 +48,10 @@ create table if not exists public.organizations (
   payment_instructions text,
   late_fee_terms text,
   company_reference text,
+  customer_field_preferences jsonb not null default '["org_number","contact_name","email","phone","address","preferred_contact_method","last_contacted_at","follow_up_date","relationship_owner","tags","notes"]'::jsonb,
+  follow_up_email_alerts_enabled boolean not null default false,
+  follow_up_alert_email text,
+  follow_up_digest_weekday integer not null default 1 check (follow_up_digest_weekday between 1 and 7),
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
@@ -69,6 +74,11 @@ create table if not exists public.customers (
   email text,
   phone text,
   address text,
+  preferred_contact_method text not null default 'email' check (preferred_contact_method in ('email', 'phone', 'meeting', 'none')),
+  last_contacted_at date,
+  follow_up_date date,
+  relationship_owner text,
+  tags text[] not null default '{}',
   notes text,
   status text not null default 'active' check (status in ('lead', 'active', 'inactive')),
   created_at timestamptz not null default timezone('utc', now()),
@@ -145,7 +155,18 @@ alter table public.organizations
   add column if not exists invoice_footer text,
   add column if not exists payment_instructions text,
   add column if not exists late_fee_terms text,
-  add column if not exists company_reference text;
+  add column if not exists company_reference text,
+  add column if not exists customer_field_preferences jsonb not null default '["org_number","contact_name","email","phone","address","preferred_contact_method","last_contacted_at","follow_up_date","relationship_owner","tags","notes"]'::jsonb,
+  add column if not exists follow_up_email_alerts_enabled boolean not null default false,
+  add column if not exists follow_up_alert_email text,
+  add column if not exists follow_up_digest_weekday integer not null default 1;
+
+alter table public.customers
+  add column if not exists preferred_contact_method text not null default 'email',
+  add column if not exists last_contacted_at date,
+  add column if not exists follow_up_date date,
+  add column if not exists relationship_owner text,
+  add column if not exists tags text[] not null default '{}';
 
 alter table public.invoices
   add column if not exists finalized_at timestamptz,
@@ -221,6 +242,7 @@ create table if not exists public.ai_events (
 create index if not exists organization_members_user_idx on public.organization_members (user_id);
 create index if not exists customers_organization_idx on public.customers (organization_id, created_at desc);
 create index if not exists customers_status_idx on public.customers (organization_id, status);
+create index if not exists customers_follow_up_idx on public.customers (organization_id, follow_up_date) where follow_up_date is not null;
 create unique index if not exists customers_org_id_idx on public.customers (organization_id, id);
 create index if not exists contacts_customer_idx on public.contacts (customer_id);
 create index if not exists tasks_organization_status_idx on public.tasks (organization_id, status, due_date);
@@ -363,6 +385,7 @@ $$;
 create or replace function public.calculate_invoice_line_totals()
 returns trigger
 language plpgsql
+set search_path = public, pg_temp
 as $$
 begin
   new.line_subtotal = coalesce(new.quantity, 0) * coalesce(new.unit_price, 0);
@@ -381,6 +404,7 @@ execute function public.calculate_invoice_line_totals();
 create or replace function public.refresh_invoice_totals(target_invoice_id uuid)
 returns void
 language plpgsql
+set search_path = public, pg_temp
 as $$
 declare
   subtotal_sum numeric;
@@ -408,6 +432,7 @@ $$;
 create or replace function public.sync_invoice_totals()
 returns trigger
 language plpgsql
+set search_path = public, pg_temp
 as $$
 begin
   perform public.refresh_invoice_totals(coalesce(new.invoice_id, old.invoice_id));
@@ -425,6 +450,7 @@ create or replace function public.user_org_role(target_organization_id uuid)
 returns text
 language sql
 stable
+set search_path = public, pg_temp
 as $$
   select role
   from public.organization_members
@@ -437,6 +463,7 @@ create or replace function public.is_org_member(target_organization_id uuid)
 returns boolean
 language sql
 stable
+set search_path = public, pg_temp
 as $$
   select exists (
     select 1
@@ -450,6 +477,7 @@ create or replace function public.can_manage_org_data(target_organization_id uui
 returns boolean
 language sql
 stable
+set search_path = public, pg_temp
 as $$
   select coalesce(public.user_org_role(target_organization_id), '') in ('owner', 'admin', 'member')
 $$;
@@ -458,6 +486,7 @@ create or replace function public.can_manage_org_settings(target_organization_id
 returns boolean
 language sql
 stable
+set search_path = public, pg_temp
 as $$
   select coalesce(public.user_org_role(target_organization_id), '') in ('owner', 'admin')
 $$;
@@ -466,6 +495,7 @@ create or replace function public.storage_object_org_id(object_name text)
 returns uuid
 language sql
 stable
+set search_path = public, storage, pg_temp
 as $$
   select nullif((storage.foldername(object_name))[1], '')::uuid
 $$;
@@ -505,6 +535,17 @@ begin
 end;
 $$;
 
+grant execute on function public.claim_next_invoice_number(uuid) to authenticated;
+
+revoke execute on function public.user_org_role(uuid) from public;
+revoke execute on function public.is_org_member(uuid) from public;
+revoke execute on function public.can_manage_org_data(uuid) from public;
+revoke execute on function public.can_manage_org_settings(uuid) from public;
+revoke execute on function public.claim_next_invoice_number(uuid) from public;
+grant execute on function public.user_org_role(uuid) to authenticated;
+grant execute on function public.is_org_member(uuid) to authenticated;
+grant execute on function public.can_manage_org_data(uuid) to authenticated;
+grant execute on function public.can_manage_org_settings(uuid) to authenticated;
 grant execute on function public.claim_next_invoice_number(uuid) to authenticated;
 
 alter table public.profiles enable row level security;

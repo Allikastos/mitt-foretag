@@ -21,6 +21,20 @@ export const documentCategories = [
   "other",
 ] as const;
 export const memberRoles = ["owner", "admin", "member", "viewer"] as const;
+export const preferredContactMethods = ["email", "phone", "meeting", "none"] as const;
+export const customerFieldKeys = [
+  "org_number",
+  "contact_name",
+  "email",
+  "phone",
+  "address",
+  "preferred_contact_method",
+  "last_contacted_at",
+  "follow_up_date",
+  "relationship_owner",
+  "tags",
+  "notes",
+] as const;
 
 export type Organization = Database["public"]["Tables"]["organizations"]["Row"];
 export type OrganizationMember =
@@ -35,6 +49,7 @@ export type ActivityLog = Database["public"]["Tables"]["activity_log"]["Row"];
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type EmailConnection =
   Database["public"]["Tables"]["email_connections"]["Row"];
+export type CustomerFieldKey = (typeof customerFieldKeys)[number];
 
 export function formatDate(dateValue: string | null | undefined) {
   if (!dateValue) {
@@ -61,6 +76,10 @@ export function formatCurrency(value: number | string | null | undefined) {
     currency: "SEK",
     maximumFractionDigits: 2,
   }).format(Number.isFinite(numericValue) ? numericValue : 0);
+}
+
+export function formatTags(tags: string[] | null | undefined) {
+  return tags?.length ? tags.join(", ") : "Ej angivet";
 }
 
 export function taskStatusLabel(status: Task["status"]) {
@@ -128,6 +147,86 @@ export function customerStatusLabel(status: Customer["status"]) {
     default:
       return status;
   }
+}
+
+export function preferredContactMethodLabel(
+  method: Customer["preferred_contact_method"],
+) {
+  switch (method) {
+    case "email":
+      return "E-post";
+    case "phone":
+      return "Telefon";
+    case "meeting":
+      return "Möte";
+    case "none":
+      return "Ingen preferens";
+    default:
+      return method;
+  }
+}
+
+export function customerFieldLabel(field: CustomerFieldKey) {
+  switch (field) {
+    case "org_number":
+      return "Organisationsnummer";
+    case "contact_name":
+      return "Kontaktperson";
+    case "email":
+      return "E-post";
+    case "phone":
+      return "Telefon";
+    case "address":
+      return "Adress";
+    case "preferred_contact_method":
+      return "Kontaktkanal";
+    case "last_contacted_at":
+      return "Senast kontaktad";
+    case "follow_up_date":
+      return "Nästa återkoppling";
+    case "relationship_owner":
+      return "Relationsansvarig";
+    case "tags":
+      return "Taggar";
+    case "notes":
+      return "Anteckningar";
+    default:
+      return field;
+  }
+}
+
+export function getCustomerFieldPreferences(
+  organization: Pick<Organization, "customer_field_preferences">,
+) {
+  const value = organization.customer_field_preferences;
+
+  if (Array.isArray(value)) {
+    const fields = value.filter((field): field is CustomerFieldKey =>
+      customerFieldKeys.includes(field as CustomerFieldKey),
+    );
+
+    if (fields.length) {
+      return fields;
+    }
+  }
+
+  return [...customerFieldKeys];
+}
+
+export function isFollowUpDue(customer: Pick<Customer, "follow_up_date">) {
+  if (!customer.follow_up_date) {
+    return false;
+  }
+
+  return customer.follow_up_date <= new Date().toISOString().slice(0, 10);
+}
+
+export function followUpTone(customer: Pick<Customer, "follow_up_date">) {
+  if (!customer.follow_up_date) {
+    return "neutral";
+  }
+
+  return isFollowUpDue(customer) ? "danger" : "warning";
 }
 
 export function invoiceStatusLabel(status: Invoice["status"]) {

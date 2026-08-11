@@ -59,6 +59,33 @@ export default async function HubSettingsPage() {
           </HubCard>
 
           <HubCard>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-lg font-semibold text-[#0B0B0C]">
+                Uppföljningspåminnelser
+              </h2>
+              <StatusBadge
+                tone={
+                  settings.organization.follow_up_email_alerts_enabled
+                    ? "warning"
+                    : "neutral"
+                }
+              >
+                {settings.organization.follow_up_email_alerts_enabled
+                  ? "Förberedd"
+                  : "Avstängd"}
+              </StatusBadge>
+            </div>
+            <p className="mt-4 text-sm leading-7 text-[#5F5F5F]">
+              Digest skickas senare till{" "}
+              {settings.organization.follow_up_alert_email ||
+                settings.organization.email ||
+                "vald e-postadress"}{" "}
+              när utskicksmotorn kopplas på. Tills dess används inställningen
+              för att visa rätt uppföljningsläge i hubben.
+            </p>
+          </HubCard>
+
+          <HubCard>
             <h2 className="text-lg font-semibold text-[#0B0B0C]">E-postkopplingar</h2>
             <div className="mt-5 space-y-3">
               {settings.emailConnections.length ? (

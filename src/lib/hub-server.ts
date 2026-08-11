@@ -176,6 +176,7 @@ export async function getHubDashboardData() {
     invoicesResult,
     documentsResult,
     activityResult,
+    followUpCustomersResult,
   ] = await Promise.all([
     supabase
       .from("tasks")
@@ -224,12 +225,21 @@ export async function getHubDashboardData() {
       .eq("organization_id", organization.id)
       .order("created_at", { ascending: false })
       .limit(6),
+    supabase
+      .from("customers")
+      .select("*")
+      .eq("organization_id", organization.id)
+      .not("follow_up_date", "is", null)
+      .lte("follow_up_date", new Date().toISOString().slice(0, 10))
+      .order("follow_up_date", { ascending: true })
+      .limit(5),
   ]);
 
   const tasks = tasksResult.data ?? [];
   const invoices = invoicesResult.data ?? [];
   const documents = documentsResult.data ?? [];
   const activity = activityResult.data ?? [];
+  const followUpCustomers = followUpCustomersResult.data ?? [];
 
   return {
     organization,
@@ -239,11 +249,13 @@ export async function getHubDashboardData() {
       unpaidInvoices: unpaidInvoicesResult.count ?? 0,
       documents: documentCountResult.count ?? 0,
       recentActivity: activityCountResult.count ?? 0,
+      dueFollowUps: followUpCustomers.length,
     },
     tasks,
     invoices,
     documents,
     activity,
+    followUpCustomers,
   };
 }
 
@@ -253,6 +265,7 @@ export async function getCustomers() {
     .from("customers")
     .select("*")
     .eq("organization_id", organization.id)
+    .order("follow_up_date", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -304,6 +317,7 @@ export async function getCustomerDetail(customerId: string) {
   }
 
   return {
+    organization,
     customer: customerResult.data,
     contacts: contactsResult.data ?? [],
     tasks: tasksResult.data ?? [],

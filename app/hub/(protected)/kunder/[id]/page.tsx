@@ -3,9 +3,14 @@ import { ContactForm, CustomerForm } from "@/components/hub/forms";
 import { HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
 import {
   customerStatusLabel,
+  customerFieldLabel,
   formatCurrency,
   formatDate,
+  followUpTone,
+  formatTags,
+  getCustomerFieldPreferences,
   invoiceStatusLabel,
+  preferredContactMethodLabel,
   taskStatusLabel,
 } from "@/src/lib/hub";
 import { getCustomerDetail } from "@/src/lib/hub-server";
@@ -22,6 +27,23 @@ export default async function HubCustomerDetailPage({
     notFound();
   }
 
+  const visibleFields = getCustomerFieldPreferences(detail.organization);
+  const customerFieldValues = {
+    org_number: detail.customer.org_number || "Ej angivet",
+    contact_name: detail.customer.contact_name || "Ej angivet",
+    email: detail.customer.email || "Ej angivet",
+    phone: detail.customer.phone || "Ej angivet",
+    address: detail.customer.address || "Ej angivet",
+    preferred_contact_method: preferredContactMethodLabel(
+      detail.customer.preferred_contact_method,
+    ),
+    last_contacted_at: formatDate(detail.customer.last_contacted_at),
+    follow_up_date: formatDate(detail.customer.follow_up_date),
+    relationship_owner: detail.customer.relationship_owner || "Ej angivet",
+    tags: formatTags(detail.customer.tags),
+    notes: detail.customer.notes || "Ej angivet",
+  };
+
   return (
     <HubShell
       title={detail.customer.company_name}
@@ -30,40 +52,54 @@ export default async function HubCustomerDetailPage({
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-6">
           <HubCard>
-            <div className="flex flex-wrap items-center gap-3">
-              <h2 className="text-lg font-semibold text-[#0B0B0C]">Kundöversikt</h2>
-              <StatusBadge tone={detail.customer.status === "active" ? "success" : "warning"}>
-                {customerStatusLabel(detail.customer.status)}
-              </StatusBadge>
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h2 className="text-lg font-semibold text-[#0B0B0C]">Kundöversikt</h2>
+                  <StatusBadge tone={detail.customer.status === "active" ? "success" : "warning"}>
+                    {customerStatusLabel(detail.customer.status)}
+                  </StatusBadge>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-[#6B6B6B]">
+                  Kontakt via{" "}
+                  {preferredContactMethodLabel(detail.customer.preferred_contact_method)}
+                  {detail.customer.relationship_owner
+                    ? ` • ansvarig ${detail.customer.relationship_owner}`
+                    : ""}
+                </p>
+              </div>
+              {detail.customer.follow_up_date ? (
+                <StatusBadge tone={followUpTone(detail.customer)}>
+                  Återkoppla {formatDate(detail.customer.follow_up_date)}
+                </StatusBadge>
+              ) : null}
             </div>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <div>
-                <p className="text-xs uppercase tracking-[0.16em] text-[#8A8A8A]">Kontakt</p>
-                <p className="mt-2 text-sm text-[#0B0B0C]">
-                  {detail.customer.contact_name || "Ej angivet"}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.16em] text-[#8A8A8A]">E-post</p>
-                <p className="mt-2 text-sm text-[#0B0B0C]">
-                  {detail.customer.email || "Ej angivet"}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.16em] text-[#8A8A8A]">Telefon</p>
-                <p className="mt-2 text-sm text-[#0B0B0C]">
-                  {detail.customer.phone || "Ej angivet"}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.16em] text-[#8A8A8A]">Adress</p>
-                <p className="mt-2 text-sm text-[#0B0B0C]">
-                  {detail.customer.address || "Ej angivet"}
-                </p>
-              </div>
+              {visibleFields.map((field) => (
+                <div
+                  key={field}
+                  className={field === "notes" ? "md:col-span-2" : undefined}
+                >
+                  <p className="text-xs uppercase tracking-[0.16em] text-[#8A8A8A]">
+                    {customerFieldLabel(field)}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-[#0B0B0C]">
+                    {customerFieldValues[field]}
+                  </p>
+                </div>
+              ))}
             </div>
-            {detail.customer.notes ? (
-              <p className="mt-5 text-sm leading-7 text-[#5F5F5F]">{detail.customer.notes}</p>
+            {detail.customer.tags.length ? (
+              <div className="mt-5 flex flex-wrap gap-2">
+                {detail.customer.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-[#F1EFE8] px-3 py-1 text-xs text-[#6B6B6B]"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
             ) : null}
           </HubCard>
 

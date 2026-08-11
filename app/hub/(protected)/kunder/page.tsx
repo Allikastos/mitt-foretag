@@ -1,7 +1,12 @@
 import Link from "next/link";
 import { CustomerForm } from "@/components/hub/forms";
 import { EmptyState, HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
-import { customerStatusLabel, formatDate } from "@/src/lib/hub";
+import {
+  customerStatusLabel,
+  followUpTone,
+  formatDate,
+  preferredContactMethodLabel,
+} from "@/src/lib/hub";
 import { getCustomers } from "@/src/lib/hub-server";
 
 function customerTone(status: string) {
@@ -39,13 +44,36 @@ export default async function HubCustomersPage() {
                         {customer.contact_name || "Ingen kontaktperson"} • {customer.email || "Ingen e-post"}
                       </p>
                     </div>
-                    <StatusBadge tone={customerTone(customer.status)}>
-                      {customerStatusLabel(customer.status)}
-                    </StatusBadge>
+                    <div className="flex flex-wrap gap-2">
+                      {customer.follow_up_date ? (
+                        <StatusBadge tone={followUpTone(customer)}>
+                          Återkoppla {formatDate(customer.follow_up_date)}
+                        </StatusBadge>
+                      ) : null}
+                      <StatusBadge tone={customerTone(customer.status)}>
+                        {customerStatusLabel(customer.status)}
+                      </StatusBadge>
+                    </div>
                   </div>
-                  <p className="mt-3 text-xs uppercase tracking-[0.16em] text-[#8A8A8A]">
-                    Tillagd {formatDate(customer.created_at)}
-                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs uppercase tracking-[0.16em] text-[#8A8A8A]">
+                    <span>Tillagd {formatDate(customer.created_at)}</span>
+                    <span>Kontakt via {preferredContactMethodLabel(customer.preferred_contact_method)}</span>
+                    {customer.relationship_owner ? (
+                      <span>Ansvarig {customer.relationship_owner}</span>
+                    ) : null}
+                  </div>
+                  {customer.tags.length ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {customer.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-full bg-white px-3 py-1 text-xs text-[#6B6B6B]"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
                 </Link>
               ))
             ) : (
