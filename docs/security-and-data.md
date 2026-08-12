@@ -37,6 +37,8 @@ The following items should be prioritized before a real SaaS launch:
   `HUB_FEATURE_SAFE_MUTATIONS`.
 - Apply and integration-test `supabase/phase-c.sql` in a disposable environment
   before enabling `HUB_FEATURE_ACCOUNTING`.
+- Apply and integration-test `supabase/phase-d.sql` before enabling
+  `HUB_FEATURE_DOCUMENT_PROCESSING`.
 - Review admin routes separately from hub roles.
 
 ## Logging Rules
@@ -97,3 +99,12 @@ The accounting module must be conservative:
 - Members may prepare drafts, but only owners and admins may approve or post.
 - Direct writes to events, drafts and journal rows must remain revoked; state
   changes go through tenant-checked RPC functions.
+
+## Document Evidence Safety
+
+- Keep original file metadata separate from manually entered or extracted facts.
+- Lock originals for retention as soon as they become accounting evidence.
+- Never let an OCR or AI result create a journal entry without deterministic
+  validation and an explicit user review step.
+- Link documents through tenant-scoped identifiers inside database functions;
+  never trust a document ID supplied by the browser.

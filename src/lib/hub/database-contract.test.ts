@@ -8,9 +8,38 @@ function sql(name: string) {
 }
 
 test("database proposals contain no destructive SQL statements", () => {
-  for (const name of ["phase-b.sql", "accounting.sql", "phase-c.sql"]) {
+  for (const name of [
+    "phase-b.sql",
+    "accounting.sql",
+    "phase-c.sql",
+    "phase-d.sql",
+  ]) {
     assert.doesNotMatch(sql(name), /^\s*(drop|truncate|delete)\b/im, name);
   }
+});
+
+test("Phase D keeps originals separate from manually reviewed facts", () => {
+  const foundation = sql("accounting.sql");
+  const workflow = sql("phase-d.sql");
+
+  assert.match(workflow, /create table if not exists public\.document_facts/i);
+  assert.match(workflow, /extraction_method[\s\S]*manual[\s\S]*ocr/i);
+  assert.match(workflow, /ocr_status[\s\S]*not_requested/i);
+  assert.match(workflow, /create or replace function public\.save_document_facts/i);
+  assert.match(workflow, /create or replace function public\.link_source_document_to_draft/i);
+  assert.match(workflow, /documents_retention_lock_is_one_way/i);
+  assert.match(workflow, /Retained hub documents cannot be replaced/i);
+  assert.match(workflow, /Retained hub documents cannot be deleted/i);
+  assert.match(workflow, /pg_advisory_xact_lock/i);
+  assert.match(
+    workflow,
+    /revoke insert, update, delete on public\.source_documents from anon, authenticated/i,
+  );
+  assert.doesNotMatch(foundation, /Managers can (create|update) source document/i);
+  assert.match(
+    foundation,
+    /source_document_id[\s\S]*target_event\.source_entity_type = 'source_document'/i,
+  );
 });
 
 test("document metadata has tenant-local duplicate and storage-key protection", () => {

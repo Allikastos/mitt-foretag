@@ -39,6 +39,9 @@ review and feature activation remain deliberately pending.
 
 ## Phase 4: Documents Without Paid AI
 
+Local guarded implementation completed. Database installation and feature
+activation remain deliberately pending; no OCR provider is connected.
+
 - Expand document metadata.
 - Let users manually enter receipt/invoice facts.
 - Link documents to business events and drafts.

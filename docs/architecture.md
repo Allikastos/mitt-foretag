@@ -15,6 +15,7 @@ written to guide development without requiring new paid services.
 - Hub database baseline: `supabase/hub.sql`.
 - Phase B hub hardening proposal: `supabase/phase-b.sql`.
 - Phase C accounting workflow proposal: `supabase/phase-c.sql`.
+- Phase D manual document workflow proposal: `supabase/phase-d.sql`.
 - Public marketing/admin content is separate from the customer hub.
 
 ## Tenant Model
@@ -74,6 +75,11 @@ Invoice or document or bank transaction
 -> user approval
 -> immutable journal entry
 -> reports.
+
+Documents use a parallel evidence chain:
+
+Original file -> source document -> manually reviewed facts -> business event
+-> bookkeeping draft. Extracted facts never replace the original file.
 
 ## Accounting First Version Scope
 

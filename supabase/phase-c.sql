@@ -281,11 +281,17 @@ begin
 
   insert into public.business_events (
     id, organization_id, event_type, status, happened_on, amount_minor,
-    currency, facts, created_by, client_request_key, request_hash
+    currency, facts, source_entity_type, source_entity_id, created_by,
+    client_request_key, request_hash
   ) values (
     target_event_id, target_organization_id, target_event_type, 'needs_review',
     target_happened_on, target_amount_minor, 'SEK',
-    coalesce(target_facts, '{}'::jsonb), auth.uid(),
+    coalesce(target_facts, '{}'::jsonb),
+    case when coalesce(target_facts->>'sourceDocumentId', '') ~* '^[0-9a-f-]{36}$'
+      then 'source_document' else null end,
+    case when coalesce(target_facts->>'sourceDocumentId', '') ~* '^[0-9a-f-]{36}$'
+      then (target_facts->>'sourceDocumentId')::uuid else null end,
+    auth.uid(),
     trim(target_client_request_key), calculated_request_hash
   );
 

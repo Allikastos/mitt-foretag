@@ -467,27 +467,6 @@ begin
 
   if not exists (
     select 1 from pg_policies where schemaname = 'public'
-      and tablename = 'source_documents'
-      and policyname = 'Managers can create source documents'
-  ) then
-    create policy "Managers can create source documents"
-      on public.source_documents for insert to authenticated
-      with check (public.can_manage_org_data(organization_id));
-  end if;
-
-  if not exists (
-    select 1 from pg_policies where schemaname = 'public'
-      and tablename = 'source_documents'
-      and policyname = 'Managers can update source document status'
-  ) then
-    create policy "Managers can update source document status"
-      on public.source_documents for update to authenticated
-      using (public.can_manage_org_data(organization_id))
-      with check (public.can_manage_org_data(organization_id));
-  end if;
-
-  if not exists (
-    select 1 from pg_policies where schemaname = 'public'
       and tablename = 'correction_links'
       and policyname = 'Managers can create correction links'
   ) then
@@ -685,13 +664,16 @@ begin
 
   insert into public.journal_entries (
     id, organization_id, fiscal_year_id, accounting_period_id,
-    business_event_id, idempotency_key_id, journal_series, journal_number,
-    posted_on, description, posting_rule_id, posting_rule_version,
-    created_by, approved_by
+    business_event_id, source_document_id, idempotency_key_id, journal_series,
+    journal_number, posted_on, description, posting_rule_id,
+    posting_rule_version, created_by, approved_by
   ) values (
     journal_entry_id, target_organization_id, target_fiscal_year.id,
-    target_period.id, target_event.id, idempotency_id, target_journal_series,
-    next_journal_number, target_event.happened_on,
+    target_period.id, target_event.id,
+    case when target_event.source_entity_type = 'source_document'
+      then target_event.source_entity_id else null end,
+    idempotency_id, target_journal_series, next_journal_number,
+    target_event.happened_on,
     coalesce(target_draft.explanation, target_event.event_type),
     target_draft.posting_rule_id, target_draft.posting_rule_version,
     auth.uid(), auth.uid()

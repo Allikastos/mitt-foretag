@@ -54,6 +54,21 @@ export type DocumentProcessingStatus =
   | "ready"
   | "failed"
   | "not_required";
+export type SourceDocumentProcessingStatus =
+  | "uploaded"
+  | "processing"
+  | "needs_information"
+  | "ready"
+  | "linked"
+  | "failed";
+export type DocumentReviewStatus = "incomplete" | "ready_for_review" | "linked";
+export type DocumentOcrStatus =
+  | "not_requested"
+  | "pending"
+  | "processing"
+  | "completed"
+  | "failed";
+export type DocumentExtractionMethod = "manual" | "ocr";
 export type InvoiceStatus =
   | "draft"
   | "sent"
@@ -194,6 +209,46 @@ export type DocumentRow = {
   original_storage_key?: string | null;
   retention_locked?: boolean;
   idempotency_key?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type SourceDocumentRow = {
+  id: string;
+  organization_id: string;
+  document_id: string;
+  business_event_id: string | null;
+  processing_status: SourceDocumentProcessingStatus;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DocumentFactsRow = {
+  id: string;
+  organization_id: string;
+  source_document_id: string;
+  document_kind: "receipt" | "supplier_invoice";
+  review_status: DocumentReviewStatus;
+  extraction_method: DocumentExtractionMethod;
+  ocr_status: DocumentOcrStatus;
+  ocr_provider: string | null;
+  supplier_name: string;
+  supplier_org_number: string | null;
+  document_number: string | null;
+  document_date: string;
+  payment_date: string;
+  total_minor: number;
+  vat_minor: number;
+  currency: string;
+  description: string;
+  suggested_event_type:
+    | "paid_domestic_purchase_25_vat"
+    | "purchase_without_deductible_vat";
+  payment_account: string;
+  revision: number;
+  created_by: string | null;
+  updated_by: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -573,6 +628,54 @@ export type Database = {
         Update: Partial<DocumentRow>;
         Relationships: [];
       };
+      source_documents: {
+        Row: SourceDocumentRow;
+        Insert: {
+          id?: string;
+          organization_id: string;
+          document_id: string;
+          business_event_id?: string | null;
+          processing_status?: SourceDocumentProcessingStatus;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<SourceDocumentRow>;
+        Relationships: [];
+      };
+      document_facts: {
+        Row: DocumentFactsRow;
+        Insert: {
+          id?: string;
+          organization_id: string;
+          source_document_id: string;
+          document_kind: "receipt" | "supplier_invoice";
+          review_status?: DocumentReviewStatus;
+          extraction_method?: DocumentExtractionMethod;
+          ocr_status?: DocumentOcrStatus;
+          ocr_provider?: string | null;
+          supplier_name: string;
+          supplier_org_number?: string | null;
+          document_number?: string | null;
+          document_date: string;
+          payment_date: string;
+          total_minor: number;
+          vat_minor: number;
+          currency?: string;
+          description: string;
+          suggested_event_type:
+            | "paid_domestic_purchase_25_vat"
+            | "purchase_without_deductible_vat";
+          payment_account?: string;
+          revision?: number;
+          created_by?: string | null;
+          updated_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<DocumentFactsRow>;
+        Relationships: [];
+      };
       invoices: {
         Row: InvoiceRow;
         Insert: {
@@ -912,6 +1015,34 @@ export type Database = {
       approve_bookkeeping_draft: {
         Args: {
           target_organization_id: string;
+          target_draft_id: string;
+        };
+        Returns: undefined;
+      };
+      save_document_facts: {
+        Args: {
+          target_organization_id: string;
+          target_document_id: string;
+          target_document_kind: "receipt" | "supplier_invoice";
+          target_supplier_name: string;
+          target_supplier_org_number: string | null;
+          target_document_number: string | null;
+          target_document_date: string;
+          target_payment_date: string;
+          target_total_minor: number;
+          target_vat_minor: number;
+          target_description: string;
+          target_suggested_event_type:
+            | "paid_domestic_purchase_25_vat"
+            | "purchase_without_deductible_vat";
+          target_payment_account: string;
+        };
+        Returns: string;
+      };
+      link_source_document_to_draft: {
+        Args: {
+          target_organization_id: string;
+          target_document_id: string;
           target_draft_id: string;
         };
         Returns: undefined;
