@@ -7,8 +7,8 @@ function sql(name: string) {
   return readFileSync(resolve(process.cwd(), "supabase", name), "utf8");
 }
 
-test("Phase B and accounting proposals contain no destructive SQL statements", () => {
-  for (const name of ["phase-b.sql", "accounting.sql"]) {
+test("database proposals contain no destructive SQL statements", () => {
+  for (const name of ["phase-b.sql", "accounting.sql", "phase-c.sql"]) {
     assert.doesNotMatch(sql(name), /^\s*(drop|truncate|delete)\b/im, name);
   }
 });
@@ -64,5 +64,28 @@ test("posted journal data is append-only and balanced before insert", () => {
   assert.doesNotMatch(
     migration,
     /create policy[^;]+journal_(entries|lines)[^;]+for (update|delete|all)/i,
+  );
+});
+
+test("Phase C requires a validated approval workflow for accounting writes", () => {
+  const foundation = sql("accounting.sql");
+  const workflow = sql("phase-c.sql");
+
+  assert.match(workflow, /create or replace function public\.save_bookkeeping_draft/i);
+  assert.match(workflow, /create or replace function public\.approve_bookkeeping_draft/i);
+  assert.match(workflow, /pg_advisory_xact_lock/i);
+  assert.match(workflow, /debit_total <> credit_total/i);
+  assert.match(workflow, /can_manage_org_settings\(target_organization_id\)/i);
+  assert.match(
+    workflow,
+    /revoke insert, update, delete on public\.journal_entries from anon, authenticated/i,
+  );
+  assert.match(
+    foundation,
+    /post_bookkeeping_draft[\s\S]*can_manage_org_settings\(target_organization_id\)/i,
+  );
+  assert.doesNotMatch(
+    foundation,
+    /Managers can manage (business_events|bookkeeping_drafts)/i,
   );
 });

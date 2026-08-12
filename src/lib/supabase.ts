@@ -67,6 +67,13 @@ export type InvoicePdfStatus =
   | "failed";
 export type EmailProvider = "gmail" | "outlook" | "imap";
 export type EmailConnectionStatus = "not_connected" | "connected" | "error";
+export type AccountingWorkflowStatus =
+  | "incomplete"
+  | "needs_review"
+  | "ready_to_post"
+  | "posted"
+  | "rejected";
+export type AccountingPeriodStatus = "open" | "review" | "locked";
 
 export type OrganizationRow = {
   id: string;
@@ -266,6 +273,122 @@ export type AiEventRow = {
   input_summary: string | null;
   output_summary: string | null;
   status: string | null;
+  created_at: string;
+};
+
+export type CompanyAccountingSettingsRow = {
+  organization_id: string;
+  company_form: "sole_trader" | "limited_company";
+  accounting_method: "cash_basis" | "accrual";
+  reporting_currency: string;
+  vat_registered: boolean;
+  vat_period: "monthly" | "quarterly" | "yearly";
+  fiscal_year_start_month: number;
+  accounting_enabled: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AccountingAccountRow = {
+  id: string;
+  organization_id: string;
+  account_number: string;
+  name: string;
+  kind: "asset" | "liability" | "equity" | "income" | "expense";
+  is_active: boolean;
+  source: string;
+  review_required: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type FiscalYearRow = {
+  id: string;
+  organization_id: string;
+  starts_on: string;
+  ends_on: string;
+  status: AccountingPeriodStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AccountingPeriodRow = {
+  id: string;
+  organization_id: string;
+  fiscal_year_id: string;
+  starts_on: string;
+  ends_on: string;
+  status: AccountingPeriodStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type BusinessEventRow = {
+  id: string;
+  organization_id: string;
+  event_type: string;
+  status: AccountingWorkflowStatus;
+  happened_on: string | null;
+  amount_minor: number | null;
+  currency: string;
+  facts: unknown;
+  source_entity_type: string | null;
+  source_entity_id: string | null;
+  created_by: string | null;
+  posted_journal_entry_id: string | null;
+  client_request_key?: string | null;
+  request_hash?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type BookkeepingDraftRow = {
+  id: string;
+  organization_id: string;
+  business_event_id: string;
+  status: AccountingWorkflowStatus;
+  posting_rule_id: string | null;
+  posting_rule_version: number | null;
+  explanation: string | null;
+  lines_json: unknown;
+  warnings: string[];
+  created_by: string | null;
+  approved_by?: string | null;
+  approved_at?: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type JournalEntryRow = {
+  id: string;
+  organization_id: string;
+  fiscal_year_id: string;
+  accounting_period_id: string;
+  business_event_id: string;
+  source_document_id: string | null;
+  idempotency_key_id: string;
+  journal_series: string;
+  journal_number: number;
+  posted_on: string;
+  description: string;
+  posting_rule_id: string;
+  posting_rule_version: number;
+  created_by: string | null;
+  approved_by: string | null;
+  created_at: string;
+};
+
+export type JournalLineRow = {
+  id: string;
+  organization_id: string;
+  journal_entry_id: string;
+  account_id: string | null;
+  account_number: string;
+  debit_minor: number;
+  credit_minor: number;
+  vat_code_id: string | null;
+  description: string | null;
+  customer_id: string | null;
   created_at: string;
 };
 
@@ -548,6 +671,154 @@ export type Database = {
         Update: Partial<AiEventRow>;
         Relationships: [];
       };
+      company_accounting_settings: {
+        Row: CompanyAccountingSettingsRow;
+        Insert: {
+          organization_id: string;
+          company_form?: "sole_trader" | "limited_company";
+          accounting_method?: "cash_basis" | "accrual";
+          reporting_currency?: string;
+          vat_registered?: boolean;
+          vat_period?: "monthly" | "quarterly" | "yearly";
+          fiscal_year_start_month?: number;
+          accounting_enabled?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<CompanyAccountingSettingsRow>;
+        Relationships: [];
+      };
+      accounting_accounts: {
+        Row: AccountingAccountRow;
+        Insert: {
+          id?: string;
+          organization_id: string;
+          account_number: string;
+          name: string;
+          kind: AccountingAccountRow["kind"];
+          is_active?: boolean;
+          source?: string;
+          review_required?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<AccountingAccountRow>;
+        Relationships: [];
+      };
+      fiscal_years: {
+        Row: FiscalYearRow;
+        Insert: {
+          id?: string;
+          organization_id: string;
+          starts_on: string;
+          ends_on: string;
+          status?: AccountingPeriodStatus;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<FiscalYearRow>;
+        Relationships: [];
+      };
+      accounting_periods: {
+        Row: AccountingPeriodRow;
+        Insert: {
+          id?: string;
+          organization_id: string;
+          fiscal_year_id: string;
+          starts_on: string;
+          ends_on: string;
+          status?: AccountingPeriodStatus;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<AccountingPeriodRow>;
+        Relationships: [];
+      };
+      business_events: {
+        Row: BusinessEventRow;
+        Insert: {
+          id?: string;
+          organization_id: string;
+          event_type: string;
+          status?: AccountingWorkflowStatus;
+          happened_on?: string | null;
+          amount_minor?: number | null;
+          currency?: string;
+          facts?: unknown;
+          source_entity_type?: string | null;
+          source_entity_id?: string | null;
+          created_by?: string | null;
+          posted_journal_entry_id?: string | null;
+          client_request_key?: string | null;
+          request_hash?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<BusinessEventRow>;
+        Relationships: [];
+      };
+      bookkeeping_drafts: {
+        Row: BookkeepingDraftRow;
+        Insert: {
+          id?: string;
+          organization_id: string;
+          business_event_id: string;
+          status?: AccountingWorkflowStatus;
+          posting_rule_id?: string | null;
+          posting_rule_version?: number | null;
+          explanation?: string | null;
+          lines_json?: unknown;
+          warnings?: string[];
+          created_by?: string | null;
+          approved_by?: string | null;
+          approved_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<BookkeepingDraftRow>;
+        Relationships: [];
+      };
+      journal_entries: {
+        Row: JournalEntryRow;
+        Insert: {
+          id?: string;
+          organization_id: string;
+          fiscal_year_id: string;
+          accounting_period_id: string;
+          business_event_id: string;
+          source_document_id?: string | null;
+          idempotency_key_id: string;
+          journal_series?: string;
+          journal_number: number;
+          posted_on: string;
+          description: string;
+          posting_rule_id: string;
+          posting_rule_version: number;
+          created_by?: string | null;
+          approved_by?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<JournalEntryRow>;
+        Relationships: [];
+      };
+      journal_lines: {
+        Row: JournalLineRow;
+        Insert: {
+          id?: string;
+          organization_id: string;
+          journal_entry_id: string;
+          account_id?: string | null;
+          account_number: string;
+          debit_minor?: number;
+          credit_minor?: number;
+          vat_code_id?: string | null;
+          description?: string | null;
+          customer_id?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<JournalLineRow>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -613,6 +884,37 @@ export type Database = {
           target_journal_series?: string;
         };
         Returns: string;
+      };
+      initialize_accounting_mvp: {
+        Args: {
+          target_organization_id: string;
+          target_fiscal_year_start: string;
+          target_fiscal_year_end: string;
+        };
+        Returns: string;
+      };
+      save_bookkeeping_draft: {
+        Args: {
+          target_organization_id: string;
+          target_client_request_key: string;
+          target_event_type: string;
+          target_happened_on: string;
+          target_amount_minor: number;
+          target_description: string;
+          target_facts: unknown;
+          target_posting_rule_id: string;
+          target_posting_rule_version: number;
+          target_lines: unknown;
+          target_warnings: string[];
+        };
+        Returns: string;
+      };
+      approve_bookkeeping_draft: {
+        Args: {
+          target_organization_id: string;
+          target_draft_id: string;
+        };
+        Returns: undefined;
       };
       claim_next_invoice_number: {
         Args: {

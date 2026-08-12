@@ -9,6 +9,7 @@ const navItems = [
   { href: "/hub/uppgifter", label: "Uppgifter" },
   { href: "/hub/dokument", label: "Dokument" },
   { href: "/hub/fakturor", label: "Fakturor" },
+  { href: "/hub/bokforing", label: "Bokföring" },
   { href: "/hub/installningar", label: "Inställningar" },
 ];
 

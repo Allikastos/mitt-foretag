@@ -449,8 +449,7 @@ begin
   end loop;
 
   foreach table_name in array array[
-    'business_events', 'bookkeeping_drafts', 'bank_transactions',
-    'reconciliation_matches'
+    'bank_transactions', 'reconciliation_matches'
   ] loop
     policy_name := 'Managers can manage ' || table_name;
     if not exists (
@@ -564,7 +563,7 @@ declare
   debit_total bigint;
   credit_total bigint;
 begin
-  if not public.can_manage_org_data(target_organization_id) then
+  if not public.can_manage_org_settings(target_organization_id) then
     raise exception 'Not authorized for organization';
   end if;
 

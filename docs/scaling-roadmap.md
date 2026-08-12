@@ -25,10 +25,13 @@ first, with a path toward 1,000 without rewriting everything.
 
 ## Phase 3: Accounting MVP
 
+Local guarded implementation completed. Database installation, specialist
+review and feature activation remain deliberately pending.
+
 - Enable accounting settings per organization.
 - Seed a minimal reviewed account list.
 - Create fiscal years and periods.
-- Add "Vad har hant?" event flow.
+- Add "Vad har hänt?" event flow.
 - Generate drafts from deterministic rules.
 - Require active user approval.
 - Post immutable journal entries.

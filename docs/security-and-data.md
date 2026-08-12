@@ -35,6 +35,8 @@ The following items should be prioritized before a real SaaS launch:
 - Move multi-step invoice finalization toward a transaction or RPC.
 - Apply and integration-test `supabase/phase-b.sql` before enabling
   `HUB_FEATURE_SAFE_MUTATIONS`.
+- Apply and integration-test `supabase/phase-c.sql` in a disposable environment
+  before enabling `HUB_FEATURE_ACCOUNTING`.
 - Review admin routes separately from hub roles.
 
 ## Logging Rules
@@ -92,3 +94,6 @@ The accounting module must be conservative:
 - Reports must be based on posted journal entries, not invoices or drafts.
 - Rules must cite their source and be reviewed by a bookkeeping specialist
   before real use.
+- Members may prepare drafts, but only owners and admins may approve or post.
+- Direct writes to events, drafts and journal rows must remain revoked; state
+  changes go through tenant-checked RPC functions.
