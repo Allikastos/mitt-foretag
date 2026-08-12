@@ -13,9 +13,48 @@ test("database proposals contain no destructive SQL statements", () => {
     "accounting.sql",
     "phase-c.sql",
     "phase-d.sql",
+    "phase-e.sql",
   ]) {
     assert.doesNotMatch(sql(name), /^\s*(drop|truncate|delete)\b/im, name);
   }
+});
+
+test("Phase E uses durable leasing without exposing worker controls", () => {
+  const workflow = sql("phase-e.sql");
+
+  assert.match(workflow, /create or replace function private\.claim_processing_job/i);
+  assert.match(workflow, /for update skip locked/i);
+  assert.match(workflow, /lease_expires_at/i);
+  assert.match(workflow, /create or replace function private\.heartbeat_processing_job/i);
+  assert.match(workflow, /create or replace function private\.reap_processing_jobs/i);
+  assert.match(workflow, /deduplication_key[\s\S]*request_hash/i);
+  assert.match(workflow, /grant execute[^;]+claim_processing_job[^;]+to service_role/i);
+  assert.match(workflow, /grant select \([\s\S]+status[\s\S]+\) on public\.processing_jobs to authenticated/i);
+  assert.doesNotMatch(
+    workflow,
+    /grant execute[^;]+(claim|heartbeat|complete|fail)_processing_job[^;]+to authenticated/i,
+  );
+  assert.doesNotMatch(
+    workflow,
+    /grant execute[^;]+enqueue_processing_job[^;]+to authenticated/i,
+  );
+  assert.doesNotMatch(
+    workflow,
+    /grant select on public\.processing_jobs to authenticated/i,
+  );
+  assert.match(
+    workflow,
+    /revoke select, insert, update, delete on public\.processing_jobs from public, anon, authenticated/i,
+  );
+});
+
+test("processing job overview never selects private worker data", () => {
+  const dataLayer = readFileSync(
+    resolve(process.cwd(), "src/lib/hub-jobs-server.ts"),
+    "utf8",
+  );
+
+  assert.doesNotMatch(dataLayer, /\.select\([^)]*\b(payload|result|error_message|lease_owner)\b/i);
 });
 
 test("Phase D keeps originals separate from manually reviewed facts", () => {

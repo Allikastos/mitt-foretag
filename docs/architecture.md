@@ -16,6 +16,7 @@ written to guide development without requiring new paid services.
 - Phase B hub hardening proposal: `supabase/phase-b.sql`.
 - Phase C accounting workflow proposal: `supabase/phase-c.sql`.
 - Phase D manual document workflow proposal: `supabase/phase-d.sql`.
+- Phase E durable background-job proposal: `supabase/phase-e.sql`.
 - Public marketing/admin content is separate from the customer hub.
 
 ## Tenant Model
@@ -134,7 +135,20 @@ Money should be stored as integer minor units, for example ore for SEK, inside
 the accounting module.
 
 The review and later installation order is documented in `docs/phase-b.md` and
-`docs/phase-c.md`.
+the later phase documents through `docs/phase-e.md`.
+
+## Background Processing Boundary
+
+Long-running work must not run as an untracked side effect of a user request.
+The intended chain is:
+
+User or scheduled trigger -> deduplicated `processing_jobs` row -> leased worker
+-> heartbeat -> result, review state or bounded retry.
+
+The hub only reads display-safe job fields. Payloads, results, worker identity
+and internal errors stay in the server/database boundary. Worker functions live
+in an unexposed private schema and are not available to authenticated clients.
+The current local memory adapter exists for tests only and rejects production.
 
 ## Deterministic Posting Rules
 

@@ -10,6 +10,7 @@ const navItems = [
   { href: "/hub/dokument", label: "Dokument" },
   { href: "/hub/fakturor", label: "Fakturor" },
   { href: "/hub/bokforing", label: "Bokföring" },
+  { href: "/hub/processer", label: "Aktivitet" },
   { href: "/hub/installningar", label: "Inställningar" },
 ];
 
@@ -25,7 +26,7 @@ export function HubNav({
   const pathname = usePathname();
 
   return (
-    <nav className="space-y-1.5" aria-label="Hub navigation">
+    <nav className="space-y-1.5" aria-label="Hubbnavigering">
       {navItems.map((item) => (
         <Link
           key={item.href}

@@ -50,6 +50,9 @@ activation remain deliberately pending; no OCR provider is connected.
 
 ## Phase 5: Background Jobs
 
+Local guarded implementation completed. Database installation, production
+worker selection and feature activation remain deliberately pending.
+
 - Use `processing_jobs` as the durable status model.
 - Keep local/dev adapters clearly marked as non-production.
 - Connect a real queue only after explicit approval.

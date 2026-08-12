@@ -82,6 +82,21 @@ export type InvoicePdfStatus =
   | "failed";
 export type EmailProvider = "gmail" | "outlook" | "imap";
 export type EmailConnectionStatus = "not_connected" | "connected" | "error";
+export type ProcessingJobType =
+  | "document_processing"
+  | "invoice_generation"
+  | "sie_export"
+  | "report_generation"
+  | "email_delivery"
+  | "bank_import"
+  | "follow_up_digest";
+export type ProcessingJobStatus =
+  | "queued"
+  | "processing"
+  | "needs_review"
+  | "succeeded"
+  | "failed"
+  | "cancelled";
 export type AccountingWorkflowStatus =
   | "incomplete"
   | "needs_review"
@@ -329,6 +344,38 @@ export type AiEventRow = {
   output_summary: string | null;
   status: string | null;
   created_at: string;
+};
+
+export type ProcessingJobRow = {
+  id: string;
+  organization_id: string;
+  type: ProcessingJobType;
+  status: ProcessingJobStatus;
+  entity_type: string | null;
+  entity_id: string | null;
+  payload: unknown;
+  result: unknown;
+  error_message: string | null;
+  user_message: string | null;
+  last_error_code: string | null;
+  idempotency_key_id: string | null;
+  deduplication_key: string | null;
+  request_hash: string | null;
+  priority: number;
+  attempt_count: number;
+  max_attempts: number;
+  available_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+  lease_owner: string | null;
+  lease_expires_at: string | null;
+  heartbeat_at: string | null;
+  cancel_requested_at: string | null;
+  cancelled_by: string | null;
+  cancellation_reason: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type CompanyAccountingSettingsRow = {
@@ -774,6 +821,42 @@ export type Database = {
         Update: Partial<AiEventRow>;
         Relationships: [];
       };
+      processing_jobs: {
+        Row: ProcessingJobRow;
+        Insert: {
+          id?: string;
+          organization_id: string;
+          type: ProcessingJobType;
+          status?: ProcessingJobStatus;
+          entity_type?: string | null;
+          entity_id?: string | null;
+          payload?: unknown;
+          result?: unknown;
+          error_message?: string | null;
+          user_message?: string | null;
+          last_error_code?: string | null;
+          idempotency_key_id?: string | null;
+          deduplication_key?: string | null;
+          request_hash?: string | null;
+          priority?: number;
+          attempt_count?: number;
+          max_attempts?: number;
+          available_at?: string;
+          started_at?: string | null;
+          finished_at?: string | null;
+          lease_owner?: string | null;
+          lease_expires_at?: string | null;
+          heartbeat_at?: string | null;
+          cancel_requested_at?: string | null;
+          cancelled_by?: string | null;
+          cancellation_reason?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<ProcessingJobRow>;
+        Relationships: [];
+      };
       company_accounting_settings: {
         Row: CompanyAccountingSettingsRow;
         Insert: {
@@ -1044,6 +1127,36 @@ export type Database = {
           target_organization_id: string;
           target_document_id: string;
           target_draft_id: string;
+        };
+        Returns: undefined;
+      };
+      enqueue_processing_job: {
+        Args: {
+          target_organization_id: string;
+          target_created_by: string | null;
+          target_type: ProcessingJobType;
+          target_entity_type: string | null;
+          target_entity_id: string | null;
+          target_payload: unknown;
+          target_deduplication_key: string;
+          target_request_hash: string;
+          target_priority?: number;
+          target_max_attempts?: number;
+        };
+        Returns: string;
+      };
+      cancel_processing_job: {
+        Args: {
+          target_organization_id: string;
+          target_job_id: string;
+          target_reason: string;
+        };
+        Returns: ProcessingJobStatus;
+      };
+      retry_processing_job: {
+        Args: {
+          target_organization_id: string;
+          target_job_id: string;
         };
         Returns: undefined;
       };

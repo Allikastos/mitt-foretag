@@ -39,16 +39,23 @@ storage key.
 
 ## Queue Or Workflow Service
 
-Current provider: none.
+Current provider: none. Postgres stores the durable control-plane state, but no
+production consumer is connected.
 
 Why needed later: OCR, bank imports, report generation and recurring email
 digests should not run inside user requests.
 
 When to connect: When background jobs need production reliability.
 
-Prepared code: `JobQueueProvider` interface and `processing_jobs` schema.
+Prepared code: `JobQueueProvider`, a development-only memory adapter, the
+`processing_jobs` lease contract and a guarded activity center.
 
 Important: Do not use an in-memory queue as production infrastructure.
+
+Candidate later path: Supabase Queues provides a Postgres-native durable queue,
+but enabling it and connecting a worker requires explicit approval and a
+separate operational review. `processing_jobs` remains the user-facing source
+of status and audit history regardless of provider.
 
 ## OCR And AI
 

@@ -39,6 +39,8 @@ The following items should be prioritized before a real SaaS launch:
   before enabling `HUB_FEATURE_ACCOUNTING`.
 - Apply and integration-test `supabase/phase-d.sql` before enabling
   `HUB_FEATURE_DOCUMENT_PROCESSING`.
+- Apply and concurrency-test `supabase/phase-e.sql`, then connect a reviewed
+  worker before enabling `HUB_FEATURE_BACKGROUND_JOBS`.
 - Review admin routes separately from hub roles.
 
 ## Logging Rules
@@ -108,3 +110,20 @@ The accounting module must be conservative:
   validation and an explicit user review step.
 - Link documents through tenant-scoped identifiers inside database functions;
   never trust a document ID supplied by the browser.
+
+## Background Job Safety
+
+- Never send raw payloads, provider responses, worker IDs or internal error
+  details to Client Components.
+- Require a tenant-local deduplication key and matching request hash for every
+  durable enqueue.
+- Claim work with row locking and a bounded lease; a heartbeat must extend only
+  the current worker's lease.
+- Keep worker functions in an unexposed schema and grant them only to the
+  service role.
+- Authenticated users may read only tenant-scoped, display-safe status columns;
+  payload, result, worker and internal-error columns stay revoked.
+- Keep generic enqueue server-only, size-bound and separate from authenticated
+  client permissions.
+- Treat cancellation of active jobs as cooperative and recheck it before saving
+  any result.
