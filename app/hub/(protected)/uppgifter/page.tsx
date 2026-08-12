@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { TaskForm } from "@/components/hub/forms";
+import { HubPagination } from "@/components/hub/pagination";
 import { EmptyState, HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
 import {
   formatDate,
@@ -11,13 +12,14 @@ import { getHubLists, getTasks } from "@/src/lib/hub-server";
 export default async function HubTasksPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; due?: string }>;
+  searchParams: Promise<{ status?: string; due?: string; page?: string }>;
 }) {
   const filters = await searchParams;
   const [tasks, lists] = await Promise.all([
     getTasks({
       status: filters.status ?? null,
       due: filters.due ?? null,
+      page: filters.page,
     }),
     getHubLists(),
   ]);
@@ -51,8 +53,8 @@ export default async function HubTasksPage({
           </div>
 
           <div className="mt-5 space-y-3">
-            {tasks.length ? (
-              tasks.map((task) => (
+            {tasks.items.length ? (
+              tasks.items.map((task) => (
                 <div key={task.id} className="rounded-[1.25rem] border border-black/8 bg-[#FBFBF9] p-4">
                   <div className="flex flex-wrap items-center gap-3">
                     <p className="font-medium text-[#0B0B0C]">{task.title}</p>
@@ -79,6 +81,11 @@ export default async function HubTasksPage({
               />
             )}
           </div>
+          <HubPagination
+            basePath="/hub/uppgifter"
+            query={{ status: filters.status, due: filters.due }}
+            {...tasks}
+          />
         </HubCard>
 
         <TaskForm customers={lists.customers} />

@@ -14,6 +14,8 @@ Good current patterns:
 - RLS policies restrict access to organization members.
 - The hub documents bucket is private.
 - Invoice numbers are claimed through a database function with row locking.
+- Phase B routes private files through the `StorageProvider` interface and its
+  Supabase adapter. Uploads use `upsert: false` and tenant-prefixed keys.
 
 ## Required Hardening
 
@@ -31,6 +33,8 @@ The following items should be prioritized before a real SaaS launch:
 - Remove or restrict delete permissions for accounting source documents.
 - Add idempotency keys for sensitive mutations.
 - Move multi-step invoice finalization toward a transaction or RPC.
+- Apply and integration-test `supabase/phase-b.sql` before enabling
+  `HUB_FEATURE_SAFE_MUTATIONS`.
 - Review admin routes separately from hub roles.
 
 ## Logging Rules

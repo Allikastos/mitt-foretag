@@ -15,6 +15,9 @@ import type {
   TaskStatus,
 } from "@/src/lib/supabase";
 import { buildInvoicePdf } from "@/src/lib/invoice-pdf";
+import { hubFeatureFlags } from "@/src/lib/hub/feature-flags";
+import { normalizeIdempotencyKey } from "@/src/lib/hub/idempotency";
+import { calculateSha256 } from "@/src/lib/hub/providers/supabase-storage-provider";
 import {
   HUB_MAX_FILE_SIZE_BYTES,
   buildOrganizationAddressLines,
@@ -57,6 +60,70 @@ function parseCheckbox(value: FormDataEntryValue | null) {
   return value === "on";
 }
 
+type HubOperationResult = {
+  outcome: "start" | "retry" | "replay" | "in_progress";
+  resultEntityId?: string | null;
+  invoiceNumber?: string | null;
+  storageKey?: string | null;
+};
+
+function parseHubOperationResult(value: unknown): HubOperationResult {
+  if (!value || typeof value !== "object" || !("outcome" in value)) {
+    throw new Error("Databasen returnerade ett ogiltigt processvar.");
+  }
+
+  const outcome = (value as { outcome: unknown }).outcome;
+  if (
+    typeof outcome !== "string" ||
+    !["start", "retry", "replay", "in_progress"].includes(outcome)
+  ) {
+    throw new Error("Databasen returnerade ett okänt processläge.");
+  }
+
+  return value as HubOperationResult;
+}
+
+function errorMessage(error: unknown) {
+  return error instanceof Error ? error.message : "Ett okänt fel inträffade.";
+}
+
+async function completeHubOperation(params: {
+  supabase: Awaited<ReturnType<typeof requireHubContext>>["supabase"];
+  organizationId: string;
+  operation: "upload_document";
+  key: string;
+  entityType: string;
+  entityId: string;
+}) {
+  const { error } = await params.supabase.rpc(
+    "complete_hub_idempotent_operation",
+    {
+      target_organization_id: params.organizationId,
+      target_operation: params.operation,
+      target_key: params.key,
+      target_result_entity_type: params.entityType,
+      target_result_entity_id: params.entityId,
+    },
+  );
+
+  if (error) throw error;
+}
+
+async function failHubOperation(params: {
+  supabase: Awaited<ReturnType<typeof requireHubContext>>["supabase"];
+  organizationId: string;
+  operation: "upload_document";
+  key: string;
+  error: unknown;
+}) {
+  await params.supabase.rpc("fail_hub_idempotent_operation", {
+    target_organization_id: params.organizationId,
+    target_operation: params.operation,
+    target_key: params.key,
+    target_error_message: errorMessage(params.error),
+  });
+}
+
 async function getInvoiceForMutation(params: {
   invoiceId: string;
   organizationId: string;
@@ -64,7 +131,9 @@ async function getInvoiceForMutation(params: {
   const { supabase } = await requireHubContext();
   const { data, error } = await supabase
     .from("invoices")
-    .select("*")
+    .select(
+      "id, organization_id, customer_id, invoice_number, status, paid_at, locked_at",
+    )
     .eq("organization_id", params.organizationId)
     .eq("id", params.invoiceId)
     .single();
@@ -74,6 +143,42 @@ async function getInvoiceForMutation(params: {
   }
 
   return data;
+}
+
+async function requireCustomerInOrganization(params: {
+  customerId: string;
+  organizationId: string;
+}) {
+  const { supabase } = await requireHubContext();
+  const { data, error } = await supabase
+    .from("customers")
+    .select("id, company_name, address, email")
+    .eq("organization_id", params.organizationId)
+    .eq("id", params.customerId)
+    .maybeSingle();
+
+  if (error || !data) {
+    throw error ?? new Error("Kunden tillhör inte det aktiva företaget.");
+  }
+
+  return data;
+}
+
+async function requireMemberInOrganization(params: {
+  userId: string;
+  organizationId: string;
+}) {
+  const { supabase } = await requireHubContext();
+  const { data, error } = await supabase
+    .from("organization_members")
+    .select("id")
+    .eq("organization_id", params.organizationId)
+    .eq("user_id", params.userId)
+    .maybeSingle();
+
+  if (error || !data) {
+    throw error ?? new Error("Användaren tillhör inte det aktiva företaget.");
+  }
 }
 
 function ensureInvoiceEditable(invoice: Pick<InvoiceRow, "status" | "locked_at">) {
@@ -89,9 +194,17 @@ export async function saveCustomerAction(formData: FormData) {
   const requestedVisibility =
     (parseOptionalString(formData.get("visibility")) as CustomerVisibility | null) ??
     "organization";
+  const ownerUserId =
+    parseOptionalString(formData.get("owner_user_id")) ?? user.id;
+
+  await requireMemberInOrganization({
+    userId: ownerUserId,
+    organizationId: organization.id,
+  });
+
   const payload = {
     organization_id: organization.id,
-    owner_user_id: parseOptionalString(formData.get("owner_user_id")) ?? user.id,
+    owner_user_id: ownerUserId,
     visibility: canSetPrivateVisibility ? requestedVisibility : "organization",
     company_name: requireString(formData.get("company_name"), "Företagsnamn"),
     org_number: parseOptionalString(formData.get("org_number")),
@@ -116,7 +229,11 @@ export async function saveCustomerAction(formData: FormData) {
   const writePayload = customerId ? payload : { ...payload, created_by: user.id };
 
   const query = customerId
-    ? supabase.from("customers").update(writePayload).eq("id", customerId)
+    ? supabase
+        .from("customers")
+        .update(writePayload)
+        .eq("organization_id", organization.id)
+        .eq("id", customerId)
     : supabase.from("customers").insert(writePayload);
 
   const { error, data } = customerId
@@ -190,6 +307,10 @@ export async function createOrganizationOnboardingAction(formData: FormData) {
 export async function saveContactAction(formData: FormData) {
   const { supabase, organization, user } = await requireHubContext();
   const customerId = requireString(formData.get("customer_id"), "Kund");
+  await requireCustomerInOrganization({
+    customerId,
+    organizationId: organization.id,
+  });
   const payload = {
     organization_id: organization.id,
     customer_id: customerId,
@@ -240,8 +361,26 @@ export async function saveTaskAction(formData: FormData) {
     assigned_to: parseOptionalString(formData.get("assigned_to")),
   };
 
+  if (payload.customer_id) {
+    await requireCustomerInOrganization({
+      customerId: payload.customer_id,
+      organizationId: organization.id,
+    });
+  }
+
+  if (payload.assigned_to) {
+    await requireMemberInOrganization({
+      userId: payload.assigned_to,
+      organizationId: organization.id,
+    });
+  }
+
   const query = taskId
-    ? supabase.from("tasks").update(payload).eq("id", taskId)
+    ? supabase
+        .from("tasks")
+        .update(payload)
+        .eq("organization_id", organization.id)
+        .eq("id", taskId)
     : supabase.from("tasks").insert(payload);
 
   const { data, error } = await query.select("id").single();
@@ -292,12 +431,10 @@ export async function saveInvoiceAction(formData: FormData) {
   };
 
   if (customerId) {
-    const { data: customer } = await supabase
-      .from("customers")
-      .select("company_name, address, email")
-      .eq("organization_id", organization.id)
-      .eq("id", customerId)
-      .single();
+    const customer = await requireCustomerInOrganization({
+      customerId,
+      organizationId: organization.id,
+    });
 
     customerSnapshot = {
       customer_name_snapshot: customer?.company_name ?? null,
@@ -309,9 +446,7 @@ export async function saveInvoiceAction(formData: FormData) {
   const payload = {
     organization_id: organization.id,
     customer_id: customerId,
-    status:
-      (parseOptionalString(formData.get("status")) as InvoiceStatus | null) ??
-      "draft",
+    status: "draft" as const,
     issue_date: issueDate,
     due_date:
       parseOptionalDate(formData.get("due_date")) ??
@@ -325,6 +460,7 @@ export async function saveInvoiceAction(formData: FormData) {
     ? supabase
         .from("invoices")
         .update(payload)
+        .eq("organization_id", organization.id)
         .eq("id", invoiceId)
     : supabase.from("invoices").insert(payload);
 
@@ -372,7 +508,12 @@ export async function saveInvoiceLineAction(formData: FormData) {
   };
 
   const query = lineId
-    ? supabase.from("invoice_lines").update(payload).eq("id", lineId)
+    ? supabase
+        .from("invoice_lines")
+        .update(payload)
+        .eq("organization_id", organization.id)
+        .eq("invoice_id", invoiceId)
+        .eq("id", lineId)
     : supabase.from("invoice_lines").insert(payload);
 
   const { data, error } = await query.select("id").single();
@@ -415,6 +556,18 @@ export async function updateInvoiceStatusAction(formData: FormData) {
     throw new Error("Utkast måste slutföras innan status kan ändras.");
   }
 
+  const allowedTransitions: Record<InvoiceStatus, InvoiceStatus[]> = {
+    draft: ["cancelled"],
+    sent: ["sent", "paid", "overdue", "cancelled"],
+    paid: ["paid"],
+    overdue: ["overdue", "paid", "cancelled"],
+    cancelled: ["cancelled"],
+  };
+
+  if (!allowedTransitions[invoice.status].includes(status)) {
+    throw new Error("Den statusändringen är inte tillåten.");
+  }
+
   const timestamp = new Date().toISOString();
 
   const { error } = await supabase
@@ -444,9 +597,134 @@ export async function updateInvoiceStatusAction(formData: FormData) {
   revalidatePath(`/hub/fakturor/${invoiceId}`);
 }
 
+async function finalizeInvoiceWithResumableWorkflow(params: {
+  supabase: Awaited<ReturnType<typeof requireHubContext>>["supabase"];
+  organizationId: string;
+  customerId: string;
+  invoiceId: string;
+  userId: string;
+  idempotencyKey: string;
+}) {
+  const { data, error } = await params.supabase.rpc(
+    "begin_invoice_finalization",
+    {
+      target_organization_id: params.organizationId,
+      target_invoice_id: params.invoiceId,
+      target_idempotency_key: params.idempotencyKey,
+    },
+  );
+
+  if (error) throw error;
+  const operation = parseHubOperationResult(data);
+
+  if (operation.outcome === "replay") {
+    return { invoiceNumber: operation.invoiceNumber ?? "", replayed: true };
+  }
+
+  if (operation.outcome === "in_progress") {
+    throw new Error("Fakturan håller redan på att slutföras.");
+  }
+
+  if (!operation.invoiceNumber || !operation.storageKey) {
+    throw new Error("Fakturan saknar reserverat nummer eller lagringsnyckel.");
+  }
+
+  try {
+    const pdfData = await getInvoicePdfData(params.invoiceId);
+    const generatedAt = new Date().toISOString();
+    const pdfBytes = buildInvoicePdf({
+      organization: pdfData.organization,
+      organizationAddressLines: buildOrganizationAddressLines(
+        pdfData.organization,
+      ),
+      invoice: {
+        ...pdfData.invoice,
+        invoice_number: operation.invoiceNumber,
+        finalized_at: generatedAt,
+      },
+      lines: pdfData.lines,
+    });
+    const pdfFileName = `${operation.invoiceNumber}.pdf`;
+    const pdfLookup = await params.supabase
+      .from("documents")
+      .select("id")
+      .eq("organization_id", params.organizationId)
+      .eq("invoice_id", params.invoiceId)
+      .eq("idempotency_key", params.idempotencyKey)
+      .maybeSingle();
+
+    if (pdfLookup.error) throw pdfLookup.error;
+    let pdfDocument = pdfLookup.data;
+
+    if (!pdfDocument) {
+      const uploaded = await uploadHubBuffer({
+        bytes: pdfBytes,
+        fileName: pdfFileName,
+        contentType: "application/pdf",
+        organizationId: params.organizationId,
+        customerId: params.customerId,
+        filePath: operation.storageKey,
+        resumeExisting: true,
+      });
+      const insertResult = await params.supabase
+        .from("documents")
+        .insert({
+          organization_id: params.organizationId,
+          customer_id: params.customerId,
+          invoice_id: params.invoiceId,
+          file_name: pdfFileName,
+          file_path: uploaded.filePath,
+          original_storage_key: uploaded.filePath,
+          mime_type: "application/pdf",
+          size_bytes: pdfBytes.byteLength,
+          sha256: uploaded.sha256,
+          document_type: "invoice_pdf",
+          processing_status: "ready",
+          retention_locked: true,
+          idempotency_key: params.idempotencyKey,
+          category: "other",
+          notes: "Automatiskt genererad faktura-PDF.",
+          uploaded_by: params.userId,
+        })
+        .select("id")
+        .single();
+
+      if (insertResult.error || !insertResult.data) {
+        throw insertResult.error ?? new Error("Kunde inte registrera faktura-PDF.");
+      }
+
+      pdfDocument = insertResult.data;
+    }
+
+    const { error: completeError } = await params.supabase.rpc(
+      "complete_invoice_finalization",
+      {
+        target_organization_id: params.organizationId,
+        target_invoice_id: params.invoiceId,
+        target_idempotency_key: params.idempotencyKey,
+        target_document_id: pdfDocument.id,
+      },
+    );
+
+    if (completeError) throw completeError;
+    return { invoiceNumber: operation.invoiceNumber, replayed: false };
+  } catch (workflowError) {
+    await params.supabase.rpc("fail_invoice_finalization", {
+      target_organization_id: params.organizationId,
+      target_invoice_id: params.invoiceId,
+      target_idempotency_key: params.idempotencyKey,
+      target_error_message: errorMessage(workflowError),
+    });
+    throw workflowError;
+  }
+}
+
 export async function finalizeInvoiceAction(formData: FormData) {
   const { supabase, organization, user } = await requireHubContext();
   const invoiceId = requireString(formData.get("invoice_id"), "Faktura");
+  const idempotencyKey = normalizeIdempotencyKey(
+    requireString(formData.get("idempotency_key"), "Idempotensnyckel"),
+  );
   const invoice = await getInvoiceForMutation({
     invoiceId,
     organizationId: organization.id,
@@ -460,7 +738,7 @@ export async function finalizeInvoiceAction(formData: FormData) {
 
   const { data: customer, error: customerError } = await supabase
     .from("customers")
-    .select("*")
+    .select("id, company_name, address, email")
     .eq("organization_id", organization.id)
     .eq("id", invoice.customer_id)
     .single();
@@ -471,7 +749,9 @@ export async function finalizeInvoiceAction(formData: FormData) {
 
   const { data: lines, error: linesError } = await supabase
     .from("invoice_lines")
-    .select("*")
+    .select(
+      "id, organization_id, invoice_id, description, quantity, unit_price, vat_rate, line_subtotal, line_vat, line_total, sort_order, created_at, updated_at",
+    )
     .eq("organization_id", organization.id)
     .eq("invoice_id", invoiceId)
     .order("sort_order", { ascending: true });
@@ -507,6 +787,34 @@ export async function finalizeInvoiceAction(formData: FormData) {
     throw new Error("Lägg till betalningsuppgifter i inställningarna först.");
   }
 
+  if (hubFeatureFlags.safeMutations) {
+    const finalization = await finalizeInvoiceWithResumableWorkflow({
+      supabase,
+      organizationId: organization.id,
+      customerId: invoice.customer_id,
+      invoiceId,
+      userId: user.id,
+      idempotencyKey,
+    });
+
+    if (!finalization.replayed) {
+      await logHubActivity({
+        organizationId: organization.id,
+        userId: user.id,
+        action: "invoice_finalized",
+        entityType: "invoice",
+        entityId: invoiceId,
+        description: `Faktura ${finalization.invoiceNumber} slutfördes och PDF skapades.`,
+      });
+    }
+
+    revalidatePath("/hub");
+    revalidatePath("/hub/fakturor");
+    revalidatePath(`/hub/fakturor/${invoiceId}`);
+    revalidatePath("/hub/dokument");
+    return;
+  }
+
   let invoiceNumber = invoice.invoice_number;
 
   if (!invoiceNumber) {
@@ -519,29 +827,35 @@ export async function finalizeInvoiceAction(formData: FormData) {
     }
 
     invoiceNumber = data;
+
+    const reservation = await supabase
+      .from("invoices")
+      .update({ invoice_number: invoiceNumber })
+      .eq("organization_id", organization.id)
+      .eq("id", invoiceId)
+      .eq("status", "draft")
+      .is("locked_at", null)
+      .is("invoice_number", null)
+      .select("invoice_number")
+      .maybeSingle();
+
+    if (reservation.error) throw reservation.error;
+
+    if (!reservation.data) {
+      const reservedInvoice = await getInvoiceForMutation({
+        invoiceId,
+        organizationId: organization.id,
+      });
+      ensureInvoiceEditable(reservedInvoice);
+      invoiceNumber = reservedInvoice.invoice_number;
+    }
+  }
+
+  if (!invoiceNumber) {
+    throw new Error("Kunde inte reservera ett fakturanummer.");
   }
 
   const finalizedAt = new Date().toISOString();
-
-  const { error: finalizeError } = await supabase
-    .from("invoices")
-    .update({
-      invoice_number: invoiceNumber,
-      status: "sent",
-      customer_name_snapshot: customer.company_name,
-      customer_address_snapshot: customer.address,
-      customer_email_snapshot: customer.email,
-      finalized_at: finalizedAt,
-      sent_at: finalizedAt,
-      locked_at: finalizedAt,
-    })
-    .eq("organization_id", organization.id)
-    .eq("id", invoiceId);
-
-  if (finalizeError) {
-    throw finalizeError;
-  }
-
   const pdfData = await getInvoicePdfData(invoiceId);
   const pdfBytes = buildInvoicePdf({
     organization: pdfData.organization,
@@ -558,45 +872,77 @@ export async function finalizeInvoiceAction(formData: FormData) {
   });
 
   const pdfFileName = `${invoiceNumber}.pdf`;
-  const { filePath } = await uploadHubBuffer({
+  const uploaded = await uploadHubBuffer({
     bytes: pdfBytes,
     fileName: pdfFileName,
     contentType: "application/pdf",
     organizationId: organization.id,
     customerId: invoice.customer_id,
+    fileId: idempotencyKey,
+    resumeExisting: true,
   });
 
-  const { data: pdfDocument, error: pdfDocumentError } = await supabase
+  const { data: existingPdfDocument, error: pdfLookupError } = await supabase
     .from("documents")
-    .insert({
-      organization_id: organization.id,
-      customer_id: invoice.customer_id,
-      invoice_id: invoiceId,
-      file_name: pdfFileName,
-      file_path: filePath,
-      mime_type: "application/pdf",
-      size_bytes: pdfBytes.byteLength,
-      category: "other",
-      notes: "Automatiskt genererad faktura-PDF.",
-      uploaded_by: user.id,
-    })
     .select("id")
-    .single();
+    .eq("organization_id", organization.id)
+    .eq("invoice_id", invoiceId)
+    .eq("file_path", uploaded.filePath)
+    .maybeSingle();
 
-  if (pdfDocumentError || !pdfDocument) {
-    throw pdfDocumentError ?? new Error("Kunde inte spara faktura-PDF.");
+  if (pdfLookupError) throw pdfLookupError;
+
+  let pdfDocument = existingPdfDocument;
+
+  if (!pdfDocument) {
+    const pdfDocumentResult = await supabase
+      .from("documents")
+      .insert({
+        organization_id: organization.id,
+        customer_id: invoice.customer_id,
+        invoice_id: invoiceId,
+        file_name: pdfFileName,
+        file_path: uploaded.filePath,
+        mime_type: "application/pdf",
+        size_bytes: pdfBytes.byteLength,
+        category: "other",
+        notes: "Automatiskt genererad faktura-PDF.",
+        uploaded_by: user.id,
+      })
+      .select("id")
+      .single();
+
+    if (pdfDocumentResult.error || !pdfDocumentResult.data) {
+      throw (
+        pdfDocumentResult.error ?? new Error("Kunde inte spara faktura-PDF.")
+      );
+    }
+
+    pdfDocument = pdfDocumentResult.data;
   }
 
-  const { error: updatePdfReferenceError } = await supabase
+  const { error: finalizeError, data: finalizedInvoice } = await supabase
     .from("invoices")
     .update({
+      invoice_number: invoiceNumber,
+      status: "sent",
+      customer_name_snapshot: customer.company_name,
+      customer_address_snapshot: customer.address,
+      customer_email_snapshot: customer.email,
+      finalized_at: finalizedAt,
+      sent_at: finalizedAt,
+      locked_at: finalizedAt,
       pdf_document_id: pdfDocument.id,
     })
     .eq("organization_id", organization.id)
-    .eq("id", invoiceId);
+    .eq("id", invoiceId)
+    .eq("status", "draft")
+    .is("locked_at", null)
+    .select("id")
+    .single();
 
-  if (updatePdfReferenceError) {
-    throw updatePdfReferenceError;
+  if (finalizeError || !finalizedInvoice) {
+    throw finalizeError ?? new Error("Kunde inte slutföra fakturan.");
   }
 
   await logHubActivity({
@@ -612,6 +958,137 @@ export async function finalizeInvoiceAction(formData: FormData) {
   revalidatePath("/hub/fakturor");
   revalidatePath(`/hub/fakturor/${invoiceId}`);
   revalidatePath("/hub/dokument");
+}
+
+async function uploadDocumentWithIdempotency(params: {
+  supabase: Awaited<ReturnType<typeof requireHubContext>>["supabase"];
+  organizationId: string;
+  userId: string;
+  file: File;
+  customerId: string | null;
+  invoiceId: string | null;
+  category: DocumentCategory;
+  notes: string | null;
+  idempotencyKey: string;
+}) {
+  const sha256 = await calculateSha256(params.file);
+  const requestHash = [
+    sha256,
+    params.customerId ?? "",
+    params.invoiceId ?? "",
+    params.category,
+  ].join(":");
+  const beginResult = await params.supabase.rpc(
+    "begin_hub_idempotent_operation",
+    {
+      target_organization_id: params.organizationId,
+      target_operation: "upload_document",
+      target_key: params.idempotencyKey,
+      target_request_hash: requestHash,
+    },
+  );
+
+  if (beginResult.error) throw beginResult.error;
+  const operation = parseHubOperationResult(beginResult.data);
+
+  if (operation.outcome === "replay" && operation.resultEntityId) {
+    return { id: operation.resultEntityId, created: false };
+  }
+
+  if (operation.outcome === "in_progress") {
+    throw new Error("Samma dokumentuppladdning behandlas redan.");
+  }
+
+  try {
+    const duplicateResult = await params.supabase
+      .from("documents")
+      .select("id")
+      .eq("organization_id", params.organizationId)
+      .eq("sha256", sha256)
+      .maybeSingle();
+
+    if (duplicateResult.error) throw duplicateResult.error;
+
+    if (duplicateResult.data) {
+      await completeHubOperation({
+        supabase: params.supabase,
+        organizationId: params.organizationId,
+        operation: "upload_document",
+        key: params.idempotencyKey,
+        entityType: "document",
+        entityId: duplicateResult.data.id,
+      });
+      return { id: duplicateResult.data.id, created: false };
+    }
+
+    const uploaded = await uploadHubFile({
+      file: params.file,
+      organizationId: params.organizationId,
+      customerId: params.customerId,
+      fileId: params.idempotencyKey,
+      resumeExisting: true,
+    });
+    const insertResult = await params.supabase
+      .from("documents")
+      .insert({
+        organization_id: params.organizationId,
+        customer_id: params.customerId,
+        invoice_id: params.invoiceId,
+        file_name: params.file.name,
+        file_path: uploaded.filePath,
+        original_storage_key: uploaded.filePath,
+        mime_type: params.file.type || null,
+        size_bytes: params.file.size,
+        sha256: uploaded.sha256,
+        document_type: "original",
+        processing_status: "not_required",
+        retention_locked: false,
+        idempotency_key: params.idempotencyKey,
+        category: params.category,
+        notes: params.notes,
+        uploaded_by: params.userId,
+      })
+      .select("id")
+      .single();
+
+    let documentId = insertResult.data?.id ?? null;
+
+    if (insertResult.error?.code === "23505") {
+      const { data: duplicate } = await params.supabase
+        .from("documents")
+        .select("id")
+        .eq("organization_id", params.organizationId)
+        .eq("sha256", sha256)
+        .maybeSingle();
+      documentId = duplicate?.id ?? null;
+    } else if (insertResult.error) {
+      throw insertResult.error;
+    }
+
+    if (!documentId) {
+      throw new Error("Kunde inte registrera dokumentets metadata.");
+    }
+
+    await completeHubOperation({
+      supabase: params.supabase,
+      organizationId: params.organizationId,
+      operation: "upload_document",
+      key: params.idempotencyKey,
+      entityType: "document",
+      entityId: documentId,
+    });
+
+    return { id: documentId, created: Boolean(insertResult.data) };
+  } catch (uploadError) {
+    await failHubOperation({
+      supabase: params.supabase,
+      organizationId: params.organizationId,
+      operation: "upload_document",
+      key: params.idempotencyKey,
+      error: uploadError,
+    });
+    throw uploadError;
+  }
 }
 
 export async function uploadDocumentAction(formData: FormData) {
@@ -641,6 +1118,63 @@ export async function uploadDocumentAction(formData: FormData) {
 
   const customerId = parseOptionalString(formData.get("customer_id"));
   const invoiceId = parseOptionalString(formData.get("invoice_id"));
+  const category =
+    (parseOptionalString(formData.get("category")) as DocumentCategory | null) ??
+    "other";
+  const notes = parseOptionalString(formData.get("notes"));
+
+  if (customerId) {
+    await requireCustomerInOrganization({
+      customerId,
+      organizationId: organization.id,
+    });
+  }
+
+  if (invoiceId) {
+    const invoice = await getInvoiceForMutation({
+      invoiceId,
+      organizationId: organization.id,
+    });
+
+    if (customerId && invoice.customer_id && invoice.customer_id !== customerId) {
+      throw new Error("Fakturan och kunden hör inte ihop.");
+    }
+  }
+
+  if (hubFeatureFlags.safeMutations) {
+    const idempotencyKey = normalizeIdempotencyKey(
+      requireString(formData.get("idempotency_key"), "Idempotensnyckel"),
+    );
+    const result = await uploadDocumentWithIdempotency({
+      supabase,
+      organizationId: organization.id,
+      userId: user.id,
+      file,
+      customerId,
+      invoiceId,
+      category,
+      notes,
+      idempotencyKey,
+    });
+
+    if (result.created) {
+      await logHubActivity({
+        organizationId: organization.id,
+        userId: user.id,
+        action: "document_uploaded",
+        entityType: "document",
+        entityId: result.id,
+        description: `${file.name} laddades upp till dokumentarkivet.`,
+      });
+    }
+
+    revalidatePath("/hub");
+    revalidatePath("/hub/dokument");
+    if (customerId) revalidatePath(`/hub/kunder/${customerId}`);
+    if (invoiceId) revalidatePath(`/hub/fakturor/${invoiceId}`);
+    return;
+  }
+
   const { filePath } = await uploadHubFile({
     file,
     organizationId: organization.id,
@@ -657,10 +1191,8 @@ export async function uploadDocumentAction(formData: FormData) {
       file_path: filePath,
       mime_type: file.type || null,
       size_bytes: file.size,
-      category:
-        (parseOptionalString(formData.get("category")) as DocumentCategory | null) ??
-        "other",
-      notes: parseOptionalString(formData.get("notes")),
+      category,
+      notes,
       uploaded_by: user.id,
     })
     .select("id")

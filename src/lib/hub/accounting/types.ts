@@ -43,6 +43,7 @@ export type AccountingEventInput = {
   totalAmountMinor: number;
   vatRateBasisPoints?: number;
   paymentAccount?: string;
+  counterAccount?: string;
   expenseAccount?: string;
   description: string;
 };

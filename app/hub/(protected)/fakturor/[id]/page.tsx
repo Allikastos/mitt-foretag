@@ -151,6 +151,8 @@ export default async function HubInvoiceDetailPage({
             currentStatus={detail.invoice.status}
             locked={isLocked}
             pdfHref={pdfHref}
+            pdfStatus={detail.invoice.pdf_status}
+            pdfError={detail.invoice.pdf_error}
           />
           <DocumentUploadForm customers={lists.customers} invoices={lists.invoices} />
         </div>

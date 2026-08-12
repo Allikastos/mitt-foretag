@@ -10,6 +10,7 @@ export const hubFeatureFlags = {
   backgroundJobs: readFlag("HUB_FEATURE_BACKGROUND_JOBS"),
   emailAutomation: readFlag("HUB_FEATURE_EMAIL_AUTOMATION"),
   bankImport: readFlag("HUB_FEATURE_BANK_IMPORT"),
+  safeMutations: readFlag("HUB_FEATURE_SAFE_MUTATIONS"),
 } as const;
 
 export type HubFeatureFlag = keyof typeof hubFeatureFlags;

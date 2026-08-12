@@ -281,6 +281,58 @@ export const ownerWithdrawalRule: PostingRule = {
   },
 };
 
+export const transferBetweenOwnAccountsRule: PostingRule = {
+  id: "se-sole-trader-transfer-between-own-accounts",
+  version: 1,
+  description: "Överföring mellan två av företagets egna konton.",
+  supportedTypes: ["transfer_between_own_accounts"],
+  companyForms: ["sole_trader"],
+  accountingMethods: ["cash_basis"],
+  requiredFields: [
+    "totalAmountMinor",
+    "happenedAt",
+    "description",
+    "paymentAccount",
+    "counterAccount",
+  ],
+  sourceRefs,
+  build(event) {
+    ensureRuleInput(event, transferBetweenOwnAccountsRule);
+    const fromAccount = event.paymentAccount ?? "";
+    const toAccount = event.counterAccount ?? "";
+
+    if (!/^\d{4}$/.test(fromAccount) || !/^\d{4}$/.test(toAccount)) {
+      throw new Error("Båda kontona måste anges med fyra siffror.");
+    }
+
+    if (fromAccount === toAccount) {
+      throw new Error("Från- och tillkonto måste vara olika.");
+    }
+
+    return result({
+      ruleId: transferBetweenOwnAccountsRule.id,
+      ruleVersion: transferBetweenOwnAccountsRule.version,
+      lines: [
+        line(
+          { number: toAccount, name: "Eget tillkonto" },
+          "debit",
+          event.totalAmountMinor,
+          event.description,
+        ),
+        line(
+          { number: fromAccount, name: "Eget frånkonto" },
+          "credit",
+          event.totalAmountMinor,
+          event.description,
+        ),
+      ],
+      plainLanguageSummary:
+        "Beloppet flyttas mellan företagets egna konton utan resultat- eller momseffekt.",
+      warnings: ["Kontrollera att båda kontona tillhör samma företag."],
+    });
+  },
+};
+
 export const postingRules = [
   paidDomesticServiceSale25VatRule,
   paidDomesticServiceSaleNoVatRule,
@@ -288,4 +340,5 @@ export const postingRules = [
   purchaseWithoutDeductibleVatRule,
   ownerDepositRule,
   ownerWithdrawalRule,
+  transferBetweenOwnAccountsRule,
 ] satisfies PostingRule[];

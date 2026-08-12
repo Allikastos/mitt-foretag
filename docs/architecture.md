@@ -13,6 +13,7 @@ written to guide development without requiring new paid services.
 - Main hub server layer: `src/lib/hub-server.ts`.
 - Hub Server Actions: `app/hub/actions.ts`.
 - Hub database baseline: `supabase/hub.sql`.
+- Phase B hub hardening proposal: `supabase/phase-b.sql`.
 - Public marketing/admin content is separate from the customer hub.
 
 ## Tenant Model
@@ -30,6 +31,9 @@ The default rule is simple:
 Current roles are `owner`, `admin`, `member` and `viewer`. Future accounting
 work should map these to more explicit capabilities rather than relying on role
 names inside UI components.
+
+Dashboard layout order is intentionally stored per browser for now. It may move
+to a user-scoped preference later, but it is not part of Phase B.
 
 ## Data Access Pattern
 
@@ -121,6 +125,8 @@ Core tables:
 
 Money should be stored as integer minor units, for example ore for SEK, inside
 the accounting module.
+
+The review and later installation order is documented in `docs/phase-b.md`.
 
 ## Deterministic Posting Rules
 

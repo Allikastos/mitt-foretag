@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import {
   canEditInvoice,
   customerFieldKeys,
@@ -325,18 +326,11 @@ export function InvoiceForm({
             </select>
           </Field>
           <Field label="Status">
-            <select
-              name="status"
-              defaultValue={invoice?.status ?? "draft"}
+            <input
+              value={invoiceStatusLabel(invoice?.status ?? "draft")}
               className={inputClassName}
-              disabled={isLocked}
-            >
-              {invoiceStatuses.map((status) => (
-                <option key={status} value={status}>
-                  {invoiceStatusLabel(status)}
-                </option>
-              ))}
-            </select>
+              disabled
+            />
           </Field>
           <Field label="Fakturadatum">
             <input
@@ -472,15 +466,38 @@ export function InvoiceStatusForm({
   currentStatus,
   locked,
   pdfHref,
+  pdfStatus,
+  pdfError,
 }: {
   invoiceId: string;
   invoiceNumber: string | null;
   currentStatus: Invoice["status"];
   locked: boolean;
   pdfHref: string;
+  pdfStatus?: Invoice["pdf_status"];
+  pdfError?: string | null;
 }) {
+  const pdfStatusLabel =
+    pdfStatus === "processing"
+      ? "PDF skapas"
+      : pdfStatus === "ready"
+        ? "PDF färdig"
+        : pdfStatus === "failed"
+          ? "PDF misslyckades"
+          : null;
+
   return (
     <HubCard>
+      {pdfStatusLabel ? (
+        <div className="mb-5 rounded-[1.25rem] border border-black/8 bg-[#FBFBF9] p-4">
+          <p className="text-sm font-medium text-[#0B0B0C]">{pdfStatusLabel}</p>
+          {pdfStatus === "failed" ? (
+            <p className="mt-1 text-sm text-[#8B3A32]">
+              {pdfError || "Försök slutföra fakturan igen."}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
       {locked ? (
         <form action={updateInvoiceStatusAction} className="flex flex-wrap items-end gap-4">
           <input type="hidden" name="invoice_id" value={invoiceId} />
@@ -500,6 +517,11 @@ export function InvoiceStatusForm({
       ) : (
         <form action={finalizeInvoiceAction} className="space-y-4">
           <input type="hidden" name="invoice_id" value={invoiceId} />
+          <input
+            type="hidden"
+            name="idempotency_key"
+            value={`invoice-finalize:${invoiceId}`}
+          />
           <div>
             <p className="text-sm font-medium text-[#0B0B0C]">Slutför faktura</p>
             <p className="mt-2 text-sm leading-6 text-[#6B6B6B]">
@@ -535,6 +557,7 @@ export function DocumentUploadForm({
   return (
     <HubCard>
       <form action={uploadDocumentAction} className="space-y-4">
+        <input type="hidden" name="idempotency_key" value={randomUUID()} />
         <FormGrid>
           <Field label="Fil">
             <input type="file" name="file" className={inputClassName} required />

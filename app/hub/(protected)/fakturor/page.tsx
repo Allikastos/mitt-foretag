@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { InvoiceForm } from "@/components/hub/forms";
 import { InvoiceTemplateGallery } from "@/components/hub/invoice-templates";
+import { HubPagination } from "@/components/hub/pagination";
 import { EmptyState, HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
 import {
   formatCurrency,
@@ -16,10 +17,15 @@ function invoiceTone(status: string) {
   return "neutral";
 }
 
-export default async function HubInvoicesPage() {
+export default async function HubInvoicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const filters = await searchParams;
   const [{ organization }, invoices, lists] = await Promise.all([
     requireHubContext(),
-    getInvoices(),
+    getInvoices({ page: filters.page }),
     getHubLists(),
   ]);
 
@@ -34,8 +40,8 @@ export default async function HubInvoicesPage() {
         <HubCard>
           <h2 className="text-lg font-semibold text-[#0B0B0C]">Fakturalista</h2>
           <div className="mt-5 space-y-3">
-            {invoices.length ? (
-              invoices.map((invoice) => (
+            {invoices.items.length ? (
+              invoices.items.map((invoice) => (
                 <Link
                   key={invoice.id}
                   href={`/hub/fakturor/${invoice.id}`}
@@ -67,6 +73,7 @@ export default async function HubInvoicesPage() {
               />
             )}
           </div>
+          <HubPagination basePath="/hub/fakturor" {...invoices} />
         </HubCard>
 
         <InvoiceForm customers={lists.customers} organization={organization} />

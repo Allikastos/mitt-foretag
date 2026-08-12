@@ -7,6 +7,7 @@ import type { AccountingEventInput, SupportedBusinessEventType } from "./types.t
 function event(
   type: SupportedBusinessEventType,
   totalAmountMinor: number,
+  overrides: Partial<AccountingEventInput> = {},
 ): AccountingEventInput {
   return {
     id: `evt-${type}`,
@@ -19,6 +20,7 @@ function event(
     totalAmountMinor,
     vatRateBasisPoints: 2500,
     description: "Golden test event",
+    ...overrides,
   };
 }
 
@@ -69,6 +71,85 @@ test("owner deposit and withdrawal affect equity, not income or expenses", () =>
   );
   assert.equal(deposit.lines.some((line) => line.accountNumber === "2018"), true);
   assert.equal(withdrawal.lines.some((line) => line.accountNumber === "2013"), true);
+});
+
+test("service sale without VAT uses the no-VAT golden posting", () => {
+  const draft = createBookkeepingDraft(
+    event("paid_domestic_service_sale_no_vat", 42_500),
+  );
+
+  assert.deepEqual(
+    draft.lines.map((line) => [line.accountNumber, line.side, line.amountMinor]),
+    [
+      ["1930", "debit", 42_500],
+      ["3044", "credit", 42_500],
+    ],
+  );
+});
+
+test("purchase without deductible VAT expenses the full amount", () => {
+  const draft = createBookkeepingDraft(
+    event("purchase_without_deductible_vat", 12_345),
+  );
+
+  assert.deepEqual(
+    draft.lines.map((line) => [line.accountNumber, line.side, line.amountMinor]),
+    [
+      ["6992", "debit", 12_345],
+      ["1930", "credit", 12_345],
+    ],
+  );
+});
+
+test("transfer between own accounts uses explicit from and to accounts", () => {
+  const draft = createBookkeepingDraft(
+    event("transfer_between_own_accounts", 50_000, {
+      paymentAccount: "1930",
+      counterAccount: "1940",
+    }),
+  );
+
+  assert.deepEqual(
+    draft.lines.map((line) => [line.accountNumber, line.side, line.amountMinor]),
+    [
+      ["1940", "debit", 50_000],
+      ["1930", "credit", 50_000],
+    ],
+  );
+});
+
+test("VAT rounding stays exact in minor units", () => {
+  const draft = createBookkeepingDraft(
+    event("paid_domestic_service_sale_25_vat", 101),
+  );
+
+  assert.deepEqual(
+    draft.lines.map((line) => line.amountMinor),
+    [101, 81, 20],
+  );
+  assert.equal(sumLines(draft.lines, "debit"), sumLines(draft.lines, "credit"));
+});
+
+test("every supported rule balances and records its rule version", () => {
+  const inputs = [
+    event("paid_domestic_service_sale_25_vat", 12_500),
+    event("paid_domestic_service_sale_no_vat", 12_500),
+    event("paid_domestic_purchase_25_vat", 12_500),
+    event("purchase_without_deductible_vat", 12_500),
+    event("owner_deposit", 12_500),
+    event("owner_withdrawal", 12_500),
+    event("transfer_between_own_accounts", 12_500, {
+      paymentAccount: "1930",
+      counterAccount: "1940",
+    }),
+  ];
+
+  for (const input of inputs) {
+    const draft = createBookkeepingDraft(input);
+    assert.equal(sumLines(draft.lines, "debit"), sumLines(draft.lines, "credit"));
+    assert.equal(draft.ruleVersion, 1);
+    assert.notEqual(draft.ruleId, "unsupported");
+  }
 });
 
 test("unsupported company form is rejected by the first version", () => {

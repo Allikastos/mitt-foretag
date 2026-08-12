@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DocumentUploadForm } from "@/components/hub/forms";
+import { HubPagination } from "@/components/hub/pagination";
 import { EmptyState, HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
 import {
   documentCategoryLabel,
@@ -7,8 +8,16 @@ import {
 } from "@/src/lib/hub";
 import { getDocuments, getHubLists } from "@/src/lib/hub-server";
 
-export default async function HubDocumentsPage() {
-  const [documents, lists] = await Promise.all([getDocuments(), getHubLists()]);
+export default async function HubDocumentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const filters = await searchParams;
+  const [documents, lists] = await Promise.all([
+    getDocuments({ page: filters.page }),
+    getHubLists(),
+  ]);
 
   return (
     <HubShell
@@ -19,8 +28,8 @@ export default async function HubDocumentsPage() {
         <HubCard>
           <h2 className="text-lg font-semibold text-[#0B0B0C]">Dokumentarkiv</h2>
           <div className="mt-5 space-y-3">
-            {documents.length ? (
-              documents.map((document) => (
+            {documents.items.length ? (
+              documents.items.map((document) => (
                 <div key={document.id} className="rounded-[1.25rem] border border-black/8 bg-[#FBFBF9] p-4">
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
@@ -53,6 +62,7 @@ export default async function HubDocumentsPage() {
               />
             )}
           </div>
+          <HubPagination basePath="/hub/dokument" {...documents} />
         </HubCard>
 
         <DocumentUploadForm customers={lists.customers} invoices={lists.invoices} />

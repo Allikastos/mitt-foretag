@@ -4,7 +4,6 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { randomUUID } from "node:crypto";
 import {
-  HUB_DOCUMENTS_BUCKET,
   buildDocumentPath,
   buildOrganizationAddressLines,
   type ActivityLog,
@@ -17,6 +16,21 @@ import {
   type OrganizationMember,
   type Task,
 } from "./hub";
+import {
+  createPaginatedResult,
+  normalizePagination,
+  type PaginatedResult,
+  type PaginationInput,
+} from "./hub/pagination.ts";
+import {
+  assertMembership,
+  assertTenantResource,
+} from "./hub/tenant-security.ts";
+import { hubFeatureFlags } from "./hub/feature-flags.ts";
+import {
+  calculateSha256,
+  SupabaseStorageProvider,
+} from "./hub/providers/supabase-storage-provider.ts";
 import { createSupabaseServerClient } from "./supabase-server";
 
 type HubContext = {
@@ -121,6 +135,12 @@ export const requireHubContext = cache(async (): Promise<HubContext> => {
     throw membershipQuery.error ?? new Error("Kunde inte läsa hubbkontext.");
   }
 
+  assertMembership({
+    membership: membershipQuery.data,
+    organizationId: membershipQuery.data.organization_id,
+    userId: user.id,
+  });
+
   return {
     supabase,
     user: {
@@ -151,7 +171,11 @@ export async function logHubActivity(params: {
   entityId?: string;
   description?: string;
 }) {
-  const { supabase } = await requireHubContext();
+  const { supabase, organization } = await requireHubContext();
+  assertTenantResource({
+    activeOrganizationId: organization.id,
+    resourceOrganizationId: params.organizationId,
+  });
 
   await supabase.from("activity_log").insert({
     organization_id: params.organizationId,
@@ -168,7 +192,9 @@ export async function getHubDashboardData() {
   const isOwnerLevel = ["owner", "admin"].includes(membership.role);
   let followUpCustomersQuery = supabase
     .from("customers")
-    .select("*")
+    .select(
+      "id, company_name, contact_name, preferred_contact_method, status, follow_up_date",
+    )
     .eq("organization_id", organization.id)
     .not("follow_up_date", "is", null)
     .lte("follow_up_date", new Date().toISOString().slice(0, 10))
@@ -225,25 +251,25 @@ export async function getHubDashboardData() {
       .eq("organization_id", organization.id),
     supabase
       .from("tasks")
-      .select("*")
+      .select("id, title, status, due_date")
       .eq("organization_id", organization.id)
       .order("due_date", { ascending: true, nullsFirst: false })
       .limit(6),
     supabase
       .from("invoices")
-      .select("*")
+      .select("id, invoice_number, status, total, created_at")
       .eq("organization_id", organization.id)
       .order("created_at", { ascending: false })
       .limit(6),
     supabase
       .from("documents")
-      .select("*")
+      .select("id, file_name, created_at")
       .eq("organization_id", organization.id)
       .order("created_at", { ascending: false })
       .limit(6),
     supabase
       .from("activity_log")
-      .select("*")
+      .select("id, action, description, created_at")
       .eq("organization_id", organization.id)
       .order("created_at", { ascending: false })
       .limit(6),
@@ -274,15 +300,20 @@ export async function getHubDashboardData() {
   };
 }
 
-export async function getCustomers() {
+export async function getCustomers(paginationInput: PaginationInput = {}) {
   const { supabase, organization, membership, user } = await requireHubContext();
+  const pagination = normalizePagination(paginationInput);
   const isOwnerLevel = ["owner", "admin"].includes(membership.role);
   let query = supabase
     .from("customers")
-    .select("*")
+    .select(
+      "id, company_name, contact_name, email, status, follow_up_date, preferred_contact_method, relationship_owner, tags, created_at, created_by, owner_user_id, visibility",
+      { count: "exact" },
+    )
     .eq("organization_id", organization.id)
     .order("follow_up_date", { ascending: true, nullsFirst: false })
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(pagination.from, pagination.to);
 
   if (!isOwnerLevel) {
     query = query.eq("visibility", "organization");
@@ -292,50 +323,65 @@ export async function getCustomers() {
     }
   }
 
-  const { data, error } = await query;
+  const { data, error, count } = await query;
 
   if (error) {
     throw error;
   }
 
-  return data ?? [];
+  return createPaginatedResult({
+    items: data ?? [],
+    count,
+    page: pagination.page,
+    pageSize: pagination.pageSize,
+  });
 }
 
-export async function getCustomerDetail(customerId: string) {
+export async function getCustomerDetail(
+  customerId: string,
+  options: { contactsPage?: number | string | null } = {},
+) {
   const { supabase, organization, membership, user } = await requireHubContext();
+  const contactsPagination = normalizePagination({ page: options.contactsPage });
 
   const [customerResult, contactsResult, tasksResult, invoicesResult, documentsResult] =
     await Promise.all([
       supabase
         .from("customers")
-        .select("*")
+        .select(
+          "id, organization_id, created_by, owner_user_id, visibility, company_name, org_number, contact_name, email, phone, address, preferred_contact_method, last_contacted_at, follow_up_date, relationship_owner, tags, notes, status, created_at, updated_at",
+        )
         .eq("organization_id", organization.id)
         .eq("id", customerId)
         .single(),
       supabase
         .from("contacts")
-        .select("*")
+        .select("id, name, email, role_title, created_at", { count: "exact" })
         .eq("organization_id", organization.id)
         .eq("customer_id", customerId)
-        .order("created_at", { ascending: true }),
+        .order("created_at", { ascending: true })
+        .range(contactsPagination.from, contactsPagination.to),
       supabase
         .from("tasks")
-        .select("*")
+        .select("id, title, status, due_date")
         .eq("organization_id", organization.id)
         .eq("customer_id", customerId)
-        .order("due_date", { ascending: true, nullsFirst: false }),
+        .order("due_date", { ascending: true, nullsFirst: false })
+        .limit(25),
       supabase
         .from("invoices")
-        .select("*")
+        .select("id, invoice_number, status, total")
         .eq("organization_id", organization.id)
         .eq("customer_id", customerId)
-        .order("created_at", { ascending: false }),
+        .order("created_at", { ascending: false })
+        .limit(25),
       supabase
         .from("documents")
-        .select("*")
+        .select("id, file_name, file_path, created_at")
         .eq("organization_id", organization.id)
         .eq("customer_id", customerId)
-        .order("created_at", { ascending: false }),
+        .order("created_at", { ascending: false })
+        .limit(25),
     ]);
 
   if (customerResult.error) {
@@ -358,11 +404,17 @@ export async function getCustomerDetail(customerId: string) {
   return {
     organization,
     customer,
-    contacts: contactsResult.data ?? [],
+    contacts: createPaginatedResult({
+      items: contactsResult.data ?? [],
+      count: contactsResult.count,
+      page: contactsPagination.page,
+      pageSize: contactsPagination.pageSize,
+    }),
     tasks: tasksResult.data ?? [],
     invoices: invoicesResult.data ?? [],
     documents: await attachSignedUrls(
       supabase,
+      organization.id,
       documentsResult.data ?? []
     ),
   };
@@ -371,13 +423,19 @@ export async function getCustomerDetail(customerId: string) {
 export async function getTasks(filters?: {
   status?: string | null;
   due?: string | null;
+  page?: number | string | null;
 }) {
   const { supabase, organization } = await requireHubContext();
+  const pagination = normalizePagination({ page: filters?.page });
   let query = supabase
     .from("tasks")
-    .select("*")
+    .select(
+      "id, customer_id, title, description, status, priority, due_date, created_at",
+      { count: "exact" },
+    )
     .eq("organization_id", organization.id)
-    .order("due_date", { ascending: true, nullsFirst: false });
+    .order("due_date", { ascending: true, nullsFirst: false })
+    .range(pagination.from, pagination.to);
 
   if (filters?.status) {
     query = query.eq("status", filters.status as Task["status"]);
@@ -391,7 +449,7 @@ export async function getTasks(filters?: {
     query = query.gte("due_date", new Date().toISOString().slice(0, 10));
   }
 
-  const { data, error } = await query;
+  const { data, error, count } = await query;
 
   if (error) {
     throw error;
@@ -416,19 +474,31 @@ export async function getTasks(filters?: {
     }
   }
 
-  return tasks.map((task) => ({
-    ...task,
-    customers: task.customer_id ? customerMap.get(task.customer_id) ?? null : null,
-  }));
+  return createPaginatedResult({
+    items: tasks.map((task) => ({
+      ...task,
+      customers: task.customer_id
+        ? customerMap.get(task.customer_id) ?? null
+        : null,
+    })),
+    count,
+    page: pagination.page,
+    pageSize: pagination.pageSize,
+  });
 }
 
-export async function getDocuments() {
+export async function getDocuments(paginationInput: PaginationInput = {}) {
   const { supabase, organization } = await requireHubContext();
-  const { data, error } = await supabase
+  const pagination = normalizePagination(paginationInput);
+  const { data, error, count } = await supabase
     .from("documents")
-    .select("*")
+    .select(
+      "id, customer_id, invoice_id, file_name, file_path, category, mime_type, size_bytes, created_at",
+      { count: "exact" },
+    )
     .eq("organization_id", organization.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(pagination.from, pagination.to);
 
   if (error) {
     throw error;
@@ -466,8 +536,9 @@ export async function getDocuments() {
     (invoicesResult.data ?? []).map((invoice) => [invoice.id, invoice])
   );
 
-  return attachSignedUrls(
+  const items = await attachSignedUrls(
     supabase,
+    organization.id,
     documents.map((document) => ({
       ...document,
       customers: document.customer_id
@@ -476,17 +547,29 @@ export async function getDocuments() {
       invoices: document.invoice_id
         ? invoiceMap.get(document.invoice_id) ?? null
         : null,
-    }))
+    })),
   );
+
+  return createPaginatedResult({
+    items,
+    count,
+    page: pagination.page,
+    pageSize: pagination.pageSize,
+  });
 }
 
-export async function getInvoices() {
+export async function getInvoices(paginationInput: PaginationInput = {}) {
   const { supabase, organization } = await requireHubContext();
-  const { data, error } = await supabase
+  const pagination = normalizePagination(paginationInput);
+  const { data, error, count } = await supabase
     .from("invoices")
-    .select("*")
+    .select(
+      "id, customer_id, invoice_number, status, issue_date, due_date, total, created_at",
+      { count: "exact" },
+    )
     .eq("organization_id", organization.id)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(pagination.from, pagination.to);
 
   if (error) {
     throw error;
@@ -511,32 +594,51 @@ export async function getInvoices() {
     }
   }
 
-  return invoices.map((invoice) => ({
-    ...invoice,
-    customers: invoice.customer_id
-      ? customerMap.get(invoice.customer_id) ?? null
-      : null,
-  }));
+  return createPaginatedResult({
+    items: invoices.map((invoice) => ({
+      ...invoice,
+      customers: invoice.customer_id
+        ? customerMap.get(invoice.customer_id) ?? null
+        : null,
+    })),
+    count,
+    page: pagination.page,
+    pageSize: pagination.pageSize,
+  });
 }
 
 export async function getInvoiceDetail(invoiceId: string) {
   const { supabase, organization } = await requireHubContext();
+  const invoiceQuery = hubFeatureFlags.safeMutations
+    ? supabase
+        .from("invoices")
+        .select(
+          "id, organization_id, customer_id, invoice_number, status, issue_date, due_date, currency, customer_name_snapshot, customer_address_snapshot, customer_email_snapshot, notes, subtotal, vat_total, total, finalized_at, sent_at, paid_at, locked_at, pdf_document_id, pdf_status, pdf_error, pdf_storage_key, finalization_idempotency_key, finalization_started_at, created_at, updated_at",
+        )
+        .eq("organization_id", organization.id)
+        .eq("id", invoiceId)
+        .single()
+    : supabase
+        .from("invoices")
+        .select(
+          "id, organization_id, customer_id, invoice_number, status, issue_date, due_date, currency, customer_name_snapshot, customer_address_snapshot, customer_email_snapshot, notes, subtotal, vat_total, total, finalized_at, sent_at, paid_at, locked_at, pdf_document_id, created_at, updated_at",
+        )
+        .eq("organization_id", organization.id)
+        .eq("id", invoiceId)
+        .single();
   const [invoiceResult, lineResult, documentsResult] = await Promise.all([
-    supabase
-      .from("invoices")
-      .select("*")
-      .eq("organization_id", organization.id)
-      .eq("id", invoiceId)
-      .single(),
+    invoiceQuery,
     supabase
       .from("invoice_lines")
-      .select("*")
+      .select(
+        "id, organization_id, invoice_id, description, quantity, unit_price, vat_rate, line_subtotal, line_vat, line_total, sort_order, created_at, updated_at",
+      )
       .eq("organization_id", organization.id)
       .eq("invoice_id", invoiceId)
       .order("sort_order", { ascending: true }),
     supabase
       .from("documents")
-      .select("*")
+      .select("id, organization_id, customer_id, invoice_id, file_name, file_path, mime_type, size_bytes, category, notes, uploaded_by, created_at, updated_at")
       .eq("organization_id", organization.id)
       .eq("invoice_id", invoiceId)
       .order("created_at", { ascending: false }),
@@ -546,6 +648,8 @@ export async function getInvoiceDetail(invoiceId: string) {
     throw invoiceResult.error;
   }
 
+  const invoiceData = invoiceResult.data as Invoice;
+
   let customer:
     | {
         id: string;
@@ -553,12 +657,12 @@ export async function getInvoiceDetail(invoiceId: string) {
       }
     | null = null;
 
-  if (invoiceResult.data.customer_id) {
+  if (invoiceData.customer_id) {
     const { data } = await supabase
       .from("customers")
       .select("id, company_name")
       .eq("organization_id", organization.id)
-      .eq("id", invoiceResult.data.customer_id)
+      .eq("id", invoiceData.customer_id)
       .maybeSingle();
 
     customer = data ?? null;
@@ -566,11 +670,15 @@ export async function getInvoiceDetail(invoiceId: string) {
 
   return {
     invoice: {
-      ...invoiceResult.data,
+      ...invoiceData,
       customers: customer,
     },
     lines: lineResult.data ?? [],
-    documents: await attachSignedUrls(supabase, documentsResult.data ?? []),
+    documents: await attachSignedUrls(
+      supabase,
+      organization.id,
+      documentsResult.data ?? [],
+    ),
   };
 }
 
@@ -579,12 +687,12 @@ export async function getSettingsData() {
   const [membersResult, emailConnectionsResult] = await Promise.all([
     supabase
       .from("organization_members")
-      .select("*")
+      .select("id, organization_id, user_id, role, created_at")
       .eq("organization_id", organization.id)
       .order("created_at", { ascending: true }),
     supabase
       .from("email_connections")
-      .select("*")
+      .select("id, organization_id, provider, email_address, status, created_at, updated_at")
       .eq("organization_id", organization.id)
       .order("created_at", { ascending: false }),
   ]);
@@ -624,12 +732,14 @@ export async function getHubLists() {
       .from("customers")
       .select("id, company_name")
       .eq("organization_id", organization.id)
-      .order("company_name", { ascending: true }),
+      .order("company_name", { ascending: true })
+      .limit(500),
     supabase
       .from("invoices")
       .select("id, invoice_number")
       .eq("organization_id", organization.id)
-      .order("created_at", { ascending: false }),
+      .order("created_at", { ascending: false })
+      .limit(500),
   ]);
 
   return {
@@ -642,17 +752,23 @@ async function attachSignedUrls<
   T extends { file_path: string } & Record<string, unknown>,
 >(
   supabase: NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>>,
+  organizationId: string,
   documents: T[]
 ) {
   const results = await Promise.all(
     documents.map(async (document) => {
-      const { data } = await supabase.storage
-        .from(HUB_DOCUMENTS_BUCKET)
-        .createSignedUrl(document.file_path, 60 * 30);
+      const storage = new SupabaseStorageProvider(supabase);
+      const signedUrl = await storage
+        .getAuthorizedUrl({
+          organizationId,
+          key: document.file_path,
+          expiresInSeconds: 60 * 30,
+        })
+        .catch(() => null);
 
       return {
         ...document,
-        signedUrl: data?.signedUrl ?? null,
+        signedUrl,
       };
     })
   );
@@ -664,9 +780,15 @@ export async function uploadHubFile(params: {
   file: File;
   organizationId: string;
   customerId?: string | null;
+  fileId?: string;
+  resumeExisting?: boolean;
 }) {
-  const { supabase } = await requireHubContext();
-  const fileId = randomUUID();
+  const { supabase, user, organization } = await requireHubContext();
+  assertTenantResource({
+    activeOrganizationId: organization.id,
+    resourceOrganizationId: params.organizationId,
+  });
+  const fileId = params.fileId ?? randomUUID();
   const filePath = buildDocumentPath({
     organizationId: params.organizationId,
     customerId: params.customerId,
@@ -674,18 +796,31 @@ export async function uploadHubFile(params: {
     fileName: params.file.name,
   });
 
-  const { error } = await supabase.storage
-    .from(HUB_DOCUMENTS_BUCKET)
-    .upload(filePath, params.file, {
-      upsert: false,
-      contentType: params.file.type || "application/octet-stream",
-    });
-
-  if (error) {
-    throw error;
+  const storage = new SupabaseStorageProvider(supabase);
+  if (
+    params.resumeExisting &&
+    (await storage.exists({
+      organizationId: params.organizationId,
+      key: filePath,
+    }))
+  ) {
+    return {
+      fileId,
+      filePath,
+      sha256: await calculateSha256(params.file),
+    };
   }
 
-  return { fileId, filePath };
+  const uploaded = await storage.upload({
+    organizationId: params.organizationId,
+    key: filePath,
+    fileName: params.file.name,
+    contentType: params.file.type || "application/octet-stream",
+    bytes: params.file,
+    uploadedBy: user.id,
+  });
+
+  return { fileId, filePath, sha256: uploaded.sha256 };
 }
 
 export async function uploadHubBuffer(params: {
@@ -694,28 +829,50 @@ export async function uploadHubBuffer(params: {
   contentType: string;
   organizationId: string;
   customerId?: string | null;
+  fileId?: string;
+  filePath?: string;
+  resumeExisting?: boolean;
 }) {
-  const { supabase } = await requireHubContext();
-  const fileId = randomUUID();
-  const filePath = buildDocumentPath({
-    organizationId: params.organizationId,
-    customerId: params.customerId,
-    fileId,
-    fileName: params.fileName,
+  const { supabase, user, organization } = await requireHubContext();
+  assertTenantResource({
+    activeOrganizationId: organization.id,
+    resourceOrganizationId: params.organizationId,
   });
-
-  const { error } = await supabase.storage
-    .from(HUB_DOCUMENTS_BUCKET)
-    .upload(filePath, params.bytes, {
-      upsert: true,
-      contentType: params.contentType,
+  const fileId = params.fileId ?? randomUUID();
+  const filePath =
+    params.filePath ??
+    buildDocumentPath({
+      organizationId: params.organizationId,
+      customerId: params.customerId,
+      fileId,
+      fileName: params.fileName,
     });
 
-  if (error) {
-    throw error;
+  const storage = new SupabaseStorageProvider(supabase);
+  if (
+    params.resumeExisting &&
+    (await storage.exists({
+      organizationId: params.organizationId,
+      key: filePath,
+    }))
+  ) {
+    return {
+      fileId,
+      filePath,
+      sha256: await calculateSha256(params.bytes),
+    };
   }
 
-  return { fileId, filePath };
+  const uploaded = await storage.upload({
+    organizationId: params.organizationId,
+    key: filePath,
+    fileName: params.fileName,
+    contentType: params.contentType,
+    bytes: params.bytes,
+    uploadedBy: user.id,
+  });
+
+  return { fileId, filePath, sha256: uploaded.sha256 };
 }
 
 export async function getInvoicePdfData(invoiceId: string) {
@@ -740,7 +897,7 @@ export type HubInvoiceDetail = {
 
 export type HubCustomerDetail = {
   customer: Customer;
-  contacts: Contact[];
+  contacts: PaginatedResult<Contact>;
   tasks: Task[];
   invoices: Invoice[];
   documents: Array<DocumentRecord & { signedUrl: string | null }>;

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CustomerForm } from "@/components/hub/forms";
+import { HubPagination } from "@/components/hub/pagination";
 import { EmptyState, HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
 import {
   customerStatusLabel,
@@ -15,8 +16,13 @@ function customerTone(status: string) {
   return "neutral";
 }
 
-export default async function HubCustomersPage() {
-  const customers = await getCustomers();
+export default async function HubCustomersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const filters = await searchParams;
+  const customers = await getCustomers({ page: filters.page });
 
   return (
     <HubShell
@@ -27,11 +33,13 @@ export default async function HubCustomersPage() {
         <HubCard>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-[#0B0B0C]">Kundlista</h2>
-            <p className="text-sm text-[#6B6B6B]">{customers.length} kunder</p>
+            <p className="text-sm text-[#6B6B6B]">
+              {customers.totalCount} kunder
+            </p>
           </div>
           <div className="mt-5 space-y-3">
-            {customers.length ? (
-              customers.map((customer) => (
+            {customers.items.length ? (
+              customers.items.map((customer) => (
                 <Link
                   key={customer.id}
                   href={`/hub/kunder/${customer.id}`}
@@ -83,6 +91,7 @@ export default async function HubCustomersPage() {
               />
             )}
           </div>
+          <HubPagination basePath="/hub/kunder" {...customers} />
         </HubCard>
 
         <div className="space-y-6">

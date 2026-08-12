@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ContactForm, CustomerForm } from "@/components/hub/forms";
+import { HubPagination } from "@/components/hub/pagination";
 import { HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
 import {
   customerStatusLabel,
@@ -17,11 +18,16 @@ import { getCustomerDetail } from "@/src/lib/hub-server";
 
 export default async function HubCustomerDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ contactsPage?: string }>;
 }) {
   const { id } = await params;
-  const detail = await getCustomerDetail(id).catch(() => null);
+  const filters = await searchParams;
+  const detail = await getCustomerDetail(id, {
+    contactsPage: filters.contactsPage,
+  }).catch(() => null);
 
   if (!detail?.customer) {
     notFound();
@@ -106,8 +112,8 @@ export default async function HubCustomerDetailPage({
           <HubCard>
             <h2 className="text-lg font-semibold text-[#0B0B0C]">Kontakter</h2>
             <div className="mt-5 space-y-3">
-              {detail.contacts.length ? (
-                detail.contacts.map((contact) => (
+              {detail.contacts.items.length ? (
+                detail.contacts.items.map((contact) => (
                   <div key={contact.id} className="rounded-[1.25rem] border border-black/8 bg-[#FBFBF9] p-4">
                     <p className="font-medium text-[#0B0B0C]">{contact.name}</p>
                     <p className="mt-1 text-sm text-[#6B6B6B]">
@@ -119,6 +125,11 @@ export default async function HubCustomerDetailPage({
                 <p className="text-sm text-[#6B6B6B]">Inga kundkontakter registrerade ännu.</p>
               )}
             </div>
+            <HubPagination
+              basePath={`/hub/kunder/${id}`}
+              pageParam="contactsPage"
+              {...detail.contacts}
+            />
           </HubCard>
 
           <HubCard>

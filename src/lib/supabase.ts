@@ -48,12 +48,23 @@ export type DocumentCategory =
   | "contract"
   | "bank_statement"
   | "other";
+export type DocumentType = "original" | "invoice_pdf" | "generated";
+export type DocumentProcessingStatus =
+  | "pending"
+  | "ready"
+  | "failed"
+  | "not_required";
 export type InvoiceStatus =
   | "draft"
   | "sent"
   | "paid"
   | "overdue"
   | "cancelled";
+export type InvoicePdfStatus =
+  | "not_started"
+  | "processing"
+  | "ready"
+  | "failed";
 export type EmailProvider = "gmail" | "outlook" | "imap";
 export type EmailConnectionStatus = "not_connected" | "connected" | "error";
 
@@ -170,6 +181,12 @@ export type DocumentRow = {
   category: DocumentCategory;
   notes: string | null;
   uploaded_by: string | null;
+  sha256?: string | null;
+  document_type?: DocumentType;
+  processing_status?: DocumentProcessingStatus;
+  original_storage_key?: string | null;
+  retention_locked?: boolean;
+  idempotency_key?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -195,6 +212,11 @@ export type InvoiceRow = {
   paid_at: string | null;
   locked_at: string | null;
   pdf_document_id: string | null;
+  pdf_status?: InvoicePdfStatus;
+  pdf_error?: string | null;
+  pdf_storage_key?: string | null;
+  finalization_idempotency_key?: string | null;
+  finalization_started_at?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -416,6 +438,12 @@ export type Database = {
           category?: DocumentCategory;
           notes?: string | null;
           uploaded_by?: string | null;
+          sha256?: string | null;
+          document_type?: DocumentType;
+          processing_status?: DocumentProcessingStatus;
+          original_storage_key?: string | null;
+          retention_locked?: boolean;
+          idempotency_key?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -445,6 +473,11 @@ export type Database = {
           paid_at?: string | null;
           locked_at?: string | null;
           pdf_document_id?: string | null;
+          pdf_status?: InvoicePdfStatus;
+          pdf_error?: string | null;
+          pdf_storage_key?: string | null;
+          finalization_idempotency_key?: string | null;
+          finalization_started_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -518,6 +551,69 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      begin_hub_idempotent_operation: {
+        Args: {
+          target_organization_id: string;
+          target_operation: string;
+          target_key: string;
+          target_request_hash: string;
+        };
+        Returns: unknown;
+      };
+      complete_hub_idempotent_operation: {
+        Args: {
+          target_organization_id: string;
+          target_operation: string;
+          target_key: string;
+          target_result_entity_type: string;
+          target_result_entity_id: string;
+        };
+        Returns: undefined;
+      };
+      fail_hub_idempotent_operation: {
+        Args: {
+          target_organization_id: string;
+          target_operation: string;
+          target_key: string;
+          target_error_message: string;
+        };
+        Returns: undefined;
+      };
+      begin_invoice_finalization: {
+        Args: {
+          target_organization_id: string;
+          target_invoice_id: string;
+          target_idempotency_key: string;
+        };
+        Returns: unknown;
+      };
+      complete_invoice_finalization: {
+        Args: {
+          target_organization_id: string;
+          target_invoice_id: string;
+          target_idempotency_key: string;
+          target_document_id: string;
+        };
+        Returns: undefined;
+      };
+      fail_invoice_finalization: {
+        Args: {
+          target_organization_id: string;
+          target_invoice_id: string;
+          target_idempotency_key: string;
+          target_error_message: string;
+        };
+        Returns: undefined;
+      };
+      post_bookkeeping_draft: {
+        Args: {
+          target_organization_id: string;
+          target_draft_id: string;
+          target_idempotency_key: string;
+          target_journal_series?: string;
+        };
+        Returns: string;
+      };
       claim_next_invoice_number: {
         Args: {
           target_organization_id: string;
