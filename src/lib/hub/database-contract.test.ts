@@ -39,6 +39,23 @@ test("migration plan preserves the reviewed schema and grant order", () => {
   );
 });
 
+test("explicit API grants remove broad cloud defaults before regranting", () => {
+  const grants = sql("api-grants.sql");
+
+  assert.match(
+    grants,
+    /revoke all on table[\s\S]+from anon, authenticated/i,
+  );
+  assert.doesNotMatch(
+    grants,
+    /grant (all|truncate|trigger|references)[^;]+to authenticated/i,
+  );
+  assert.match(
+    grants,
+    /grant select \([\s\S]+\) on public\.processing_jobs to authenticated/i,
+  );
+});
+
 test("synthetic seed is isolated, multi-tenant and never automatic", () => {
   const seedPath = resolve(
     process.cwd(),

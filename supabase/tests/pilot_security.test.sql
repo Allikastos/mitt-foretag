@@ -1,6 +1,6 @@
 begin;
 
-select plan(21);
+select plan(23);
 
 select is(
   (select count(*)::integer from public.organizations where org_number like 'TEST-%'),
@@ -67,6 +67,27 @@ select ok(
 select ok(
   has_function_privilege('authenticated', 'public.create_hub_organization(text,text,text)', 'EXECUTE'),
   'authenticated users create organizations through the atomic RPC'
+);
+select is(
+  (
+    select count(*)::integer
+    from information_schema.role_table_grants
+    where table_schema = 'public'
+      and grantee = 'authenticated'
+      and privilege_type in ('TRUNCATE', 'TRIGGER', 'REFERENCES')
+  ),
+  0,
+  'authenticated users have no structural or RLS-bypassing table privileges'
+);
+select is(
+  (
+    select count(*)::integer
+    from information_schema.role_table_grants
+    where table_schema = 'public'
+      and grantee = 'anon'
+  ),
+  0,
+  'anonymous users have no direct privileges on hub tables'
 );
 
 reset role;
