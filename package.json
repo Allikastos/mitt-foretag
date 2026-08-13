@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test --experimental-strip-types src/lib/hub/*.test.ts src/lib/hub/accounting/*.test.ts src/lib/hub/documents/*.test.ts src/lib/hub/jobs/*.test.ts src/lib/hub/providers/*.test.ts",
+    "test": "node --test --experimental-strip-types src/lib/hub/*.test.ts src/lib/hub/accounting/*.test.ts src/lib/hub/documents/*.test.ts src/lib/hub/integrations/*.test.ts src/lib/hub/jobs/*.test.ts src/lib/hub/providers/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

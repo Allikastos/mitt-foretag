@@ -10,6 +10,10 @@ export const hubFeatureFlags = {
   backgroundJobs: readFlag("HUB_FEATURE_BACKGROUND_JOBS"),
   emailAutomation: readFlag("HUB_FEATURE_EMAIL_AUTOMATION"),
   bankImport: readFlag("HUB_FEATURE_BANK_IMPORT"),
+  subscriptionBilling: readFlag("HUB_FEATURE_SUBSCRIPTION_BILLING"),
+  rateLimiting: readFlag("HUB_FEATURE_RATE_LIMITING"),
+  observability: readFlag("HUB_FEATURE_OBSERVABILITY"),
+  externalBackups: readFlag("HUB_FEATURE_EXTERNAL_BACKUPS"),
   safeMutations: readFlag("HUB_FEATURE_SAFE_MUTATIONS"),
 } as const;
 

@@ -1,5 +1,10 @@
 import { SettingsForm } from "@/components/hub/forms";
-import { HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
+import {
+  HubCard,
+  HubShell,
+  SecondaryLink,
+  StatusBadge,
+} from "@/components/hub/ui";
 import {
   billingPlanLabel,
   billingStatusLabel,
@@ -118,17 +123,26 @@ export default async function HubSettingsPage() {
 
         <div className="space-y-6">
           <HubCard>
-            <h2 className="text-lg font-semibold text-[#0B0B0C]">Kommande integrationer</h2>
-            <div className="mt-5 space-y-3 text-sm leading-7 text-[#5F5F5F]">
-              <p>
-                E-postintegrationer, AI-händelser och bokföringsexport är förberedda
-                i arkitekturen men inte aktiverade i v1.
-              </p>
-              <p>
-                När nästa steg tas finns redan tabeller och tydliga TODO-spår i
-                serverlagret för Gmail/Outlook, PDF-generering, e-postutskick,
-                bokföringsexport och AI-assistent.
-              </p>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.16em] text-[var(--hub-accent-strong)]">
+                  Drift och kopplingar
+                </p>
+                <h2 className="mt-2 text-lg font-semibold text-[var(--hub-text)]">
+                  Integrationscenter
+                </h2>
+              </div>
+              <StatusBadge>Lokalt förberett</StatusBadge>
+            </div>
+            <p className="mt-4 text-sm leading-7 text-[var(--hub-muted)]">
+              Se vilka externa tjänster som redan används, vilken kod som är
+              förberedd och vilka kostnads- och säkerhetsbeslut som återstår.
+              Inget aktiveras automatiskt.
+            </p>
+            <div className="mt-5">
+              <SecondaryLink href="/hub/integrationer">
+                Öppna integrationscenter
+              </SecondaryLink>
             </div>
           </HubCard>
 

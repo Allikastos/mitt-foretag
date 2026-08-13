@@ -1,134 +1,206 @@
-# Future Integrations
+# Integrationsguide
 
-Last updated: 2026-08-12
+Senast uppdaterad: 2026-08-12
 
-No integration in this file is active by default. Each provider must be enabled
-behind a feature flag and approved before setup.
+Ingen ny extern tjänst i den här guiden är aktiverad. En koppling får installeras
+först när behov, kostnad, personuppgiftsflöde, ägare, testplan och rollback är
+godkända. Hemligheter ska ligga i leverantörens eller Vercels servermiljö och
+får aldrig klistras in i chatt, kod eller databasens anslutningstabell.
 
-## Production Database
+## Gemensam aktiveringsordning
 
-Current provider: Supabase.
+1. Dokumentera varför tjänsten behövs och vilket lokalt flöde den ersätter.
+2. Kontrollera aktuell gratisnivå, rörlig kostnad och ett tydligt kostnadstak.
+3. Kartlägg exakt vilka person- och företagsuppgifter som lämnar systemet.
+4. Granska personuppgiftsbiträdesavtal, dataplats och lagringstid.
+5. Välj leverantör och ange endast dess icke-hemliga namn i `HUB_*_PROVIDER`.
+6. Lägg API-nycklar och webhook-hemligheter som servervariabler i en testmiljö.
+7. Installera leverantörsadaptern bakom befintligt provider-kontrakt.
+8. Verifiera signatur, idempotens, tenant-isolering, felhantering och kostnadsgräns.
+9. Slå på relevant `HUB_FEATURE_*` sist och endast i kontrollerad förhandsmiljö.
+10. Dokumentera ägare, larm, återställning och hur kopplingen stängs av.
 
-Why needed: Already used for auth, database and storage.
+## Databas och inloggning
 
-When to revisit: If usage, compliance or cost makes the current Supabase setup
-insufficient.
+- **Varför och när:** Supabase används redan för Auth och Postgres. Planen ska
+  omprövas när kapacitet, återställning, juridik eller kostnad kräver det.
+- **Kostnad:** Gratisnivå finns, medan produktionskapacitet och automatisk
+  backup beror på vald Supabase-plan. Kontrollera alltid aktuell prissida.
+- **Förberedd kod:** `src/lib/supabase.ts`, `src/lib/supabase-server.ts`, RLS,
+  organisationsfilter och manuellt typade databaskontrakt.
+- **Miljövariabler:** `NEXT_PUBLIC_SUPABASE_URL` och en publishable/anon-nyckel.
+  Service role är serverhemlig och får aldrig göras publik.
+- **Dashboard och CLI:** Granska Auth, Database, API och Advisors. Lokalt används
+  `supabase db reset`, `supabase db lint`, `supabase test db` och
+  `supabase gen types typescript --local` först i en separat miljö.
+- **Test och rollback:** Kör tenant- och RLS-tester, ta backup och gör ett
+  återställningstest före migrering. Rulla tillbaka via en ny additiv migration,
+  aldrig genom att radera produktionsdata på chans.
+- **Säkerhet:** RLS ska vara på, explicita grants ska vara snäva och service role
+  ska bara användas i betrodd serverkod.
 
-Prepared code: Supabase-specific access is currently centralized in
-`src/lib/supabase.ts` and `src/lib/supabase-server.ts`.
+## Privat dokumentlagring
 
-Manual setup later: Keep secrets in Supabase/Vercel dashboards only. Never paste
-service role keys into chat or commit them.
+- **Varför och när:** Supabase Storage håller filer utanför Postgres och används
+  redan för privata hubbdokument. Ompröva vid ökade volymer eller backupkrav.
+- **Kostnad:** Gratis startnivå finns; lagring och utgående trafik kan kosta när
+  volymen växer.
+- **Förberedd kod:** `StorageProvider` och `SupabaseStorageProvider` använder
+  organisationsprefix, privata objekt och kortlivade signerade länkar.
+- **Miljövariabler:** Samma Supabase-projektvariabler som databasen; ingen publik
+  bucket-nyckel ska införas.
+- **Dashboard och CLI:** Kontrollera att `hub-documents` är privat och att
+  Storage-RLS motsvarar organisationstillhörigheten. Ändra filer via Storage API,
+  inte genom direkt SQL mot `storage`-schemat.
+- **Test och rollback:** Prova uppladdning, läsning, nekad korsföretagsåtkomst och
+  filåterställning. Behåll providerneutrala storage keys vid en migration.
+- **Säkerhet:** Logga aldrig signerade länkar eller dokumentinnehåll.
 
-## Private Object Storage
+## Bakgrundskö och arbetsflöden
 
-Current provider: Supabase Storage.
+- **Varför och när:** OCR, rapporter, e-post och importer ska inte blockera
+  användarens HTTP-anrop. Anslut först när en produktionsworker behövs.
+- **Kostnad:** Supabase Queues kan använda befintlig Postgres-miljö; andra
+  produkter tar ofta betalt per körning eller exekveringstid.
+- **Förberedd kod:** `JobQueueProvider`, `processing_jobs`, lease, heartbeat,
+  återförsök och aktivitetssidan. Minnesadaptern är endast för utveckling.
+- **Miljövariabler:** `HUB_JOB_QUEUE_PROVIDER`, leverantörens serverhemligheter,
+  `HUB_FEATURE_BACKGROUND_JOBS` och `HUB_FEATURE_SAFE_MUTATIONS`.
+- **Dashboard och CLI:** Aktivera vald kö i dess dashboard och starta en separat
+  worker enligt leverantörens dokumentation. Kör Phase E lokalt före anslutning.
+- **Test och rollback:** Testa samtidiga claims, utgångna leases, dubletter,
+  avbrott och workerbortfall. Stäng först av flaggan, låt säkert arbete slutföras
+  och koppla därefter bort konsumenten.
+- **Säkerhet:** Skicka minsta nödvändiga payload, håll workerfunktioner privata
+  och använd service role endast i workern.
 
-Why needed: Documents must not be stored as blobs in Postgres.
+## Dokumenttolkning och AI
 
-When to revisit: If thousands of documents, retention rules, backup needs or
-cost require a different storage provider.
+- **Varför och när:** Ska föreslå fakta från kvitton och leverantörsfakturor
+  efter att det manuella granskningsflödet är verifierat.
+- **Kostnad:** Gratis provkvoter kan finnas; normal kostnad är per sida, dokument,
+  token eller modellkörning. Sätt ett organisationsbundet kostnadstak.
+- **Förberedd kod:** `DocumentProcessor` returnerar strukturerade förslag och
+  `DisabledDocumentProcessor` stoppar användning utan leverantör.
+- **Miljövariabler:** `HUB_DOCUMENT_PROCESSOR_PROVIDER`, leverantörens servernyckel
+  och `HUB_FEATURE_DOCUMENT_PROCESSING`.
+- **Dashboard och CLI:** Skapa projekt och begränsad nyckel först efter beslut.
+  Installera officiell SDK när leverantören faktiskt valts, inte i förväg.
+- **Test och rollback:** Använd syntetiska dokument, mät kvalitet och kostnad och
+  kontrollera att låg säkerhet kräver frågor. Stäng flaggan för omedelbar rollback;
+  manuellt flöde ska alltid finnas kvar.
+- **Säkerhet:** Ingen rå OCR-text i loggar. AI får aldrig bokföra, godkänna eller
+  ändra originalfilen automatiskt.
 
-Prepared code: `StorageProvider` interface in `src/lib/hub/providers`.
+## Hubbens e-postutskick
 
-Required future env vars: provider-specific bucket/project credentials. These
-must stay server-only unless explicitly public.
+- **Varför och när:** Fakturor, uppföljningsdigest och driftmeddelanden behöver
+  spårbar leverans. Webbplatsens befintliga Resend-kontaktformulär är separat.
+- **Kostnad:** Leverantörer har ofta en begränsad gratisnivå och tar därefter
+  betalt efter volym eller plan.
+- **Förberedd kod:** `EmailDeliveryProvider` och en avstängd adapter som inte kan
+  skicka något av misstag.
+- **Miljövariabler:** `HUB_EMAIL_DELIVERY_PROVIDER`, leverantörens API-nyckel,
+  verifierad avsändare, webhook-hemlighet och `HUB_FEATURE_EMAIL_AUTOMATION`.
+- **Dashboard och CLI:** Verifiera domän, SPF/DKIM, avsändare och webhook i vald
+  leverantörs dashboard. Lägg variabler med `vercel env add` först efter beslut.
+- **Test och rollback:** Skicka bara till en godkänd testadress, prova bounce,
+  dublett och avregistrering. Stäng flaggan och återkalla webhook/nyckel vid rollback.
+- **Säkerhet:** Mallar ska få minsta nödvändiga data; fullständiga dokument och
+  mottagarlistor får inte hamna i leveransloggar.
 
-Rollback: Keep document metadata provider-neutral so files can be migrated by
-storage key.
+## Bankimport
 
-## Queue Or Workflow Service
+- **Varför och när:** Transaktioner kan förenkla avstämning, men CSV-import ska
+  fungera först och alla matchningar ska granskas.
+- **Kostnad:** CSV är kostnadsfri. Bank-API eller aggregator kan kosta per konto,
+  anslutning eller anrop och kan kräva avtal.
+- **Förberedd kod:** `BankImportProvider` och en avstängd adapter. Resultatet är
+  transaktionsförslag, aldrig automatiska verifikationer.
+- **Miljövariabler:** `HUB_BANK_IMPORT_PROVIDER`, leverantörens servernycklar och
+  `HUB_FEATURE_BANK_IMPORT`.
+- **Dashboard och CLI:** Registrera redirect-URL, samtyckesflöde och webhook först
+  efter juridisk och teknisk granskning. Ingen generell CLI-installation förbereds.
+- **Test och rollback:** Testa syntetiskt konto, återkallat samtycke, dubletter,
+  valuta och datumgränser. Stäng flaggan, återkalla samtycke och behåll revisionsspår.
+- **Säkerhet:** Kryptera tokens, begränsa scopes och logga aldrig fullständiga
+  kontoutdrag eller autentiseringsuppgifter.
 
-Current provider: none. Postgres stores the durable control-plane state, but no
-production consumer is connected.
+## Abonnemangsbetalning
 
-Why needed later: OCR, bank imports, report generation and recurring email
-digests should not run inside user requests.
+- **Varför och när:** Behövs för månadsbetalning när paket, priser, provperiod,
+  moms, uppsägning och supportansvar är beslutade.
+- **Kostnad:** Stripe eller annan betalleverantör tar vanligen transaktionsavgift
+  och kan ha separat kostnad för abonnemangsfunktioner. Kontrollera aktuell modell.
+- **Förberedd kod:** `SubscriptionBillingProvider`, avstängd adapter, befintliga
+  plan/statusfält och Phase F-idempotens för verifierade webhookhändelser.
+- **Miljövariabler:** `HUB_SUBSCRIPTION_BILLING_PROVIDER`, servernyckel, pris-ID,
+  webhook-hemlighet och `HUB_FEATURE_SUBSCRIPTION_BILLING`.
+- **Dashboard och CLI:** Skapa produkt, återkommande pris, kundportal och signerad
+  webhook i leverantörens testläge. Installera officiell SDK först efter valet.
+- **Test och rollback:** Testa lyckad, misslyckad och försenad betalning,
+  uppgradering, uppsägning, webhookdublett och fel ordning. Stäng checkoutflaggan
+  först; avsluta inte kundabonnemang automatiskt som teknisk rollback.
+- **Säkerhet:** Kortdata ska aldrig passera hubbens server. Verifiera signaturen
+  mot rå body före Phase F-kvittot och behandla varje event idempotent.
 
-When to connect: When background jobs need production reliability.
+## Anropsbegränsning
 
-Prepared code: `JobQueueProvider`, a development-only memory adapter, the
-`processing_jobs` lease contract and a guarded activity center.
+- **Varför och när:** Behövs före publika eller kostnadsdrivande API:er som AI,
+  uppladdning och inbjudningar.
+- **Kostnad:** Delad Redis/KV har ofta gratis startnivå och kostnad per kommando,
+  lagring eller trafik.
+- **Förberedd kod:** `RateLimitProvider`; den avstängda adaptern failar stängt och
+  släpper inte igenom ett skyddat anrop.
+- **Miljövariabler:** `HUB_RATE_LIMIT_PROVIDER`, server-URL/token och
+  `HUB_FEATURE_RATE_LIMITING`.
+- **Dashboard och CLI:** Skapa databas i rätt region och begränsa token. Installera
+  officiell klient först när leverantören valts.
+- **Test och rollback:** Testa gräns, tidsfönster, flera serverinstanser och
+  leverantörsbortfall. Stäng det skyddade flödet om tjänsten faller bort; byt inte
+  till ett tyst processminne i produktion.
+- **Säkerhet:** Lagra hashade ämnesnycklar, inte rå IP, e-post eller användardata.
 
-Important: Do not use an in-memory queue as production infrastructure.
+## Felspårning och driftövervakning
 
-Candidate later path: Supabase Queues provides a Postgres-native durable queue,
-but enabling it and connecting a worker requires explicit approval and a
-separate operational review. `processing_jobs` remains the user-facing source
-of status and audit history regardless of provider.
+- **Varför och när:** Ska upptäcka fel innan betalande kunder påverkas. Vercel
+  Analytics och runtime logs finns, men är inte full hubbspecifik felspårning.
+- **Kostnad:** Vercels grundfunktioner beror på plan; externa verktyg kostar ofta
+  efter händelser, loggvolym och lagringstid.
+- **Förberedd kod:** `ErrorReporter` accepterar bara fel, korrelations-ID och
+  primitiv, uttryckligen tillåten kontext. Avstängd adapter skickar ingenting.
+- **Miljövariabler:** `HUB_ERROR_REPORTER_PROVIDER`, server-DSN/token och
+  `HUB_FEATURE_OBSERVABILITY`.
+- **Dashboard och CLI:** Bestäm projekt, miljö, maskningsregler, lagringstid och
+  larmmottagare innan officiell SDK installeras.
+- **Test och rollback:** Skicka ett syntetiskt fel utan persondata och prova larm.
+  Stäng flaggan, ta bort DSN och avinstallera adapter vid rollback.
+- **Säkerhet:** Förbjud dokument, tokens, bankdata, full e-post och råa payloads.
 
-## OCR And AI
+## Backup och återställning
 
-Current provider: none.
+- **Varför och när:** Backup är användbar först när återställningen är provad.
+  Databas och Storage-objekt måste hanteras som två separata tillgångar.
+- **Kostnad:** Supabase ger automatiska dagliga backups på betalda planer. Free
+  bör exportera regelbundet. PITR, extern lagring och trafik kan kosta extra.
+- **Förberedd kod:** `BackupProvider`, avstängd adapter och integrationsstatus.
+- **Miljövariabler:** `HUB_BACKUP_PROVIDER`, serverhemligheter till målarkiv och
+  `HUB_FEATURE_EXTERNAL_BACKUPS`.
+- **Dashboard och CLI:** Kontrollera Database > Backups. En manuell logisk export
+  görs senare med `supabase db dump --linked -f backup.sql` i en godkänd miljö.
+  Storage-objekt måste kopieras separat via Storage API.
+- **Test och rollback:** Sätt RPO/RTO, verifiera kryptering och återställ en kopia
+  i isolerad miljö. Avbryt schemaläggningen och återkalla målarkivets nyckel vid
+  rollback utan att radera tidigare verifierade backups.
+- **Säkerhet:** Separera backupkonto från driftkonto, kryptera, begränsa åtkomst,
+  logga återställningar och prova både databas och filer.
 
-Why needed later: Reading receipts, supplier invoices and bank statements.
+## Phase F:s webhookgräns
 
-When to connect: After manual document flow, audit trail, review UI and cost
-limits exist.
-
-Prepared code: `DocumentProcessor` interface.
-
-Security: OCR output may contain personal data and must not be logged in full.
-
-Accounting rule: AI may suggest facts and categories. It must not post final
-debit/credit entries.
-
-## Redis And Rate Limiting
-
-Current provider: none.
-
-Why needed later: Contact forms, login-sensitive endpoints, upload endpoints and
-AI endpoints may need throttling.
-
-Prepared code: keep a provider-independent rate-limit interface before adding a
-provider.
-
-## Observability
-
-Current provider: Vercel analytics package is installed. No hub-specific error
-tracking provider is required yet.
-
-Why needed later: Production support and debugging.
-
-When to connect: Before paid customers depend on the hub daily.
-
-Rule: Do not send full documents, tokens or sensitive accounting data to logs.
-
-## Email Delivery
-
-Current provider: Resend for the public contact form.
-
-Why needed later: Invoice sending, weekly follow-up digests and operational
-notifications.
-
-When to connect: After email templates, unsubscribe/notification preferences and
-delivery logging are designed.
-
-Prepared code: Email should go through a provider interface before hub emails
-are enabled.
-
-## Bank Integration
-
-Current provider: none.
-
-Why needed later: Bank transaction import and reconciliation.
-
-Cost-free first step: CSV import for bank transactions.
-
-When to connect: After manual CSV import, matching rules and audit trail work.
-
-Regulatory note: Real bank integrations may involve provider cost, consent
-flows and compliance review.
-
-## Payments
-
-Current provider: none connected for subscriptions. Organization fields already
-reserve Stripe IDs.
-
-Why needed later: Monthly SaaS billing.
-
-When to connect: After product packaging, trial policy, cancellation handling
-and Swedish invoice/accounting implications are decided.
-
-Manual setup later: The user should create provider account/dashboard settings
-directly. Secrets go into Vercel environment variables, never into chat.
+`supabase/phase-f.sql` är endast ett lokalt förslag. Det sparar anslutningsstatus
+och kvitton för externa events, men inga hemligheter och ingen rå payload.
+Webhookmottagaren ska först verifiera leverantörens signatur mot exakt rå body,
+beräkna SHA-256, och därefter anropa `private.begin_external_event` med service
+role. Samma företag, provider och event-ID kan inte återanvändas med annat
+innehåll. Funktionen svarar dessutom om eventet ska behandlas, så en pågående
+eller redan slutförd dublett inte körs igen.

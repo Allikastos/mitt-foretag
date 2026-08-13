@@ -59,6 +59,15 @@ worker selection and feature activation remain deliberately pending.
 
 ## Phase 6: External Services
 
+Local guarded readiness is complete. Provider installation, cost approval,
+database installation and feature activation remain deliberately pending.
+
+- A Swedish integration center makes readiness, data sharing and cost gates
+  visible to owners and employees.
+- Provider-neutral contracts fail safely while no provider is selected.
+- Phase F proposes owner-readable connection status and server-only webhook
+  idempotency without secrets or raw payload storage.
+
 Only after the product needs them and cost is approved:
 
 - OCR/AI provider.

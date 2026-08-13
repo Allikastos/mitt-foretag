@@ -97,6 +97,33 @@ export type ProcessingJobStatus =
   | "succeeded"
   | "failed"
   | "cancelled";
+export type IntegrationCategory =
+  | "database"
+  | "private_storage"
+  | "document_ai"
+  | "background_queue"
+  | "hub_email"
+  | "bank_import"
+  | "subscription_billing"
+  | "rate_limiting"
+  | "observability"
+  | "backup_restore";
+export type IntegrationConnectionStatus =
+  | "pending"
+  | "connected"
+  | "degraded"
+  | "error"
+  | "disconnected";
+export type IntegrationHealthStatus =
+  | "unknown"
+  | "healthy"
+  | "degraded"
+  | "error";
+export type ExternalEventStatus =
+  | "processing"
+  | "succeeded"
+  | "failed"
+  | "ignored";
 export type AccountingWorkflowStatus =
   | "incomplete"
   | "needs_review"
@@ -375,6 +402,38 @@ export type ProcessingJobRow = {
   cancellation_reason: string | null;
   created_by: string | null;
   created_at: string;
+  updated_at: string;
+};
+
+export type IntegrationConnectionRow = {
+  id: string;
+  organization_id: string;
+  category: IntegrationCategory;
+  provider: string;
+  status: IntegrationConnectionStatus;
+  display_name: string | null;
+  configuration_version: number;
+  health_status: IntegrationHealthStatus;
+  connected_by: string | null;
+  connected_at: string | null;
+  last_health_checked_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ExternalEventReceiptRow = {
+  id: string;
+  organization_id: string;
+  integration_connection_id: string | null;
+  provider: string;
+  external_event_id: string;
+  event_type: string;
+  payload_sha256: string;
+  status: ExternalEventStatus;
+  attempt_count: number;
+  failure_code: string | null;
+  received_at: string;
+  processed_at: string | null;
   updated_at: string;
 };
 
@@ -855,6 +914,46 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<ProcessingJobRow>;
+        Relationships: [];
+      };
+      integration_connections: {
+        Row: IntegrationConnectionRow;
+        Insert: {
+          id?: string;
+          organization_id: string;
+          category: IntegrationCategory;
+          provider: string;
+          status?: IntegrationConnectionStatus;
+          display_name?: string | null;
+          configuration_version?: number;
+          health_status?: IntegrationHealthStatus;
+          connected_by?: string | null;
+          connected_at?: string | null;
+          last_health_checked_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<IntegrationConnectionRow>;
+        Relationships: [];
+      };
+      external_event_receipts: {
+        Row: ExternalEventReceiptRow;
+        Insert: {
+          id?: string;
+          organization_id: string;
+          integration_connection_id?: string | null;
+          provider: string;
+          external_event_id: string;
+          event_type: string;
+          payload_sha256: string;
+          status?: ExternalEventStatus;
+          attempt_count?: number;
+          failure_code?: string | null;
+          received_at?: string;
+          processed_at?: string | null;
+          updated_at?: string;
+        };
+        Update: Partial<ExternalEventReceiptRow>;
         Relationships: [];
       };
       company_accounting_settings: {

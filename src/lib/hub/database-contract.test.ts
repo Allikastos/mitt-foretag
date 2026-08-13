@@ -14,9 +14,33 @@ test("database proposals contain no destructive SQL statements", () => {
     "phase-c.sql",
     "phase-d.sql",
     "phase-e.sql",
+    "phase-f.sql",
   ]) {
     assert.doesNotMatch(sql(name), /^\s*(drop|truncate|delete)\b/im, name);
   }
+});
+
+test("Phase F stores safe integration status and idempotent event receipts", () => {
+  const integrations = sql("phase-f.sql");
+
+  assert.match(integrations, /create table if not exists public\.integration_connections/i);
+  assert.match(integrations, /create table if not exists public\.external_event_receipts/i);
+  assert.match(integrations, /payload_sha256[\s\S]*\^\[0-9a-f\]\{64\}\$/i);
+  assert.match(
+    integrations,
+    /unique \(organization_id, provider, external_event_id\)/i,
+  );
+  assert.match(integrations, /returns table \([^)]*should_process boolean\)/i);
+  assert.match(integrations, /status = 'processing'[\s\S]*interval '15 minutes'/i);
+  assert.match(integrations, /create or replace function private\.begin_external_event/i);
+  assert.match(integrations, /create or replace function private\.complete_external_event/i);
+  assert.match(integrations, /grant execute[^;]+begin_external_event[^;]+to service_role/i);
+  assert.doesNotMatch(integrations, /\b(api_key|access_token|refresh_token|webhook_secret)\b/i);
+  assert.doesNotMatch(integrations, /\bpayload\s+jsonb\b/i);
+  assert.doesNotMatch(
+    integrations,
+    /grant (insert|update|delete) on public\.(integration_connections|external_event_receipts) to authenticated/i,
+  );
 });
 
 test("Phase E uses durable leasing without exposing worker controls", () => {

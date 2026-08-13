@@ -41,6 +41,8 @@ The following items should be prioritized before a real SaaS launch:
   `HUB_FEATURE_DOCUMENT_PROCESSING`.
 - Apply and concurrency-test `supabase/phase-e.sql`, then connect a reviewed
   worker before enabling `HUB_FEATURE_BACKGROUND_JOBS`.
+- Apply and security-test `supabase/phase-f.sql` before storing integration
+  status or accepting external webhook events.
 - Review admin routes separately from hub roles.
 
 ## Logging Rules
@@ -127,3 +129,20 @@ The accounting module must be conservative:
   client permissions.
 - Treat cancellation of active jobs as cooperative and recheck it before saving
   any result.
+
+## External Integration Safety
+
+- Never store API keys, OAuth tokens or webhook secrets in
+  `integration_connections`.
+- Verify each webhook signature against its exact raw body before parsing it or
+  writing an event receipt.
+- Store only SHA-256 and safe event metadata; raw webhook payloads remain outside
+  the Phase F receipt table.
+- Reject a repeated provider/event-ID when event type, organization or payload
+  hash differs.
+- Keep event receipt writes and integration status writes in the private schema
+  and limited to service role.
+- Add a provider only after cost, data processing, retention, alarms, rollback
+  and ownership are documented.
+- Keep every feature flag off until the provider adapter and its failure mode
+  have passed a controlled preview test.
