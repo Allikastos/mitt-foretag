@@ -1,5 +1,6 @@
 import { createBrowserClient } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { assertSafeHubEnvironment } from "./hub/runtime-environment";
 
 export type PostStatus = "draft" | "scheduled" | "published";
 
@@ -1314,6 +1315,16 @@ export function getSupabaseBrowserClient() {
   }
 
   const { url, anonKey } = requireSupabaseEnv();
+
+  assertSafeHubEnvironment({
+    NEXT_PUBLIC_HUB_RUNTIME_ENVIRONMENT:
+      process.env.NEXT_PUBLIC_HUB_RUNTIME_ENVIRONMENT,
+    NEXT_PUBLIC_HUB_DATA_ENVIRONMENT:
+      process.env.NEXT_PUBLIC_HUB_DATA_ENVIRONMENT,
+    NEXT_PUBLIC_HUB_PRODUCTION_SUPABASE_PROJECT_REF:
+      process.env.NEXT_PUBLIC_HUB_PRODUCTION_SUPABASE_PROJECT_REF,
+    NEXT_PUBLIC_SUPABASE_URL: url,
+  });
 
   browserClient = createBrowserClient<Database>(url, anonKey);
 

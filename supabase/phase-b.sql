@@ -143,6 +143,263 @@ $$;
 alter table public.idempotency_keys enable row level security;
 alter table public.processing_jobs enable row level security;
 
+-- Keep employee customer scope enforceable below the UI layer. These helpers
+-- run with the function owner's RLS bypass, but expose only a boolean decision.
+create or replace function public.can_access_customer(
+  target_organization_id uuid,
+  target_customer_id uuid
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select exists (
+    select 1
+    from public.organization_members membership
+    join public.organizations organization
+      on organization.id = membership.organization_id
+    join public.customers customer
+      on customer.organization_id = membership.organization_id
+     and customer.id = target_customer_id
+    where membership.organization_id = target_organization_id
+      and membership.user_id = auth.uid()
+      and (
+        membership.role in ('owner', 'admin')
+        or (
+          customer.visibility = 'organization'
+          and (
+            organization.employee_customer_scope = 'all_customers'
+            or customer.owner_user_id = auth.uid()
+            or customer.created_by = auth.uid()
+          )
+        )
+      )
+  )
+$$;
+
+create or replace function public.can_access_invoice(
+  target_organization_id uuid,
+  target_invoice_id uuid
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select exists (
+    select 1
+    from public.invoices invoice
+    where invoice.organization_id = target_organization_id
+      and invoice.id = target_invoice_id
+      and (
+        invoice.customer_id is null
+        or public.can_access_customer(target_organization_id, invoice.customer_id)
+      )
+  )
+  and public.is_org_member(target_organization_id)
+$$;
+
+create or replace function public.can_write_customer(
+  target_organization_id uuid,
+  target_visibility text,
+  target_owner_user_id uuid,
+  target_created_by uuid
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select exists (
+    select 1
+    from public.organization_members membership
+    join public.organizations organization
+      on organization.id = membership.organization_id
+    where membership.organization_id = target_organization_id
+      and membership.user_id = auth.uid()
+      and (
+        membership.role in ('owner', 'admin')
+        or (
+          membership.role = 'member'
+          and target_visibility = 'organization'
+          and (
+            organization.employee_customer_scope = 'all_customers'
+            or target_owner_user_id = auth.uid()
+            or target_created_by = auth.uid()
+          )
+        )
+      )
+  )
+$$;
+
+revoke all on function public.can_access_customer(uuid, uuid) from public;
+revoke all on function public.can_access_invoice(uuid, uuid) from public;
+revoke all on function public.can_write_customer(uuid, text, uuid, uuid) from public;
+grant execute on function public.can_access_customer(uuid, uuid) to authenticated;
+grant execute on function public.can_access_invoice(uuid, uuid) to authenticated;
+grant execute on function public.can_write_customer(uuid, text, uuid, uuid) to authenticated;
+
+alter policy "Members can read customers" on public.customers
+  using (public.can_access_customer(organization_id, id));
+alter policy "Members can manage customers" on public.customers
+  using (
+    public.can_write_customer(
+      organization_id, visibility, owner_user_id, created_by
+    )
+  )
+  with check (
+    public.can_write_customer(
+      organization_id, visibility, owner_user_id, created_by
+    )
+  );
+
+alter policy "Members can read contacts" on public.contacts
+  using (public.can_access_customer(organization_id, customer_id));
+alter policy "Members can manage contacts" on public.contacts
+  using (
+    public.can_manage_org_data(organization_id)
+    and public.can_access_customer(organization_id, customer_id)
+  )
+  with check (
+    public.can_manage_org_data(organization_id)
+    and public.can_access_customer(organization_id, customer_id)
+  );
+
+alter policy "Members can read tasks" on public.tasks
+  using (
+    public.is_org_member(organization_id)
+    and (
+      customer_id is null
+      or public.can_access_customer(organization_id, customer_id)
+    )
+  );
+alter policy "Members can manage tasks" on public.tasks
+  using (
+    public.can_manage_org_data(organization_id)
+    and (
+      customer_id is null
+      or public.can_access_customer(organization_id, customer_id)
+    )
+  )
+  with check (
+    public.can_manage_org_data(organization_id)
+    and (
+      customer_id is null
+      or public.can_access_customer(organization_id, customer_id)
+    )
+  );
+
+alter policy "Members can read documents" on public.documents
+  using (
+    public.is_org_member(organization_id)
+    and (
+      customer_id is null
+      or public.can_access_customer(organization_id, customer_id)
+    )
+  );
+alter policy "Members can manage documents" on public.documents
+  using (
+    public.can_manage_org_data(organization_id)
+    and (
+      customer_id is null
+      or public.can_access_customer(organization_id, customer_id)
+    )
+  )
+  with check (
+    public.can_manage_org_data(organization_id)
+    and (
+      customer_id is null
+      or public.can_access_customer(organization_id, customer_id)
+    )
+  );
+
+alter policy "Members can read invoices" on public.invoices
+  using (public.can_access_invoice(organization_id, id));
+alter policy "Members can manage invoices" on public.invoices
+  using (
+    public.can_manage_org_data(organization_id)
+    and public.can_access_invoice(organization_id, id)
+  )
+  with check (
+    public.can_manage_org_data(organization_id)
+    and (
+      customer_id is null
+      or public.can_access_customer(organization_id, customer_id)
+    )
+  );
+
+alter policy "Members can read invoice lines" on public.invoice_lines
+  using (public.can_access_invoice(organization_id, invoice_id));
+alter policy "Members can manage invoice lines" on public.invoice_lines
+  using (
+    public.can_manage_org_data(organization_id)
+    and public.can_access_invoice(organization_id, invoice_id)
+  )
+  with check (
+    public.can_manage_org_data(organization_id)
+    and public.can_access_invoice(organization_id, invoice_id)
+  );
+
+alter policy "Hub members can view documents bucket" on storage.objects
+  using (
+    bucket_id = 'hub-documents'
+    and exists (
+      select 1
+      from public.documents document
+      where document.organization_id = public.storage_object_org_id(name)
+        and document.file_path = name
+        and (
+          document.customer_id is null
+          or public.can_access_customer(document.organization_id, document.customer_id)
+        )
+    )
+  );
+alter policy "Hub members can update documents bucket" on storage.objects
+  using (
+    bucket_id = 'hub-documents'
+    and public.can_manage_org_data(public.storage_object_org_id(name))
+    and exists (
+      select 1 from public.documents document
+      where document.organization_id = public.storage_object_org_id(name)
+        and document.file_path = name
+        and (
+          document.customer_id is null
+          or public.can_access_customer(document.organization_id, document.customer_id)
+        )
+    )
+  )
+  with check (
+    bucket_id = 'hub-documents'
+    and public.can_manage_org_data(public.storage_object_org_id(name))
+    and exists (
+      select 1 from public.documents document
+      where document.organization_id = public.storage_object_org_id(name)
+        and document.file_path = name
+        and (
+          document.customer_id is null
+          or public.can_access_customer(document.organization_id, document.customer_id)
+        )
+    )
+  );
+alter policy "Hub members can delete documents bucket" on storage.objects
+  using (
+    bucket_id = 'hub-documents'
+    and public.can_manage_org_data(public.storage_object_org_id(name))
+    and exists (
+      select 1 from public.documents document
+      where document.organization_id = public.storage_object_org_id(name)
+        and document.file_path = name
+        and (
+          document.customer_id is null
+          or public.can_access_customer(document.organization_id, document.customer_id)
+        )
+    )
+  );
+
 do $$
 begin
   if not exists (

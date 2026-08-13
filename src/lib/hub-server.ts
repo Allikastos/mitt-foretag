@@ -27,6 +27,7 @@ import {
   assertTenantResource,
 } from "./hub/tenant-security.ts";
 import { hubFeatureFlags } from "./hub/feature-flags.ts";
+import { assertSafeHubServerEnvironment } from "./hub/runtime-environment-server.ts";
 import {
   calculateSha256,
   SupabaseStorageProvider,
@@ -52,6 +53,7 @@ export async function createOrganizationForUser(context: {
   organizationName?: string | null;
   orgNumber?: string | null;
 }) {
+  assertSafeHubServerEnvironment();
   const organizationId = randomUUID();
   const organizationName =
     context.organizationName?.trim() ||
@@ -69,7 +71,7 @@ export async function createOrganizationForUser(context: {
     });
 
   if (organizationError) {
-    throw organizationError ?? new Error("Kunde inte skapa organisation.");
+    throw new Error("Kunde inte skapa organisationen just nu.");
   }
 
   const { error: memberError } = await context.supabase
@@ -81,7 +83,7 @@ export async function createOrganizationForUser(context: {
     });
 
   if (memberError) {
-    throw memberError;
+    throw new Error("Kunde inte skapa ägarbehörigheten just nu.");
   }
 
   await context.supabase.from("activity_log").insert({
@@ -95,6 +97,7 @@ export async function createOrganizationForUser(context: {
 }
 
 export const requireHubContext = cache(async (): Promise<HubContext> => {
+  assertSafeHubServerEnvironment();
   const supabase = await createSupabaseServerClient();
 
   if (!supabase) {
@@ -132,7 +135,7 @@ export const requireHubContext = cache(async (): Promise<HubContext> => {
   }
 
   if (membershipQuery.error || !membershipQuery.data?.organizations) {
-    throw membershipQuery.error ?? new Error("Kunde inte läsa hubbkontext.");
+    throw new Error("Kunde inte läsa din hubbåtkomst just nu.");
   }
 
   assertMembership({
@@ -326,7 +329,7 @@ export async function getCustomers(paginationInput: PaginationInput = {}) {
   const { data, error, count } = await query;
 
   if (error) {
-    throw error;
+    throw new Error("Kundlistan kunde inte hämtas just nu.");
   }
 
   return createPaginatedResult({
@@ -385,7 +388,7 @@ export async function getCustomerDetail(
     ]);
 
   if (customerResult.error) {
-    throw customerResult.error;
+    throw new Error("Kunden kunde inte hämtas just nu.");
   }
 
   const isOwnerLevel = ["owner", "admin"].includes(membership.role);
@@ -452,7 +455,7 @@ export async function getTasks(filters?: {
   const { data, error, count } = await query;
 
   if (error) {
-    throw error;
+    throw new Error("Uppgiftslistan kunde inte hämtas just nu.");
   }
 
   const tasks = data ?? [];
@@ -501,7 +504,7 @@ export async function getDocuments(paginationInput: PaginationInput = {}) {
     .range(pagination.from, pagination.to);
 
   if (error) {
-    throw error;
+    throw new Error("Dokumentlistan kunde inte hämtas just nu.");
   }
 
   const documents = data ?? [];
@@ -572,7 +575,7 @@ export async function getInvoices(paginationInput: PaginationInput = {}) {
     .range(pagination.from, pagination.to);
 
   if (error) {
-    throw error;
+    throw new Error("Fakturalistan kunde inte hämtas just nu.");
   }
 
   const invoices = data ?? [];
@@ -645,7 +648,7 @@ export async function getInvoiceDetail(invoiceId: string) {
   ]);
 
   if (invoiceResult.error) {
-    throw invoiceResult.error;
+    throw new Error("Fakturan kunde inte hämtas just nu.");
   }
 
   const invoiceData = invoiceResult.data as Invoice;

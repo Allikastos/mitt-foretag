@@ -36,7 +36,7 @@ export function HubLoginForm() {
       });
 
       if (error) {
-        setErrorMessage(error.message);
+        setErrorMessage("E-postadressen eller lösenordet är felaktigt.");
         return;
       }
 

@@ -1,0 +1,11 @@
+{
+  "baselineRequired": "A reviewed, non-destructive baseline migration containing the currently installed hub schema",
+  "sources": [
+    { "name": "hub_phase_b", "file": "phase-b.sql" },
+    { "name": "accounting_foundation", "file": "accounting.sql" },
+    { "name": "accounting_phase_c", "file": "phase-c.sql" },
+    { "name": "documents_phase_d", "file": "phase-d.sql" },
+    { "name": "jobs_phase_e", "file": "phase-e.sql" },
+    { "name": "integrations_phase_f", "file": "phase-f.sql" }
+  ]
+}

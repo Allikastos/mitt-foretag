@@ -34,7 +34,7 @@ export async function cancelProcessingJobAction(formData: FormData) {
     target_reason: "Avbruten från aktivitetscentret.",
   });
 
-  if (error) throw error;
+  if (error) throw new Error("Processen kunde inte avbrytas.");
 
   await logHubActivity({
     organizationId: organization.id,
@@ -57,7 +57,7 @@ export async function retryProcessingJobAction(formData: FormData) {
     target_job_id: jobId,
   });
 
-  if (error) throw error;
+  if (error) throw new Error("Processen kunde inte startas om.");
 
   await logHubActivity({
     organizationId: organization.id,

@@ -40,14 +40,14 @@ export default async function HubAccountingPage() {
 
   return (
     <HubShell
-      title="Bokföring"
-      description="Förbered, granska och bokför enkla svenska affärshändelser i en tydlig kedja."
+      title="Bokföring – förhandsversion"
+      description="Förhandsgranska enkla svenska affärshändelser. Funktionen är inte redo för faktisk bokföring."
     >
       <section className="overflow-hidden rounded-[1.8rem] bg-[var(--hub-panel)] text-[var(--hub-panel-contrast)] shadow-[0_32px_80px_-54px_rgba(0,0,0,0.65)]">
         <div className="grid gap-7 p-6 md:p-8 xl:grid-cols-[1.35fr_0.65fr] xl:items-end">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--hub-accent)]">
-              Bokföringsstudio
+              Bokföringsstudio – förhandsversion
             </p>
             <h2 className="mt-3 max-w-2xl text-2xl font-semibold tracking-[-0.04em] md:text-3xl">
               Från händelse till verifierad verifikation, utan dolda steg.
@@ -68,7 +68,7 @@ export default async function HubAccountingPage() {
           <div className="rounded-[1.4rem] border border-white/10 bg-white/[0.07] p-5">
             <p className="text-xs uppercase tracking-[0.18em] text-[var(--hub-accent)]">Avgränsad första version</p>
             <p className="mt-3 text-lg font-semibold">Enskild firma</p>
-            <p className="mt-1 text-sm leading-6 text-[var(--hub-panel-muted)]">Kontantmetoden, SEK och sju vanliga händelsetyper. Lön, lån, EU-handel och bokslut stoppas.</p>
+            <p className="mt-1 text-sm leading-6 text-[var(--hub-panel-muted)]">Endast enskild firma, kontantmetoden, kalenderår och SEK. Lön, lån, EU-handel, periodisering och bokslut stoppas.</p>
           </div>
         </div>
       </section>

@@ -562,7 +562,26 @@ begin
   where organization_id = target_organization_id and id = target_draft_id
   for update;
 
-  if not found or target_draft.status <> 'ready_to_post' then
+  if not found then
+    raise exception 'Bookkeeping draft does not exist';
+  end if;
+
+  idempotency_result := public.begin_hub_idempotent_operation(
+    target_organization_id,
+    'post_journal_entry',
+    target_idempotency_key,
+    target_draft_id::text
+  );
+
+  if idempotency_result->>'outcome' = 'replay' then
+    return (idempotency_result->>'resultEntityId')::uuid;
+  end if;
+
+  if idempotency_result->>'outcome' = 'in_progress' then
+    raise exception 'An identical journal posting is already in progress';
+  end if;
+
+  if target_draft.status <> 'ready_to_post' then
     raise exception 'Bookkeeping draft is not ready to post';
   end if;
 
@@ -630,21 +649,6 @@ begin
 
   if target_draft.posting_rule_id is null or target_draft.posting_rule_version is null then
     raise exception 'Posting rule identity is required';
-  end if;
-
-  idempotency_result := public.begin_hub_idempotent_operation(
-    target_organization_id,
-    'post_journal_entry',
-    target_idempotency_key,
-    target_draft_id::text
-  );
-
-  if idempotency_result->>'outcome' = 'replay' then
-    return (idempotency_result->>'resultEntityId')::uuid;
-  end if;
-
-  if idempotency_result->>'outcome' = 'in_progress' then
-    raise exception 'An identical journal posting is already in progress';
   end if;
 
   select id into idempotency_id

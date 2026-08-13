@@ -51,7 +51,7 @@ export async function saveDocumentFactsAction(formData: FormData) {
     .maybeSingle();
 
   if (documentResult.error || !documentResult.data) {
-    throw documentResult.error ?? new Error("Dokumentet tillhör inte det aktiva företaget.");
+    throw new Error("Dokumentet kunde inte hittas i det aktiva företaget.");
   }
 
   const review = buildManualDocumentReview({
@@ -89,7 +89,7 @@ export async function saveDocumentFactsAction(formData: FormData) {
   });
 
   if (error || !data) {
-    throw error ?? new Error("Dokumentuppgifterna kunde inte sparas.");
+    throw new Error("Dokumentuppgifterna kunde inte sparas.");
   }
 
   await logHubActivity({
@@ -123,7 +123,7 @@ export async function createDocumentAccountingDraftAction(formData: FormData) {
     .maybeSingle();
 
   if (sourceResult.error || !sourceResult.data) {
-    throw sourceResult.error ?? new Error("Spara dokumentuppgifterna först.");
+    throw new Error("Spara dokumentuppgifterna först.");
   }
   if (sourceResult.data.business_event_id) {
     throw new Error("Dokumentet är redan kopplat till ett bokföringsutkast.");
@@ -139,7 +139,7 @@ export async function createDocumentAccountingDraftAction(formData: FormData) {
     .maybeSingle();
 
   if (factsResult.error || !factsResult.data) {
-    throw factsResult.error ?? new Error("Dokumentet saknar granskade uppgifter.");
+    throw new Error("Dokumentet saknar granskade uppgifter.");
   }
   if (factsResult.data.review_status !== "ready_for_review") {
     throw new Error("Dokumentuppgifterna är inte redo att kopplas.");
@@ -197,7 +197,7 @@ export async function createDocumentAccountingDraftAction(formData: FormData) {
   });
 
   if (draftResult.error || !draftResult.data) {
-    throw draftResult.error ?? new Error("Konteringsutkastet kunde inte skapas.");
+    throw new Error("Konteringsutkastet kunde inte skapas.");
   }
 
   const linkResult = await supabase.rpc("link_source_document_to_draft", {
@@ -206,7 +206,9 @@ export async function createDocumentAccountingDraftAction(formData: FormData) {
     target_draft_id: draftResult.data,
   });
 
-  if (linkResult.error) throw linkResult.error;
+  if (linkResult.error) {
+    throw new Error("Dokumentet kunde inte kopplas till konteringsutkastet.");
+  }
 
   await logHubActivity({
     organizationId: organization.id,

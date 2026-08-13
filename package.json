@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --test --experimental-strip-types src/lib/hub/*.test.ts src/lib/hub/accounting/*.test.ts src/lib/hub/documents/*.test.ts src/lib/hub/integrations/*.test.ts src/lib/hub/jobs/*.test.ts src/lib/hub/providers/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:migrations:prepare": "node scripts/prepare-supabase-migrations.mjs",
+    "db:test": "supabase test db",
+    "db:test:integration": "node scripts/test-supabase-integration.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",

@@ -17,6 +17,7 @@ import type {
 import { buildInvoicePdf } from "@/src/lib/invoice-pdf";
 import { hubFeatureFlags } from "@/src/lib/hub/feature-flags";
 import { normalizeIdempotencyKey } from "@/src/lib/hub/idempotency";
+import { assertSafeHubServerEnvironment } from "@/src/lib/hub/runtime-environment-server";
 import { calculateSha256 } from "@/src/lib/hub/providers/supabase-storage-provider";
 import {
   HUB_MAX_FILE_SIZE_BYTES,
@@ -84,7 +85,9 @@ function parseHubOperationResult(value: unknown): HubOperationResult {
 }
 
 function errorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Ett okänt fel inträffade.";
+  return error instanceof Error
+    ? "Dokumenthanteringen misslyckades."
+    : "Ett okänt fel inträffade.";
 }
 
 async function completeHubOperation(params: {
@@ -106,7 +109,7 @@ async function completeHubOperation(params: {
     },
   );
 
-  if (error) throw error;
+  if (error) throw new Error("Dokumentprocessen kunde inte slutföras.");
 }
 
 async function failHubOperation(params: {
@@ -139,7 +142,7 @@ async function getInvoiceForMutation(params: {
     .single();
 
   if (error || !data) {
-    throw error ?? new Error("Kunde inte hitta fakturan.");
+    throw new Error("Fakturan kunde inte hittas i det aktiva företaget.");
   }
 
   return data;
@@ -158,7 +161,7 @@ async function requireCustomerInOrganization(params: {
     .maybeSingle();
 
   if (error || !data) {
-    throw error ?? new Error("Kunden tillhör inte det aktiva företaget.");
+    throw new Error("Kunden kunde inte hittas i det aktiva företaget.");
   }
 
   return data;
@@ -177,7 +180,7 @@ async function requireMemberInOrganization(params: {
     .maybeSingle();
 
   if (error || !data) {
-    throw error ?? new Error("Användaren tillhör inte det aktiva företaget.");
+    throw new Error("Användaren kunde inte hittas i det aktiva företaget.");
   }
 }
 
@@ -241,7 +244,7 @@ export async function saveCustomerAction(formData: FormData) {
     : await query.select("id").single();
 
   if (error || !data) {
-    throw error ?? new Error("Kunde inte spara kund.");
+    throw new Error("Kunden kunde inte sparas.");
   }
 
   await logHubActivity({
@@ -259,6 +262,7 @@ export async function saveCustomerAction(formData: FormData) {
 }
 
 export async function createOrganizationOnboardingAction(formData: FormData) {
+  assertSafeHubServerEnvironment();
   const { createSupabaseServerClient } = await import("@/src/lib/supabase-server");
   const serverClient = await createSupabaseServerClient();
 
@@ -328,7 +332,7 @@ export async function saveContactAction(formData: FormData) {
     .single();
 
   if (error || !data) {
-    throw error ?? new Error("Kunde inte spara kontakt.");
+    throw new Error("Kontakten kunde inte sparas.");
   }
 
   await logHubActivity({
@@ -386,7 +390,7 @@ export async function saveTaskAction(formData: FormData) {
   const { data, error } = await query.select("id").single();
 
   if (error || !data) {
-    throw error ?? new Error("Kunde inte spara uppgift.");
+    throw new Error("Uppgiften kunde inte sparas.");
   }
 
   await logHubActivity({
@@ -467,7 +471,7 @@ export async function saveInvoiceAction(formData: FormData) {
   const { data, error } = await query.select("id").single();
 
   if (error || !data) {
-    throw error ?? new Error("Kunde inte spara faktura.");
+    throw new Error("Fakturan kunde inte sparas.");
   }
 
   await logHubActivity({
@@ -519,7 +523,7 @@ export async function saveInvoiceLineAction(formData: FormData) {
   const { data, error } = await query.select("id").single();
 
   if (error || !data) {
-    throw error ?? new Error("Kunde inte spara fakturarad.");
+    throw new Error("Fakturaraden kunde inte sparas.");
   }
 
   await logHubActivity({
@@ -580,7 +584,7 @@ export async function updateInvoiceStatusAction(formData: FormData) {
     .eq("id", invoiceId);
 
   if (error) {
-    throw error;
+    throw new Error("Fakturastatusen kunde inte uppdateras.");
   }
 
   await logHubActivity({
@@ -614,7 +618,7 @@ async function finalizeInvoiceWithResumableWorkflow(params: {
     },
   );
 
-  if (error) throw error;
+  if (error) throw new Error("Fakturaprocessen kunde inte startas.");
   const operation = parseHubOperationResult(data);
 
   if (operation.outcome === "replay") {
@@ -690,7 +694,7 @@ async function finalizeInvoiceWithResumableWorkflow(params: {
         .single();
 
       if (insertResult.error || !insertResult.data) {
-        throw insertResult.error ?? new Error("Kunde inte registrera faktura-PDF.");
+        throw new Error("Faktura-PDF:en kunde inte registreras.");
       }
 
       pdfDocument = insertResult.data;
@@ -706,7 +710,9 @@ async function finalizeInvoiceWithResumableWorkflow(params: {
       },
     );
 
-    if (completeError) throw completeError;
+    if (completeError) {
+      throw new Error("Fakturaprocessen kunde inte slutföras.");
+    }
     return { invoiceNumber: operation.invoiceNumber, replayed: false };
   } catch (workflowError) {
     await params.supabase.rpc("fail_invoice_finalization", {
@@ -715,7 +721,7 @@ async function finalizeInvoiceWithResumableWorkflow(params: {
       target_idempotency_key: params.idempotencyKey,
       target_error_message: errorMessage(workflowError),
     });
-    throw workflowError;
+    throw new Error("Fakturaprocessen misslyckades och kan återupptas senare.");
   }
 }
 
@@ -744,7 +750,7 @@ export async function finalizeInvoiceAction(formData: FormData) {
     .single();
 
   if (customerError || !customer) {
-    throw customerError ?? new Error("Kunden kunde inte läsas.");
+    throw new Error("Kunden kunde inte läsas.");
   }
 
   const { data: lines, error: linesError } = await supabase
@@ -757,7 +763,7 @@ export async function finalizeInvoiceAction(formData: FormData) {
     .order("sort_order", { ascending: true });
 
   if (linesError) {
-    throw linesError;
+    throw new Error("Fakturaraderna kunde inte läsas.");
   }
 
   if (!lines?.length) {
@@ -823,7 +829,7 @@ export async function finalizeInvoiceAction(formData: FormData) {
     });
 
     if (error) {
-      throw error;
+      throw new Error("Ett fakturanummer kunde inte reserveras.");
     }
 
     invoiceNumber = data;
@@ -890,7 +896,7 @@ export async function finalizeInvoiceAction(formData: FormData) {
     .eq("file_path", uploaded.filePath)
     .maybeSingle();
 
-  if (pdfLookupError) throw pdfLookupError;
+  if (pdfLookupError) throw new Error("Faktura-PDF:en kunde inte kontrolleras.");
 
   let pdfDocument = existingPdfDocument;
 
@@ -942,7 +948,7 @@ export async function finalizeInvoiceAction(formData: FormData) {
     .single();
 
   if (finalizeError || !finalizedInvoice) {
-    throw finalizeError ?? new Error("Kunde inte slutföra fakturan.");
+    throw new Error("Fakturan kunde inte slutföras.");
   }
 
   await logHubActivity({
@@ -988,7 +994,9 @@ async function uploadDocumentWithIdempotency(params: {
     },
   );
 
-  if (beginResult.error) throw beginResult.error;
+  if (beginResult.error) {
+    throw new Error("Dokumentprocessen kunde inte startas.");
+  }
   const operation = parseHubOperationResult(beginResult.data);
 
   if (operation.outcome === "replay" && operation.resultEntityId) {
@@ -1007,7 +1015,9 @@ async function uploadDocumentWithIdempotency(params: {
       .eq("sha256", sha256)
       .maybeSingle();
 
-    if (duplicateResult.error) throw duplicateResult.error;
+    if (duplicateResult.error) {
+      throw new Error("Dokumentarkivet kunde inte kontrolleras.");
+    }
 
     if (duplicateResult.data) {
       await completeHubOperation({
@@ -1062,7 +1072,7 @@ async function uploadDocumentWithIdempotency(params: {
         .maybeSingle();
       documentId = duplicate?.id ?? null;
     } else if (insertResult.error) {
-      throw insertResult.error;
+      throw new Error("Dokumentets metadata kunde inte registreras.");
     }
 
     if (!documentId) {
@@ -1087,7 +1097,7 @@ async function uploadDocumentWithIdempotency(params: {
       key: params.idempotencyKey,
       error: uploadError,
     });
-    throw uploadError;
+    throw new Error("Dokumentet kunde inte laddas upp.");
   }
 }
 
@@ -1199,7 +1209,7 @@ export async function uploadDocumentAction(formData: FormData) {
     .single();
 
   if (error || !data) {
-    throw error ?? new Error("Kunde inte spara dokument.");
+    throw new Error("Dokumentet kunde inte sparas.");
   }
 
   await logHubActivity({
@@ -1282,7 +1292,7 @@ export async function updateOrganizationSettingsAction(formData: FormData) {
     .eq("id", organization.id);
 
   if (error) {
-    throw error;
+    throw new Error("Företagsinställningarna kunde inte sparas.");
   }
 
   await logHubActivity({

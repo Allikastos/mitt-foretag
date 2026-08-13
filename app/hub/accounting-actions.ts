@@ -55,7 +55,7 @@ export async function initializeAccountingMvpAction(formData: FormData) {
   });
 
   if (error || !data) {
-    throw error ?? new Error("Bokföringsgrunden kunde inte skapas.");
+    throw new Error("Bokföringsgrunden kunde inte skapas.");
   }
 
   await logHubActivity({
@@ -119,7 +119,7 @@ export async function saveBookkeepingDraftAction(formData: FormData) {
   });
 
   if (error || !data) {
-    throw error ?? new Error("Bokföringsutkastet kunde inte sparas.");
+    throw new Error("Bokföringsutkastet kunde inte sparas.");
   }
 
   await logHubActivity({
@@ -143,7 +143,7 @@ export async function approveBookkeepingDraftAction(formData: FormData) {
     target_draft_id: draftId,
   });
 
-  if (error) throw error;
+  if (error) throw new Error("Bokföringsutkastet kunde inte godkännas.");
 
   await logHubActivity({
     organizationId: organization.id,
@@ -169,7 +169,7 @@ export async function postBookkeepingDraftAction(formData: FormData) {
   });
 
   if (error || !data) {
-    throw error ?? new Error("Utkastet kunde inte bokföras.");
+    throw new Error("Utkastet kunde inte bokföras.");
   }
 
   await logHubActivity({

@@ -20,6 +20,42 @@ test("database proposals contain no destructive SQL statements", () => {
   }
 });
 
+test("migration plan preserves the reviewed Phase B to F order", () => {
+  const plan = JSON.parse(
+    readFileSync(resolve(process.cwd(), "supabase", "migration-plan.json"), "utf8"),
+  ) as { sources: Array<{ file: string }> };
+
+  assert.deepEqual(
+    plan.sources.map((source) => source.file),
+    [
+      "phase-b.sql",
+      "accounting.sql",
+      "phase-c.sql",
+      "phase-d.sql",
+      "phase-e.sql",
+      "phase-f.sql",
+    ],
+  );
+});
+
+test("synthetic seed is isolated, multi-tenant and never automatic", () => {
+  const seedPath = resolve(
+    process.cwd(),
+    "supabase",
+    "seeds",
+    "pilot-synthetic.sql",
+  );
+  const seed = readFileSync(seedPath, "utf8");
+
+  assert.match(seed, /altura\.data_environment[\s\S]*local[\s\S]*test/i);
+  assert.match(seed, /SYNTHETIC_TEST_DATA_ONLY/);
+  assert.match(seed, /requires an empty or already synthetic database/i);
+  assert.match(seed, /Syntetiska Alpha/);
+  assert.match(seed, /Syntetiska Beta/);
+  assert.match(seed, /'owner'[\s\S]*'admin'[\s\S]*'member'[\s\S]*'viewer'/);
+  assert.equal(seedPath.endsWith("supabase/seed.sql"), false);
+});
+
 test("Phase F stores safe integration status and idempotent event receipts", () => {
   const integrations = sql("phase-f.sql");
 
@@ -111,6 +147,11 @@ test("document metadata has tenant-local duplicate and storage-key protection", 
   assert.match(migration, /documents_org_file_path_idx[\s\S]*organization_id, file_path/);
   assert.match(migration, /upsert: false|original_storage_key/);
   assert.match(migration, /contacts_org_customer_fk[\s\S]*organization_id, customer_id/);
+  assert.match(migration, /create or replace function public\.can_access_customer/i);
+  assert.match(migration, /employee_customer_scope = 'all_customers'/i);
+  assert.match(migration, /alter policy "Members can read customers"/i);
+  assert.match(migration, /alter policy "Hub members can view documents bucket"/i);
+  assert.match(migration, /document\.file_path = name/i);
 });
 
 test("invoice finalization is modeled as a resumable database workflow", () => {
@@ -156,6 +197,10 @@ test("posted journal data is append-only and balanced before insert", () => {
   assert.doesNotMatch(
     migration,
     /create policy[^;]+journal_(entries|lines)[^;]+for (update|delete|all)/i,
+  );
+  assert.match(
+    migration,
+    /select \* into target_draft[\s\S]*for update;[\s\S]*begin_hub_idempotent_operation[\s\S]*target_draft\.status <> 'ready_to_post'/i,
   );
 });
 
