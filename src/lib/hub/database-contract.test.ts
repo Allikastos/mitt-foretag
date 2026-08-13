@@ -20,7 +20,7 @@ test("database proposals contain no destructive SQL statements", () => {
   }
 });
 
-test("migration plan preserves the reviewed Phase B to F order", () => {
+test("migration plan preserves the reviewed schema and grant order", () => {
   const plan = JSON.parse(
     readFileSync(resolve(process.cwd(), "supabase", "migration-plan.json"), "utf8"),
   ) as { sources: Array<{ file: string }> };
@@ -34,6 +34,7 @@ test("migration plan preserves the reviewed Phase B to F order", () => {
       "phase-d.sql",
       "phase-e.sql",
       "phase-f.sql",
+      "api-grants.sql",
     ],
   );
 });

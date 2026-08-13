@@ -1,3 +1,4 @@
+-- Generated from supabase/phase-f.sql; review before any database use.
 -- Additive Phase F integration readiness and webhook idempotency.
 -- Apply after hub.sql, phase-b.sql, accounting.sql and phases C-E.
 -- This proposal has not been executed against any Supabase environment.

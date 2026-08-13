@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { setTimeout as delay } from "node:timers/promises";
 
 const root = process.cwd();
 const supabaseDirectory = resolve(root, "supabase");
@@ -28,42 +29,40 @@ if (existsSync(linkedProjectFile)) {
 const cli = spawnSync("supabase", ["--version"], { encoding: "utf8" });
 if (cli.status !== 0) stop("Supabase CLI saknas.");
 
-if (!existsSync(migrationsDirectory)) {
-  stop("migrationskatalogen saknas; skapa och granska en baslinjemigration först.");
-}
-
-const existingMigrations = readdirSync(migrationsDirectory).filter((name) =>
-  name.endsWith(".sql"),
-);
-const hasBaseline = existingMigrations.some((name) =>
-  /create\s+table\s+(if\s+not\s+exists\s+)?public\.organizations/i.test(
-    readFileSync(resolve(migrationsDirectory, name), "utf8"),
-  ),
-);
-
-if (!hasBaseline) {
-  stop("ingen granskad baslinjemigration för hubben hittades.");
-}
-
 const plan = JSON.parse(
   readFileSync(resolve(supabaseDirectory, "migration-plan.json"), "utf8"),
 );
+const existingMigrations = existsSync(migrationsDirectory)
+  ? readdirSync(migrationsDirectory).filter((name) => name.endsWith(".sql"))
+  : [];
 
-for (const source of plan.sources) {
-  if (existingMigrations.some((name) => name.endsWith(`_${source.name}.sql`))) {
-    stop(`migrationen ${source.name} finns redan.`);
-  }
+if (existingMigrations.length > 0) {
+  stop("migrationskatalogen måste vara tom för en reproducerbar generering.");
 }
 
-for (const source of plan.sources) {
+function safeBaseline(sql) {
+  const withoutConstraintReplacements = sql.replace(
+    /alter table public\.(?:organizations|customers)\n\s+drop constraint if exists [^,]+,\n\s+add constraint [^\n]+\n\s+check \([^;]+;\n/gi,
+    "",
+  );
+
+  return withoutConstraintReplacements.replace(
+    /^\s*drop\s+(?:trigger|policy)\s+if\s+exists\b.*;\s*$/gim,
+    "",
+  );
+}
+
+async function createMigration(source, transform = (sql) => sql) {
   const sourcePath = resolve(supabaseDirectory, source.file);
-  const sql = readFileSync(sourcePath, "utf8");
+  const sql = transform(readFileSync(sourcePath, "utf8"));
 
   if (/^\s*(drop|truncate|delete)\b/im.test(sql)) {
     stop(`${source.file} innehåller en destruktiv SQL-sats.`);
   }
 
-  const before = new Set(readdirSync(migrationsDirectory));
+  const before = new Set(
+    existsSync(migrationsDirectory) ? readdirSync(migrationsDirectory) : [],
+  );
   const created = spawnSync("supabase", ["migration", "new", source.name], {
     cwd: root,
     encoding: "utf8",
@@ -84,6 +83,12 @@ for (const source of plan.sources) {
     resolve(migrationsDirectory, migrationFile),
     `-- Generated from supabase/${source.file}; review before any database use.\n${sql}`,
   );
+
+  // Supabase migration versions have second precision and must remain unique.
+  await delay(1100);
 }
+
+await createMigration(plan.baseline, safeBaseline);
+for (const source of plan.sources) await createMigration(source);
 
 console.log("Timestampade lokala migrationer skapades. Granska diffen innan lokal reset.");

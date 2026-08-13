@@ -3,10 +3,10 @@ begin;
 select plan(11);
 
 select ok(to_regclass('public.document_facts') is not null, 'document facts table exists');
-select has_column('public', 'document_facts', 'extraction_method');
-select has_column('public', 'document_facts', 'ocr_status');
-select has_column('public', 'document_facts', 'revision');
-select has_column('public', 'source_documents', 'business_event_id');
+select has_column('public', 'document_facts', 'extraction_method', 'facts track extraction method');
+select has_column('public', 'document_facts', 'ocr_status', 'facts track OCR status');
+select has_column('public', 'document_facts', 'revision', 'facts are revisioned');
+select has_column('public', 'source_documents', 'business_event_id', 'source documents link to events');
 select ok(to_regprocedure('public.save_document_facts(uuid,uuid,text,text,text,text,date,date,bigint,bigint,text,text,text)') is not null, 'manual facts RPC exists');
 select ok(to_regprocedure('public.link_source_document_to_draft(uuid,uuid,uuid)') is not null, 'document link RPC exists');
 select ok(not has_table_privilege('authenticated', 'public.document_facts', 'INSERT'), 'facts reject direct inserts');

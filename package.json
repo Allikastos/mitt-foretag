@@ -4,14 +4,17 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:hub:local": "node scripts/run-local-hub.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test": "node --test --experimental-strip-types src/lib/hub/*.test.ts src/lib/hub/accounting/*.test.ts src/lib/hub/documents/*.test.ts src/lib/hub/integrations/*.test.ts src/lib/hub/jobs/*.test.ts src/lib/hub/providers/*.test.ts",
     "typecheck": "tsc --noEmit",
     "db:migrations:prepare": "node scripts/prepare-supabase-migrations.mjs",
+    "db:seed:synthetic": "node scripts/run-synthetic-supabase-seed.mjs",
     "db:test": "supabase test db",
-    "db:test:integration": "node scripts/test-supabase-integration.mjs"
+    "db:test:integration": "node scripts/test-supabase-integration.mjs",
+    "db:test:integration:local": "node scripts/run-local-supabase-integration.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",
@@ -35,6 +38,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "supabase": "2.114.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

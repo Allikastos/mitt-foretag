@@ -294,7 +294,6 @@ export async function createOrganizationOnboardingAction(formData: FormData) {
 
   await createOrganizationForUser({
     supabase: serverClient,
-    userId: user.id,
     email: user.email ?? null,
     fullName:
       user.user_metadata?.full_name ??

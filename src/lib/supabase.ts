@@ -1108,6 +1108,14 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      create_hub_organization: {
+        Args: {
+          target_name: string;
+          target_org_number?: string | null;
+          target_email?: string | null;
+        };
+        Returns: string;
+      };
       begin_hub_idempotent_operation: {
         Args: {
           target_organization_id: string;

@@ -92,7 +92,11 @@ async function run() {
         name: "Integrationstest Alpha",
         employee_customer_scope: "assigned_only",
       },
-      { id: organizationB, name: "Integrationstest Beta" },
+      {
+        id: organizationB,
+        name: "Integrationstest Beta",
+        employee_customer_scope: "all_customers",
+      },
     ]),
     "skapa organisationer",
   );
@@ -146,6 +150,43 @@ async function run() {
       signedInClient(viewerA),
       signedInClient(ownerB),
     ]);
+
+  const bootstrappedOrganizationId = await requireData(
+    ownerClient.rpc("create_hub_organization", {
+      target_name: "Atomisk onboarding",
+      target_org_number: `TEST-${suffix}`,
+      target_email: ownerA.email,
+    }),
+    "skapa organisation atomiskt",
+  );
+  createdOrganizationIds.push(bootstrappedOrganizationId);
+  const bootstrapMembership = await requireData(
+    service
+      .from("organization_members")
+      .select("role")
+      .eq("organization_id", bootstrappedOrganizationId)
+      .eq("user_id", ownerA.id)
+      .single(),
+    "kontrollera atomiskt ägarskap",
+  );
+  assert.equal(bootstrapMembership.role, "owner");
+  const bootstrapActivity = await requireData(
+    service
+      .from("activity_log")
+      .select("action")
+      .eq("organization_id", bootstrappedOrganizationId)
+      .single(),
+    "kontrollera onboardingaktivitet",
+  );
+  assert.equal(bootstrapActivity.action, "organization_bootstrapped");
+  assert.notEqual(
+    (
+      await memberClient.from("organizations").insert({
+        name: "Otillåten direktorganisation",
+      })
+    ).error,
+    null,
+  );
 
   const memberCustomers = await requireData(
     memberClient.from("customers").select("id"),
@@ -238,9 +279,13 @@ async function run() {
     memberClient.storage.from("hub-documents").remove([unlockedPath]),
     "radera olåst fil",
   );
-  assert.notEqual(
-    (await memberClient.storage.from("hub-documents").remove([retainedPath])).error,
-    null,
+  await requireData(
+    memberClient.storage.from("hub-documents").remove([retainedPath]),
+    "försök radera låst fil",
+  );
+  await requireData(
+    memberClient.storage.from("hub-documents").download(retainedPath),
+    "låst fil finns kvar efter raderingsförsök",
   );
 
   const year = new Date().getUTCFullYear();

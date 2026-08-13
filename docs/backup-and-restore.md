@@ -34,7 +34,8 @@ Målen är produktbeslut och måste godkännas innan skarp drift.
 7. Applicera inga nya migrationer förrän återställd migrationshistorik har granskats.
 8. Verifiera tabellantal, tvåorganisationers RLS, roller, fakturor, audit och dokumenthashar.
 9. Ladda tillbaka Storage-objekt och verifiera samtliga manifestposter byte för byte.
-10. Kör `npm run db:test`, `npm run db:test:integration` och en manuell hubb-smoke test.
+10. Kör `npm run db:test -- --local supabase/tests`,
+    `npm run db:test:integration:local` och en manuell hubb-smoke test.
 
 ## Incidentordning
 

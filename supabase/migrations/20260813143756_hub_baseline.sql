@@ -1,3 +1,4 @@
+-- Generated from supabase/hub.sql; review before any database use.
 create extension if not exists pgcrypto;
 
 create or replace function public.set_updated_at()
@@ -186,30 +187,10 @@ alter table public.customers
   add column if not exists relationship_owner text,
   add column if not exists tags text[] not null default '{}';
 
-alter table public.organizations
-  drop constraint if exists organizations_hub_theme_check,
-  add constraint organizations_hub_theme_check
-  check (hub_theme in ('nova', 'forest', 'coast', 'graphite'));
 
-alter table public.organizations
-  drop constraint if exists organizations_employee_customer_scope_check,
-  add constraint organizations_employee_customer_scope_check
-  check (employee_customer_scope in ('all_customers', 'assigned_only'));
 
-alter table public.organizations
-  drop constraint if exists organizations_billing_plan_check,
-  add constraint organizations_billing_plan_check
-  check (billing_plan in ('starter', 'team', 'agency'));
 
-alter table public.organizations
-  drop constraint if exists organizations_billing_status_check,
-  add constraint organizations_billing_status_check
-  check (billing_status in ('trialing', 'active', 'past_due', 'paused', 'canceled', 'unpaid'));
 
-alter table public.customers
-  drop constraint if exists customers_visibility_check,
-  add constraint customers_visibility_check
-  check (visibility in ('organization', 'owners_only'));
 
 alter table public.invoices
   add column if not exists finalized_at timestamptz,
@@ -302,23 +283,22 @@ create index if not exists activity_log_organization_idx on public.activity_log 
 create index if not exists email_connections_organization_idx on public.email_connections (organization_id);
 create index if not exists ai_events_organization_idx on public.ai_events (organization_id, created_at desc);
 
-drop trigger if exists set_profiles_updated_at on public.profiles;
 create trigger set_profiles_updated_at before update on public.profiles for each row execute function public.set_updated_at();
-drop trigger if exists set_organizations_updated_at on public.organizations;
+
 create trigger set_organizations_updated_at before update on public.organizations for each row execute function public.set_updated_at();
-drop trigger if exists set_customers_updated_at on public.customers;
+
 create trigger set_customers_updated_at before update on public.customers for each row execute function public.set_updated_at();
-drop trigger if exists set_contacts_updated_at on public.contacts;
+
 create trigger set_contacts_updated_at before update on public.contacts for each row execute function public.set_updated_at();
-drop trigger if exists set_tasks_updated_at on public.tasks;
+
 create trigger set_tasks_updated_at before update on public.tasks for each row execute function public.set_updated_at();
-drop trigger if exists set_documents_updated_at on public.documents;
+
 create trigger set_documents_updated_at before update on public.documents for each row execute function public.set_updated_at();
-drop trigger if exists set_invoices_updated_at on public.invoices;
+
 create trigger set_invoices_updated_at before update on public.invoices for each row execute function public.set_updated_at();
-drop trigger if exists set_invoice_lines_updated_at on public.invoice_lines;
+
 create trigger set_invoice_lines_updated_at before update on public.invoice_lines for each row execute function public.set_updated_at();
-drop trigger if exists set_email_connections_updated_at on public.email_connections;
+
 create trigger set_email_connections_updated_at before update on public.email_connections for each row execute function public.set_updated_at();
 
 do $$
@@ -437,7 +417,6 @@ begin
 end;
 $$;
 
-drop trigger if exists calculate_invoice_line_totals on public.invoice_lines;
 create trigger calculate_invoice_line_totals
 before insert or update on public.invoice_lines
 for each row
@@ -482,7 +461,6 @@ begin
 end;
 $$;
 
-drop trigger if exists sync_invoice_totals_after_write on public.invoice_lines;
 create trigger sync_invoice_totals_after_write
 after insert or update or delete on public.invoice_lines
 for each row
@@ -653,136 +631,108 @@ alter table public.activity_log enable row level security;
 alter table public.email_connections enable row level security;
 alter table public.ai_events enable row level security;
 
-drop policy if exists "Users can view own profile" on public.profiles;
 create policy "Users can view own profile" on public.profiles
 for select to authenticated
 using (id = auth.uid());
 
-drop policy if exists "Users can upsert own profile" on public.profiles;
 create policy "Users can upsert own profile" on public.profiles
 for all to authenticated
 using (id = auth.uid())
 with check (id = auth.uid());
 
-drop policy if exists "Members can read organizations" on public.organizations;
 create policy "Members can read organizations" on public.organizations
 for select to authenticated
 using (public.is_org_member(id));
 
-drop policy if exists "Owners and admins can update organizations" on public.organizations;
 create policy "Owners and admins can update organizations" on public.organizations
 for update to authenticated
 using (public.can_manage_org_settings(id))
 with check (public.can_manage_org_settings(id));
 
-drop policy if exists "Users can create organizations" on public.organizations;
-
-drop policy if exists "Members can read memberships" on public.organization_members;
 create policy "Members can read memberships" on public.organization_members
 for select to authenticated
 using (public.is_org_member(organization_id));
 
-drop policy if exists "Owners and admins can manage memberships" on public.organization_members;
 create policy "Owners and admins can manage memberships" on public.organization_members
 for all to authenticated
 using (public.can_manage_org_settings(organization_id))
 with check (public.can_manage_org_settings(organization_id));
 
-drop policy if exists "Users can create initial owner membership" on public.organization_members;
-
-drop policy if exists "Members can read customers" on public.customers;
 create policy "Members can read customers" on public.customers
 for select to authenticated
 using (public.is_org_member(organization_id));
 
-drop policy if exists "Members can manage customers" on public.customers;
 create policy "Members can manage customers" on public.customers
 for all to authenticated
 using (public.can_manage_org_data(organization_id))
 with check (public.can_manage_org_data(organization_id));
 
-drop policy if exists "Members can read contacts" on public.contacts;
 create policy "Members can read contacts" on public.contacts
 for select to authenticated
 using (public.is_org_member(organization_id));
 
-drop policy if exists "Members can manage contacts" on public.contacts;
 create policy "Members can manage contacts" on public.contacts
 for all to authenticated
 using (public.can_manage_org_data(organization_id))
 with check (public.can_manage_org_data(organization_id));
 
-drop policy if exists "Members can read tasks" on public.tasks;
 create policy "Members can read tasks" on public.tasks
 for select to authenticated
 using (public.is_org_member(organization_id));
 
-drop policy if exists "Members can manage tasks" on public.tasks;
 create policy "Members can manage tasks" on public.tasks
 for all to authenticated
 using (public.can_manage_org_data(organization_id))
 with check (public.can_manage_org_data(organization_id));
 
-drop policy if exists "Members can read documents" on public.documents;
 create policy "Members can read documents" on public.documents
 for select to authenticated
 using (public.is_org_member(organization_id));
 
-drop policy if exists "Members can manage documents" on public.documents;
 create policy "Members can manage documents" on public.documents
 for all to authenticated
 using (public.can_manage_org_data(organization_id))
 with check (public.can_manage_org_data(organization_id));
 
-drop policy if exists "Members can read invoices" on public.invoices;
 create policy "Members can read invoices" on public.invoices
 for select to authenticated
 using (public.is_org_member(organization_id));
 
-drop policy if exists "Members can manage invoices" on public.invoices;
 create policy "Members can manage invoices" on public.invoices
 for all to authenticated
 using (public.can_manage_org_data(organization_id))
 with check (public.can_manage_org_data(organization_id));
 
-drop policy if exists "Members can read invoice lines" on public.invoice_lines;
 create policy "Members can read invoice lines" on public.invoice_lines
 for select to authenticated
 using (public.is_org_member(organization_id));
 
-drop policy if exists "Members can manage invoice lines" on public.invoice_lines;
 create policy "Members can manage invoice lines" on public.invoice_lines
 for all to authenticated
 using (public.can_manage_org_data(organization_id))
 with check (public.can_manage_org_data(organization_id));
 
-drop policy if exists "Members can read activity log" on public.activity_log;
 create policy "Members can read activity log" on public.activity_log
 for select to authenticated
 using (public.is_org_member(organization_id));
 
-drop policy if exists "Members can create activity log" on public.activity_log;
 create policy "Members can create activity log" on public.activity_log
 for insert to authenticated
 with check (public.can_manage_org_data(organization_id));
 
-drop policy if exists "Members can read email connections" on public.email_connections;
 create policy "Members can read email connections" on public.email_connections
 for select to authenticated
 using (public.is_org_member(organization_id));
 
-drop policy if exists "Owners and admins can manage email connections" on public.email_connections;
 create policy "Owners and admins can manage email connections" on public.email_connections
 for all to authenticated
 using (public.can_manage_org_settings(organization_id))
 with check (public.can_manage_org_settings(organization_id));
 
-drop policy if exists "Members can read ai events" on public.ai_events;
 create policy "Members can read ai events" on public.ai_events
 for select to authenticated
 using (public.is_org_member(organization_id));
 
-drop policy if exists "Members can create ai events" on public.ai_events;
 create policy "Members can create ai events" on public.ai_events
 for insert to authenticated
 with check (public.can_manage_org_data(organization_id));
@@ -791,7 +741,6 @@ insert into storage.buckets (id, name, public)
 values ('hub-documents', 'hub-documents', false)
 on conflict (id) do update set public = excluded.public;
 
-drop policy if exists "Hub members can view documents bucket" on storage.objects;
 create policy "Hub members can view documents bucket" on storage.objects
 for select to authenticated
 using (
@@ -799,7 +748,6 @@ using (
   and public.is_org_member(public.storage_object_org_id(name))
 );
 
-drop policy if exists "Hub members can upload documents bucket" on storage.objects;
 create policy "Hub members can upload documents bucket" on storage.objects
 for insert to authenticated
 with check (
@@ -807,7 +755,6 @@ with check (
   and public.can_manage_org_data(public.storage_object_org_id(name))
 );
 
-drop policy if exists "Hub members can update documents bucket" on storage.objects;
 create policy "Hub members can update documents bucket" on storage.objects
 for update to authenticated
 using (
@@ -819,7 +766,6 @@ with check (
   and public.can_manage_org_data(public.storage_object_org_id(name))
 );
 
-drop policy if exists "Hub members can delete documents bucket" on storage.objects;
 create policy "Hub members can delete documents bucket" on storage.objects
 for delete to authenticated
 using (

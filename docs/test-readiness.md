@@ -1,8 +1,8 @@
 # Testberedskap för hubben
 
-Status: 2026-08-13. Underlaget gäller commitserien efter `338b0f3` till och med
-`9b6eb15` samt den lokala testberedskapscommit som skapas efter denna granskning.
-Inga ändringar i dokumentet innebär att SQL får köras mot produktion.
+Status: 2026-08-13. Den lokala valideringen utgår från `7ac0b13` och har körts
+mot en isolerad Supabase-stack i Rancher Desktop. Inga ändringar eller tester i
+dokumentet innebär att SQL får köras mot produktion.
 
 ## Granskat nuläge
 
@@ -42,10 +42,10 @@ innehåller URL, projektreferens eller nyckel. Publika bloggläsningar påverkas
 
 ## Migrationsordning
 
-`supabase/hub.sql` är en äldre installationskälla. Den innehåller `drop policy`,
-`drop trigger` och ersättning av constraints och får därför inte användas som en
-uppgraderingsmigration. En granskad, icke-destruktiv baslinjemigration måste först
-representera det schema som redan finns.
+`supabase/hub.sql` är fortsatt installationskälla och får inte köras direkt som
+uppgraderingsmigration. Generatorn skapar en granskbar baslinje för en tom databas
+och tar bort källans återinstallationssatser för policyer, triggers och constraints.
+Den genererade baslinjen innehåller inga `drop`, `truncate` eller `delete`.
 
 Efter baslinjen är den låsta ordningen:
 
@@ -55,38 +55,37 @@ Efter baslinjen är den låsta ordningen:
 4. `phase-d.sql`
 5. `phase-e.sql`
 6. `phase-f.sql`
+7. `api-grants.sql`
 
 Ordningen finns maskinläsbart i `supabase/migration-plan.json`. Källorna testas
 statiskt mot `drop`, `truncate` och `delete`. Phase B innehåller även de skärpta
 RLS- och Storage-policyerna för kundomfång.
 
-När Supabase CLI och Docker finns tillgängliga:
+Migreringarna genererades lokalt med Supabase CLI 2.114.0:
 
 ```bash
-supabase init
-supabase migration new hub_baseline
-# Lägg ett separat granskat, icke-destruktivt baslinjeschema i den skapade filen.
 ALTURA_MIGRATION_CONFIRMATION=CREATE_FOR_ISOLATED_TEST_ONLY npm run db:migrations:prepare
 ```
 
-Skriptet använder `supabase migration new` för riktiga timestamps. Det avbryter
-om CLI eller baslinje saknas, om en källa innehåller destruktiv SQL eller om
+Skriptet använder `supabase migration new` för riktiga, unika timestamps. Det avbryter
+om CLI eller lokal config saknas, om en källa innehåller destruktiv SQL eller om
 Supabase-katalogen är länkad till ett fjärrprojekt. Kör inte `supabase db pull`
 mot produktion som ett bekvämt baslinjesteg utan separat granskning, eftersom
 migrationshistoriken kan påverkas.
 
 ## Lokal testkörning
 
-Verktyg saknas på den nuvarande datorn: `supabase`, Docker och `psql`. Inget har
-installerats automatiskt. När de installerats körs flödet endast lokalt:
+Rancher Desktop körs som Docker-kompatibel runtime med Kubernetes avstängt.
+Supabase CLI är projektlokalt och exakt låst till 2.114.0. Flödet körs endast
+mot projekt-id `altura_nova_hub_local`:
 
 ```bash
-supabase start
-supabase db reset --local
-PGOPTIONS="-c altura.data_environment=local -c altura.allow_synthetic_seed=SYNTHETIC_TEST_DATA_ONLY" \
-  psql postgresql://postgres:postgres@127.0.0.1:54322/postgres \
-  -v ON_ERROR_STOP=1 -f supabase/seeds/pilot-synthetic.sql
-npm run db:test
+npx supabase start
+npx supabase db reset --local --no-seed
+ALTURA_SYNTHETIC_SEED_CONFIRMATION=SYNTHETIC_TEST_DATA_ONLY npm run db:seed:synthetic
+npm run db:test -- --local supabase/tests
+npm run db:test:integration:local
+npm run dev:hub:local
 ```
 
 Det syntetiska seedet ligger avsiktligt inte i `supabase/seed.sql`, kräver två
@@ -94,19 +93,30 @@ sessionsmarkörer och vägrar en databas som innehåller andra organisationer.
 Det skapar två företag, samtliga roller och isolerade kunder, uppgifter,
 dokumentmetadata, fakturor, bokföringsutkast, jobb och auditposter.
 
-Det separata API-testet skapar och städar sina egna lokala användare:
-
-```bash
-export SUPABASE_URL=http://127.0.0.1:54321
-export SUPABASE_ANON_KEY='<lokal anon-nyckel från supabase status>'
-export SUPABASE_SERVICE_ROLE_KEY='<lokal service-role-nyckel från supabase status>'
-ALTURA_INTEGRATION_TEST_CONFIRMATION=LOCAL_SUPABASE_ONLY npm run db:test:integration
-```
-
-Skriptet vägrar fjärrhostar. Det testar RLS och manipulerade ID:n mellan två
+Den lokala API-runnern hämtar URL och tillfälliga lokala nycklar från
+`supabase status` i minnet, skriver inte till `.env.local` och vägrar både
+fjärrhostar och länkade projekt. Den testar RLS och manipulerade ID:n mellan två
 organisationer, owner/member/viewer, privat Storage, korsorganisationsläsning,
 radering av olåst fil, spärr för låst original, samtidiga bokföringsanrop,
-unika fakturanummer, oföränderliga verifikationer och jobbdeduplicering.
+unika fakturanummer, oföränderliga verifikationer, jobbdeduplicering och atomisk
+onboarding med organisation, ägarskap och auditpost i samma RPC.
+
+## Genomförda kontroller
+
+- Två fullständiga `db reset --local --no-seed` från tom databas passerade.
+- Syntetisk seed laddades efter båda återställningarna med båda spärrmarkörerna.
+- Fem pgTAP-filer med totalt 88 kontroller passerade.
+- Auth-, REST-, RPC-, Storage- och samtidighetstester passerade.
+- `db lint` för `public` och `private` rapporterade inga schemafel.
+- Supabase Security Advisor rapporterade inga problem.
+- Tre duplicerade index togs bort efter Performance Advisor-granskning.
+- `npm test` passerade 82 av 82 tester, och ESLint, TypeScript samt Next.js
+  produktionsbuild passerade.
+- `/hub/login` renderades utan console-fel. En äldre dev-process på port 3000
+  saknade miljömarkörer; skyddade `/hub` stoppades då korrekt av fail-closed-spärren.
+- Performance Advisor har kvar icke-blockerande varningar om överlappande
+  permissiva läspolicies och två `auth.uid()`-initplaner. De bör optimeras före
+  större datamängder men ändrar inte det verifierade behörighetsutfallet.
 
 ## Avbrott och återställning
 
@@ -118,9 +128,13 @@ unika fakturanummer, oföränderliga verifikationer och jobbdeduplicering.
 
 ## Kvar före pilot
 
-- Skapa och granska den verkliga baslinjemigrationen.
-- Installera lokal verktygskedja och kör pgTAP- samt API-integrationstesterna.
 - Kör ett separat återställningstest för databas och Storage-filer.
 - Skapa ett separat Supabase-testprojekt för Vercel preview.
+- Uppgradera och verifiera Next.js från exakt 16.2.1 till en korrigerad version.
+  `npm audit --omit=dev` rapporterar 10 kända produktionssårbarheter, varav sex
+  med hög allvarlighetsgrad. Ingen automatisk `audit fix --force` har körts.
+- Stäng den äldre dev-processen och kör `npm run dev:hub:local` för ett fullständigt
+  autentiserat visuellt smoke-test med de lokala syntetiska kontona.
+- Optimera överlappande RLS-läspolicies och komplettera index efter verkliga queryplaner.
 - Granska resultat och migrationsdiff innan någon fjärrlänkning eller flaggaktivering.
 - Håll OCR, bankkoppling, abonnemangsbetalning, e-postautomation och externa köer avstängda.

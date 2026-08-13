@@ -1,6 +1,6 @@
 begin;
 
-select plan(19);
+select plan(21);
 
 select is(
   (select count(*)::integer from public.organizations where org_number like 'TEST-%'),
@@ -22,12 +22,13 @@ select is((select count(*)::integer from public.tasks), 1, 'customer scope appli
 select is((select count(*)::integer from public.documents), 1, 'customer scope applies to document metadata');
 select is((select count(*)::integer from public.invoices), 1, 'customer scope applies to invoices');
 select is((select count(*)::integer from public.invoice_lines), 1, 'customer scope applies to invoice lines');
+with changed as (
+  update public.customers set notes = 'blocked'
+  where id = '23000000-0000-4000-8000-000000000001'
+  returning 1
+)
 select is(
-  (with changed as (
-    update public.customers set notes = 'blocked'
-    where id = '23000000-0000-4000-8000-000000000001'
-    returning 1
-  ) select count(*)::integer from changed),
+  (select count(*)::integer from changed),
   0,
   'manipulated cross-organization customer id changes no rows'
 );
@@ -40,6 +41,8 @@ select throws_ok(
       '11000000-0000-4000-8000-000000000003',
       'Blocked cross-organization customer'
     )$$,
+  '42501',
+  'new row violates row-level security policy for table "customers"',
   'member cannot forge a customer in another organization'
 );
 select ok(
@@ -57,6 +60,14 @@ select ok(
   not has_table_privilege('authenticated', 'public.journal_lines', 'UPDATE'),
   'authenticated users cannot mutate journal lines directly'
 );
+select ok(
+  not has_table_privilege('authenticated', 'public.organizations', 'INSERT'),
+  'authenticated users cannot insert organizations directly'
+);
+select ok(
+  has_function_privilege('authenticated', 'public.create_hub_organization(text,text,text)', 'EXECUTE'),
+  'authenticated users create organizations through the atomic RPC'
+);
 
 reset role;
 set local role authenticated;
@@ -70,6 +81,8 @@ select is((select count(*)::integer from public.customers), 0, 'assigned-only vi
 select throws_ok(
   $$insert into public.tasks (organization_id, title)
     values ('10000000-0000-4000-8000-000000000001', 'Blocked viewer task')$$,
+  '42501',
+  'new row violates row-level security policy for table "tasks"',
   'viewer cannot create tasks'
 );
 
@@ -91,7 +104,9 @@ select throws_ok(
   $$update public.company_accounting_settings
     set company_form = 'limited_company', accounting_enabled = true
     where organization_id = '10000000-0000-4000-8000-000000000001'$$,
-  'unsupported accounting setup is blocked by the database'
+  '42501',
+  'permission denied for table company_accounting_settings',
+  'direct accounting configuration writes are blocked'
 );
 
 reset role;

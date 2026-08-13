@@ -47,51 +47,30 @@ type HubContext = {
 
 export async function createOrganizationForUser(context: {
   supabase: NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>>;
-  userId: string;
   email: string | null;
   fullName: string | null;
   organizationName?: string | null;
   orgNumber?: string | null;
 }) {
   assertSafeHubServerEnvironment();
-  const organizationId = randomUUID();
   const organizationName =
     context.organizationName?.trim() ||
     context.fullName?.trim() ||
     context.email?.split("@")[0]?.replace(/[._-]+/g, " ") ||
     "Mitt företag";
 
-  const { error: organizationError } = await context.supabase
-    .from("organizations")
-    .insert({
-      id: organizationId,
-      name: organizationName,
-      org_number: context.orgNumber ?? null,
-      email: context.email,
-    });
+  const { data: organizationId, error } = await context.supabase.rpc(
+    "create_hub_organization",
+    {
+      target_name: organizationName,
+      target_org_number: context.orgNumber ?? null,
+      target_email: context.email,
+    },
+  );
 
-  if (organizationError) {
-    throw new Error("Kunde inte skapa organisationen just nu.");
+  if (error || !organizationId) {
+    throw new Error("Kunde inte skapa organisationen och ägarbehörigheten just nu.");
   }
-
-  const { error: memberError } = await context.supabase
-    .from("organization_members")
-    .insert({
-      organization_id: organizationId,
-      user_id: context.userId,
-      role: "owner",
-    });
-
-  if (memberError) {
-    throw new Error("Kunde inte skapa ägarbehörigheten just nu.");
-  }
-
-  await context.supabase.from("activity_log").insert({
-    organization_id: organizationId,
-    user_id: context.userId,
-    action: "organization_bootstrapped",
-    description: "Första hubborganisationen skapades automatiskt.",
-  });
 
   return organizationId;
 }
