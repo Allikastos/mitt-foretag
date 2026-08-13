@@ -1,5 +1,6 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type {
@@ -459,18 +460,34 @@ export async function saveInvoiceAction(formData: FormData) {
     ...customerSnapshot,
   };
 
-  const query = invoiceId
-    ? supabase
-        .from("invoices")
-        .update(payload)
-        .eq("organization_id", organization.id)
-        .eq("id", invoiceId)
-    : supabase.from("invoices").insert(payload);
+  let savedInvoiceId = invoiceId;
 
-  const { data, error } = await query.select("id").single();
+  if (invoiceId) {
+    const { data, error } = await supabase
+      .from("invoices")
+      .update(payload)
+      .eq("organization_id", organization.id)
+      .eq("id", invoiceId)
+      .select("id")
+      .single();
 
-  if (error || !data) {
-    throw new Error("Fakturan kunde inte sparas.");
+    if (error || !data) {
+      throw new Error("Fakturan kunde inte sparas.");
+    }
+  } else {
+    savedInvoiceId = randomUUID();
+    const { error } = await supabase.from("invoices").insert({
+      id: savedInvoiceId,
+      ...payload,
+    });
+
+    if (error) {
+      throw new Error("Fakturan kunde inte sparas.");
+    }
+  }
+
+  if (!savedInvoiceId) {
+    throw new Error("Fakturan kunde inte identifieras efter sparning.");
   }
 
   await logHubActivity({
@@ -478,16 +495,16 @@ export async function saveInvoiceAction(formData: FormData) {
     userId: user.id,
     action: invoiceId ? "invoice_updated" : "invoice_created",
     entityType: "invoice",
-    entityId: data.id,
+    entityId: savedInvoiceId,
     description: `Faktura ${invoiceId ? "utkast" : "utan nummer"} sparades.`,
   });
 
   revalidatePath("/hub");
   revalidatePath("/hub/fakturor");
-  revalidatePath(`/hub/fakturor/${data.id}`);
+  revalidatePath(`/hub/fakturor/${savedInvoiceId}`);
 
   if (!invoiceId) {
-    redirect(`/hub/fakturor/${data.id}`);
+    redirect(`/hub/fakturor/${savedInvoiceId}`);
   }
 }
 

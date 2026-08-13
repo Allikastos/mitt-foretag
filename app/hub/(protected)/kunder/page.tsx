@@ -8,7 +8,7 @@ import {
   formatDate,
   preferredContactMethodLabel,
 } from "@/src/lib/hub";
-import { getCustomers } from "@/src/lib/hub-server";
+import { getCustomers, requireHubContext } from "@/src/lib/hub-server";
 
 function customerTone(status: string) {
   if (status === "active") return "success";
@@ -22,7 +22,10 @@ export default async function HubCustomersPage({
   searchParams: Promise<{ page?: string }>;
 }) {
   const filters = await searchParams;
-  const customers = await getCustomers({ page: filters.page });
+  const [customers, { membership }] = await Promise.all([
+    getCustomers({ page: filters.page }),
+    requireHubContext(),
+  ]);
 
   return (
     <HubShell
@@ -95,7 +98,16 @@ export default async function HubCustomersPage({
         </HubCard>
 
         <div className="space-y-6">
-          <CustomerForm />
+          {membership.role === "viewer" ? (
+            <HubCard>
+              <p className="font-semibold text-[var(--hub-text)]">Läsbehörighet</p>
+              <p className="mt-2 text-sm leading-6 text-[var(--hub-muted)]">
+                Du kan se kunder men inte skapa eller ändra kunduppgifter.
+              </p>
+            </HubCard>
+          ) : (
+            <CustomerForm />
+          )}
         </div>
       </div>
     </HubShell>

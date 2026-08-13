@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { spawn } from "node:child_process";
+import { createServer } from "node:net";
 
 const root = process.cwd();
 const linkedProjectFile = resolve(root, "supabase", ".temp", "project-ref");
@@ -40,18 +41,54 @@ if (!status.API_URL?.startsWith("http://127.0.0.1:")) {
   stop("Supabase-statusen pekar inte på loopback-adressen.");
 }
 
-const dev = spawn("next", ["dev"], {
-  cwd: root,
-  stdio: "inherit",
-  env: {
-    ...process.env,
-    NEXT_PUBLIC_SUPABASE_URL: status.API_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: status.ANON_KEY,
-    NEXT_PUBLIC_HUB_RUNTIME_ENVIRONMENT: "development",
-    NEXT_PUBLIC_HUB_DATA_ENVIRONMENT: "local",
-    NEXT_PUBLIC_HUB_PRODUCTION_SUPABASE_PROJECT_REF: "",
+const firstPort = Number.parseInt(process.env.HUB_LOCAL_PORT ?? "3001", 10);
+if (!Number.isInteger(firstPort) || firstPort < 1 || firstPort > 65535) {
+  stop("HUB_LOCAL_PORT måste vara ett giltigt portnummer.");
+}
+
+async function portIsAvailable(port) {
+  return new Promise((resolveAvailability) => {
+    const server = createServer();
+    server.unref();
+    server.once("error", () => resolveAvailability(false));
+    server.listen({ host: "127.0.0.1", port }, () => {
+      server.close(() => resolveAvailability(true));
+    });
+  });
+}
+
+let port;
+for (let candidate = firstPort; candidate < firstPort + 50; candidate += 1) {
+  if (candidate <= 65535 && (await portIsAvailable(candidate))) {
+    port = candidate;
+    break;
+  }
+}
+
+if (!port) {
+  stop(`ingen ledig port hittades från ${firstPort}.`);
+}
+
+const localDistDir = process.env.NEXT_LOCAL_DIST_DIR ?? ".next-local";
+console.log(`Den lokala hubben startar på http://127.0.0.1:${port}`);
+
+const dev = spawn(
+  "next",
+  ["dev", "--hostname", "127.0.0.1", "--port", String(port)],
+  {
+    cwd: root,
+    stdio: "inherit",
+    env: {
+      ...process.env,
+      NEXT_LOCAL_DIST_DIR: localDistDir,
+      NEXT_PUBLIC_SUPABASE_URL: status.API_URL,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: status.ANON_KEY,
+      NEXT_PUBLIC_HUB_RUNTIME_ENVIRONMENT: "development",
+      NEXT_PUBLIC_HUB_DATA_ENVIRONMENT: "local",
+      NEXT_PUBLIC_HUB_PRODUCTION_SUPABASE_PROJECT_REF: "",
+    },
   },
-});
+);
 
 dev.on("error", () => stop("Next.js kunde inte startas."));
 dev.on("close", (code, signal) => {

@@ -29,7 +29,16 @@ export default async function HubSettingsPage() {
     >
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-6">
-          <SettingsForm organization={settings.organization} />
+          {["owner", "admin"].includes(membership.role) ? (
+            <SettingsForm organization={settings.organization} />
+          ) : (
+            <HubCard>
+              <p className="font-semibold text-[var(--hub-text)]">Inställningar är skrivskyddade</p>
+              <p className="mt-2 text-sm leading-6 text-[var(--hub-muted)]">
+                Endast ägare och administratörer kan ändra företagets uppgifter och behörighetsval.
+              </p>
+            </HubCard>
+          )}
 
           <HubCard>
             <div className="flex flex-wrap items-center justify-between gap-3">

@@ -11,7 +11,7 @@ import {
   formatDate,
 } from "@/src/lib/hub";
 import { getDocumentReviewSummaries } from "@/src/lib/hub-documents-server";
-import { getDocuments, getHubLists } from "@/src/lib/hub-server";
+import { getDocuments, getHubLists, requireHubContext } from "@/src/lib/hub-server";
 
 export default async function HubDocumentsPage({
   searchParams,
@@ -19,9 +19,10 @@ export default async function HubDocumentsPage({
   searchParams: Promise<{ page?: string }>;
 }) {
   const filters = await searchParams;
-  const [documents, lists] = await Promise.all([
+  const [documents, lists, { membership }] = await Promise.all([
     getDocuments({ page: filters.page }),
     getHubLists(),
+    requireHubContext(),
   ]);
   const reviewData = await getDocumentReviewSummaries(
     documents.items.map((document) => document.id),
@@ -141,7 +142,16 @@ export default async function HubDocumentsPage({
           <HubPagination basePath="/hub/dokument" {...documents} />
         </HubCard>
 
-        <DocumentUploadForm customers={lists.customers} invoices={lists.invoices} />
+        {membership.role === "viewer" ? (
+          <HubCard>
+            <p className="font-semibold text-[var(--hub-text)]">Läsbehörighet</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--hub-muted)]">
+              Du kan öppna dokument men inte ladda upp eller ändra underlag.
+            </p>
+          </HubCard>
+        ) : (
+          <DocumentUploadForm customers={lists.customers} invoices={lists.invoices} />
+        )}
       </div>
     </HubShell>
   );

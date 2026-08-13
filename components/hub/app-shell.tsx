@@ -122,7 +122,7 @@ export function HubAppShell({
             {isVisuallyCollapsed ? ">" : "<"}
           </button>
 
-          <div className="flex h-full flex-col rounded-[2rem] border border-[color:var(--hub-panel-border)] bg-[var(--hub-panel)] p-5 text-[var(--hub-panel-contrast)] shadow-[0_30px_80px_-52px_rgba(0,0,0,0.55)] md:p-6">
+          <div className="flex h-full min-h-0 flex-col overflow-y-auto overscroll-contain rounded-[2rem] border border-[color:var(--hub-panel-border)] bg-[var(--hub-panel)] p-5 text-[var(--hub-panel-contrast)] shadow-[0_30px_80px_-52px_rgba(0,0,0,0.55)] md:p-6">
             <div className={isVisuallyCollapsed ? "pr-12" : "pr-16"}>
               <p className="text-xs font-medium uppercase tracking-[0.24em] text-[var(--hub-accent)]">
                 Hub

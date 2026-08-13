@@ -468,6 +468,7 @@ export function InvoiceStatusForm({
   pdfHref,
   pdfStatus,
   pdfError,
+  finalizationBlockedMessage,
 }: {
   invoiceId: string;
   invoiceNumber: string | null;
@@ -476,6 +477,7 @@ export function InvoiceStatusForm({
   pdfHref: string;
   pdfStatus?: Invoice["pdf_status"];
   pdfError?: string | null;
+  finalizationBlockedMessage?: string | null;
 }) {
   const pdfStatusLabel =
     pdfStatus === "processing"
@@ -529,7 +531,14 @@ export function InvoiceStatusForm({
               och en PDF sparas i dokumentarkivet.
             </p>
           </div>
-          <SubmitButton>Slutför faktura</SubmitButton>
+          {finalizationBlockedMessage ? (
+            <p className="rounded-[1.15rem] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+              {finalizationBlockedMessage}
+            </p>
+          ) : null}
+          <SubmitButton disabled={Boolean(finalizationBlockedMessage)}>
+            Slutför faktura
+          </SubmitButton>
         </form>
       )}
       <div className="mt-5 flex flex-wrap gap-3">

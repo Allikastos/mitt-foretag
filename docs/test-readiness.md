@@ -130,11 +130,12 @@ onboarding med organisation, ägarskap och auditpost i samma RPC.
 
 - Kör ett separat återställningstest för databas och Storage-filer.
 - Skapa ett separat Supabase-testprojekt för Vercel preview.
-- Uppgradera och verifiera Next.js från exakt 16.2.1 till en korrigerad version.
-  `npm audit --omit=dev` rapporterar 10 kända produktionssårbarheter, varav sex
-  med hög allvarlighetsgrad. Ingen automatisk `audit fix --force` har körts.
-- Stäng den äldre dev-processen och kör `npm run dev:hub:local` för ett fullständigt
-  autentiserat visuellt smoke-test med de lokala syntetiska kontona.
+- Next.js är verifierat på exakt `16.2.11`. Både fullständig och production-only
+  npm audit rapporterar 0 sårbarheter; se
+  `docs/security/pilot-dependency-security.md` för versionsbeslut och testlogg.
+- Kör `npm run dev:hub:local` för ett fullständigt autentiserat visuellt
+  smoke-test. Skriptet lämnar den äldre processen på port 3000 orörd och väljer
+  automatiskt en annan ledig lokal port.
 - Optimera överlappande RLS-läspolicies och komplettera index efter verkliga queryplaner.
 - Granska resultat och migrationsdiff innan någon fjärrlänkning eller flaggaktivering.
 - Håll OCR, bankkoppling, abonnemangsbetalning, e-postautomation och externa köer avstängda.

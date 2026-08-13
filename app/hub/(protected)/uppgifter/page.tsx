@@ -7,7 +7,7 @@ import {
   priorityLabel,
   taskStatusLabel,
 } from "@/src/lib/hub";
-import { getHubLists, getTasks } from "@/src/lib/hub-server";
+import { getHubLists, getTasks, requireHubContext } from "@/src/lib/hub-server";
 
 export default async function HubTasksPage({
   searchParams,
@@ -15,13 +15,14 @@ export default async function HubTasksPage({
   searchParams: Promise<{ status?: string; due?: string; page?: string }>;
 }) {
   const filters = await searchParams;
-  const [tasks, lists] = await Promise.all([
+  const [tasks, lists, { membership }] = await Promise.all([
     getTasks({
       status: filters.status ?? null,
       due: filters.due ?? null,
       page: filters.page,
     }),
     getHubLists(),
+    requireHubContext(),
   ]);
 
   return (
@@ -88,7 +89,16 @@ export default async function HubTasksPage({
           />
         </HubCard>
 
-        <TaskForm customers={lists.customers} />
+        {membership.role === "viewer" ? (
+          <HubCard>
+            <p className="font-semibold text-[var(--hub-text)]">Läsbehörighet</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--hub-muted)]">
+              Du kan se uppgifter men inte skapa eller ändra dem.
+            </p>
+          </HubCard>
+        ) : (
+          <TaskForm customers={lists.customers} />
+        )}
       </div>
     </HubShell>
   );

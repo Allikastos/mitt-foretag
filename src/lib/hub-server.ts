@@ -385,6 +385,7 @@ export async function getCustomerDetail(
 
   return {
     organization,
+    membership,
     customer,
     contacts: createPaginatedResult({
       items: contactsResult.data ?? [],

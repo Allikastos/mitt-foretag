@@ -36,6 +36,26 @@ export default async function HubInvoiceDetailPage({
 
   const isLocked = !canEditInvoice(detail.invoice);
   const pdfHref = `/hub/fakturor/${detail.invoice.id}/pdf`;
+  const hasAddress = Boolean(
+    context.organization.address_line_1?.trim() ||
+      context.organization.address?.trim(),
+  );
+  const hasPaymentDetails = Boolean(
+    context.organization.bankgiro ||
+      context.organization.plusgiro ||
+      context.organization.bank_account ||
+      context.organization.swish_number ||
+      context.organization.payment_instructions,
+  );
+  const finalizationBlockers = [
+    !detail.lines.length ? "minst en fakturarad" : null,
+    !context.organization.org_number?.trim() ? "organisationsnummer" : null,
+    !hasAddress ? "företagsadress" : null,
+    !hasPaymentDetails ? "betalningsuppgifter" : null,
+  ].filter((item): item is string => Boolean(item));
+  const finalizationBlockedMessage = finalizationBlockers.length
+    ? `Komplettera ${finalizationBlockers.join(", ")} innan fakturan kan slutföras.`
+    : null;
 
   return (
     <HubShell
@@ -139,22 +159,34 @@ export default async function HubInvoiceDetailPage({
         </div>
 
         <div className="space-y-6">
-          <InvoiceForm
-            invoice={detail.invoice}
-            customers={lists.customers}
-            organization={context.organization}
-          />
-          <InvoiceLineForm invoiceId={detail.invoice.id} locked={isLocked} />
-          <InvoiceStatusForm
-            invoiceId={detail.invoice.id}
-            invoiceNumber={detail.invoice.invoice_number}
-            currentStatus={detail.invoice.status}
-            locked={isLocked}
-            pdfHref={pdfHref}
-            pdfStatus={detail.invoice.pdf_status}
-            pdfError={detail.invoice.pdf_error}
-          />
-          <DocumentUploadForm customers={lists.customers} invoices={lists.invoices} />
+          {context.membership.role === "viewer" ? (
+            <HubCard>
+              <p className="font-semibold text-[var(--hub-text)]">Läsbehörighet</p>
+              <p className="mt-2 text-sm leading-6 text-[var(--hub-muted)]">
+                Du kan läsa fakturan men inte redigera, slutföra eller ladda upp underlag.
+              </p>
+            </HubCard>
+          ) : (
+            <>
+              <InvoiceForm
+                invoice={detail.invoice}
+                customers={lists.customers}
+                organization={context.organization}
+              />
+              <InvoiceLineForm invoiceId={detail.invoice.id} locked={isLocked} />
+              <InvoiceStatusForm
+                invoiceId={detail.invoice.id}
+                invoiceNumber={detail.invoice.invoice_number}
+                currentStatus={detail.invoice.status}
+                locked={isLocked}
+                pdfHref={pdfHref}
+                pdfStatus={detail.invoice.pdf_status}
+                pdfError={detail.invoice.pdf_error}
+                finalizationBlockedMessage={finalizationBlockedMessage}
+              />
+              <DocumentUploadForm customers={lists.customers} invoices={lists.invoices} />
+            </>
+          )}
         </div>
       </div>
     </HubShell>

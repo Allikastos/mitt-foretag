@@ -196,8 +196,19 @@ export default async function HubCustomerDetailPage({
         </div>
 
         <div className="space-y-6">
-          <CustomerForm customer={detail.customer} />
-          <ContactForm customerId={detail.customer.id} />
+          {detail.membership.role === "viewer" ? (
+            <HubCard>
+              <p className="font-semibold text-[var(--hub-text)]">Läsbehörighet</p>
+              <p className="mt-2 text-sm leading-6 text-[var(--hub-muted)]">
+                Du kan läsa kundkortet men inte ändra kunden eller lägga till kontakter.
+              </p>
+            </HubCard>
+          ) : (
+            <>
+              <CustomerForm customer={detail.customer} />
+              <ContactForm customerId={detail.customer.id} />
+            </>
+          )}
         </div>
       </div>
     </HubShell>

@@ -23,7 +23,7 @@ export default async function HubInvoicesPage({
   searchParams: Promise<{ page?: string }>;
 }) {
   const filters = await searchParams;
-  const [{ organization }, invoices, lists] = await Promise.all([
+  const [{ organization, membership }, invoices, lists] = await Promise.all([
     requireHubContext(),
     getInvoices({ page: filters.page }),
     getHubLists(),
@@ -76,7 +76,16 @@ export default async function HubInvoicesPage({
           <HubPagination basePath="/hub/fakturor" {...invoices} />
         </HubCard>
 
-        <InvoiceForm customers={lists.customers} organization={organization} />
+        {membership.role === "viewer" ? (
+          <HubCard>
+            <p className="font-semibold text-[var(--hub-text)]">Läsbehörighet</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--hub-muted)]">
+              Du kan se fakturor men inte skapa eller ändra fakturautkast.
+            </p>
+          </HubCard>
+        ) : (
+          <InvoiceForm customers={lists.customers} organization={organization} />
+        )}
       </div>
     </HubShell>
   );
