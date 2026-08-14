@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { HubNav } from "@/components/hub/nav";
 import { HubSignOutButton } from "@/components/hub/sign-out-button";
 
@@ -84,6 +84,7 @@ export function HubAppShell({
   membershipRoleLabel,
   supportEmail,
 }: HubAppShellProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const isCollapsed = useSyncExternalStore(
     subscribe,
     getSidebarSnapshot,
@@ -104,8 +105,65 @@ export function HubAppShell({
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row">
+      <aside className="lg:hidden">
+        <div className="rounded-[1.5rem] border border-[color:var(--hub-panel-border)] bg-[var(--hub-panel)] px-4 py-3 text-[var(--hub-panel-contrast)] shadow-[0_22px_60px_-48px_rgba(0,0,0,0.55)]">
+          <div className="flex min-h-12 items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-[var(--hub-accent)]">
+                Hub
+              </p>
+              <p className="mt-1 truncate text-base font-semibold tracking-[-0.025em]">
+                {organizationName}
+              </p>
+            </div>
+            <span className="rounded-full bg-[var(--hub-panel-hover)] px-3 py-1.5 text-xs text-[var(--hub-panel-muted)]">
+              {membershipRoleLabel}
+            </span>
+            <button
+              type="button"
+              aria-expanded={isMobileMenuOpen}
+              aria-controls="hub-mobile-navigation"
+              aria-label={
+                isMobileMenuOpen ? "Stäng mobilmenyn" : "Öppna mobilmenyn"
+              }
+              onClick={() => setIsMobileMenuOpen((isOpen) => !isOpen)}
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--hub-panel-active)] px-4 text-sm font-medium text-[var(--hub-panel-active-text)] transition hover:opacity-90"
+            >
+              {isMobileMenuOpen ? "Stäng" : "Meny"}
+            </button>
+          </div>
+
+          {isMobileMenuOpen ? (
+            <div
+              id="hub-mobile-navigation"
+              className="mt-3 border-t border-[color:var(--hub-panel-border)] pt-3"
+            >
+              <p className="mb-3 text-xs leading-5 text-[var(--hub-panel-muted)]">
+                Inloggad som {userEmail}
+              </p>
+              <HubNav onNavigate={() => setIsMobileMenuOpen(false)} />
+              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-[color:var(--hub-panel-border)] pt-4">
+                <a
+                  href={`mailto:${supportEmail}`}
+                  className="text-sm text-[var(--hub-panel-muted)] transition hover:text-[var(--hub-panel-contrast)]"
+                >
+                  Support
+                </a>
+                <Link
+                  href="/"
+                  className="text-sm text-[var(--hub-panel-muted)] transition hover:text-[var(--hub-panel-contrast)]"
+                >
+                  Till Altura Nova
+                </Link>
+                <HubSignOutButton compact />
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </aside>
+
       <aside
-        className={`lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)] lg:self-start ${
+        className={`hidden lg:sticky lg:top-6 lg:block lg:h-[calc(100vh-3rem)] lg:self-start ${
           isVisuallyCollapsed ? "lg:w-[5.75rem]" : "lg:w-[16.75rem] xl:w-[18.5rem]"
         }`}
       >

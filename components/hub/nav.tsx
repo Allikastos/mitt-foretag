@@ -20,8 +20,10 @@ function isActive(pathname: string, href: string) {
 
 export function HubNav({
   isCollapsed = false,
+  onNavigate,
 }: {
   isCollapsed?: boolean;
+  onNavigate?: () => void;
 }) {
   const pathname = usePathname();
 
@@ -31,6 +33,7 @@ export function HubNav({
         <Link
           key={item.href}
           href={item.href}
+          onClick={onNavigate}
           aria-current={isActive(pathname, item.href) ? "page" : undefined}
           title={isCollapsed ? item.label : undefined}
           className={`flex min-h-11 items-center rounded-[1.15rem] px-4 py-3 text-sm font-medium outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--hub-panel-active)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--hub-panel)] ${
