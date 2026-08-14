@@ -8,8 +8,10 @@ Datum: 2026-08-14
 - Verifierad project ref: `jtposcdefsmromnouald`.
 - Förbjudet projekt: `Bidewind Consulting`, ref `zshdbqhuiuwjdpsavnml`.
 - Endast syntetisk data under `example.test` har använts.
-- Ingen Vercel-koppling, deployment, GitHub-push, pull request eller
-  produktionsändring har utförts.
+- Ingen Vercel-koppling, produktionsdeployment eller produktionsändring har
+  utförts.
+- En separat, inloggningsskyddad Netlify-draft används som preview. Den är inte
+  Netlifys produktionsdeployment och använder endast Supabase-staging.
 
 ## Baslinje och databas
 
@@ -76,7 +78,7 @@ onboarding- och webbläsarfixtures har separata, ännu snävare cleanup-kommando
 
 ## Testresultat
 
-- Enhetstester: 84 av 84 passerade.
+- Enhetstester: 86 av 86 passerade.
 - pgTAP: 90 av 90 passerade.
 - Lokal Auth, REST/API, RPC, Storage och samtidighet: passerade.
 - Remote Auth, REST/API, RPC, Storage, RLS, idempotens och samtidighet:
@@ -120,10 +122,14 @@ och draggränssnittet finns kvar. Detta bör ingå i den manuella preview-smoken
   egna genererade organisationer, användare och filer.
 - Seeden återställer nu verifierade organisationsstandarder idempotent efter
   ett syntetiskt webbläsartest.
+- Föråldrade Supabase-refreshcookies rensas nu avgränsat och leder tillbaka
+  till inloggningen i stället för att visa ett rått serverfel. Övriga authfel
+  döljs inte, och Supabase SSR:s cacheheaders förs vidare till svaret.
 
 ## Security Advisor
 
-Security Advisor har 0 fel och 20 varningar:
+Den senaste fullständiga Security Advisor-kontrollen hade 0 fel och 20
+varningar:
 
 - 19 varningar gäller avsiktligt autentiserade `SECURITY DEFINER`-RPC:er. De är
   tenant- och rollkontrollerade och testas i remote-sviten.
@@ -132,10 +138,16 @@ Security Advisor har 0 fel och 20 varningar:
   kostnader. Starka slumpade testlösenord används. Före produktion ska planen
   och Auth-skyddet beslutas uttryckligen.
 
-## Previewmiljö senare
+En avslutande omkörning via den separata Supabase-anslutningen stoppades av
+anslutningens behörighet. Remote schema-lint för både `public` och `private`
+passerade efteråt och inga migrations- eller DDL-ändringar gjordes sedan den
+senaste lyckade Advisor-kontrollen.
 
-Följande variabler behövs i Vercel Preview. Hemliga värden ska hämtas direkt
-från staging och aldrig dokumenteras i klartext:
+## Skyddad previewmiljö
+
+Netlify-sajten `altura-nova-hub-preview` är en separat, privat draftpreview.
+Följande variabler är lagrade i Netlify utan att hemliga värden dokumenteras i
+klartext:
 
 - `NEXT_PUBLIC_SUPABASE_URL` - stagingprojektets URL.
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - stagingprojektets publika nyckel.
@@ -153,17 +165,18 @@ från staging och aldrig dokumenteras i klartext:
 Preview behöver ingen service-role-nyckel för de nuvarande användarflödena.
 En sådan nyckel får inte läggas i klientvariabler eller `NEXT_PUBLIC_*`.
 
-## Checklista före framtida preview
+## Checklista för preview
 
-1. Skapa en separat preview-branch från de lokala stagingcommittarna.
-2. Kontrollera åter `jtposcdefsmromnouald` och 9 av 9 migrationer.
-3. Lägg endast previewvariablerna ovan i Vercel, scoped till Preview.
-4. Bekräfta att ingen variabel pekar på Bidewind-refen eller produktionsdata.
-5. Koppla Vercel först efter ett separat uttryckligt godkännande.
-6. Pusha preview-branchen först efter ett separat uttryckligt godkännande.
-7. Kör login, tenantisolering, dokument, faktura, mobilnavigation och manuell
-   dashboard-dragning på den skapade preview-URL:en.
-8. Aktivera inte skarp bokföring, mejl, betalning eller externa integrationer.
+1. Behåll branchen `codex/altura-nova-hub-preview` separat från `main`.
+2. Kontrollera `jtposcdefsmromnouald` och 9 av 9 migrationer före nya
+   databasändringar.
+3. Behåll previewen inloggningsskyddad och använd endast stagingvariabler.
+4. Bekräfta att ingen URL eller nyckel pekar på Bidewind eller produktion.
+5. Kör login, tenantisolering, dokument, faktura och mobilnavigation efter
+   relevanta previewändringar.
+6. Kontrollera dashboardens HTML5-dragning manuellt i previewen.
+7. Aktivera inte skarp bokföring, mejl, betalning eller externa integrationer
+   utan ett nytt uttryckligt beslut.
 
 ## Kvarvarande risker
 
@@ -173,6 +186,8 @@ En sådan nyckel får inte läggas i klientvariabler eller `NEXT_PUBLIC_*`.
 - Skarp svensk bokföring kräver fortsatt fackgranskning; gränssnittet är en
   förhandsversion.
 - Dashboardens dragning behöver en sista manuell kontroll i riktig preview.
+- Security Advisor bör öppnas i Supabase Dashboard vid nästa databasändring så
+  att de kända 20 varningarna kan jämföras mot baslinjen.
 
 Referenser:
 
