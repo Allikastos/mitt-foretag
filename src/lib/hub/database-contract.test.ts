@@ -74,6 +74,25 @@ test("synthetic seed is isolated, multi-tenant and never automatic", () => {
   assert.equal(seedPath.endsWith("supabase/seed.sql"), false);
 });
 
+test("staging tooling is pinned to the isolated project", () => {
+  const helper = readFileSync(
+    resolve(process.cwd(), "scripts", "staging-supabase.mjs"),
+    "utf8",
+  );
+  const runner = readFileSync(
+    resolve(process.cwd(), "scripts", "run-staging-synthetic-seed.mjs"),
+    "utf8",
+  );
+
+  assert.match(helper, /jtposcdefsmromnouald/);
+  assert.match(helper, /altura-nova-hub-staging/);
+  assert.match(helper, /zshdbqhuiuwjdpsavnml/);
+  assert.match(runner, /SYNTHETIC_STAGING_ONLY/);
+  assert.match(runner, /example\.test/);
+  assert.match(runner, /STAGING_CREDENTIALS_FILE/);
+  assert.doesNotMatch(runner, /process\.env\.SUPABASE_SERVICE_ROLE_KEY\s*=/);
+});
+
 test("Phase F stores safe integration status and idempotent event receipts", () => {
   const integrations = sql("phase-f.sql");
 

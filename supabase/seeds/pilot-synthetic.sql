@@ -42,11 +42,26 @@ insert into public.profiles (id, full_name, email) values
 on conflict (id) do nothing;
 
 insert into public.organizations (
-  id, name, org_number, email, employee_customer_scope, billing_status
+  id, name, org_number, email, employee_customer_scope, billing_status,
+  hub_theme, address_line_1, address_line_2, postal_code, city, bankgiro,
+  payment_instructions, next_invoice_number
 ) values
-  ('10000000-0000-4000-8000-000000000001', 'Syntetiska Alpha', 'TEST-ALPHA', 'alpha@example.test', 'assigned_only', 'trialing'),
-  ('20000000-0000-4000-8000-000000000002', 'Syntetiska Beta', 'TEST-BETA', 'beta@example.test', 'all_customers', 'trialing')
-on conflict (id) do nothing;
+  ('10000000-0000-4000-8000-000000000001', 'Syntetiska Alpha', 'TEST-ALPHA', 'alpha@example.test', 'assigned_only', 'trialing', 'nova', null, null, null, null, null, null, 1),
+  ('20000000-0000-4000-8000-000000000002', 'Syntetiska Beta', 'TEST-BETA', 'beta@example.test', 'all_customers', 'trialing', 'nova', null, null, null, null, null, null, 1)
+on conflict (id) do update set
+  name = excluded.name,
+  org_number = excluded.org_number,
+  email = excluded.email,
+  employee_customer_scope = excluded.employee_customer_scope,
+  billing_status = excluded.billing_status,
+  hub_theme = excluded.hub_theme,
+  address_line_1 = excluded.address_line_1,
+  address_line_2 = excluded.address_line_2,
+  postal_code = excluded.postal_code,
+  city = excluded.city,
+  bankgiro = excluded.bankgiro,
+  payment_instructions = excluded.payment_instructions,
+  next_invoice_number = excluded.next_invoice_number;
 
 insert into public.organization_members (organization_id, user_id, role) values
   ('10000000-0000-4000-8000-000000000001', '11000000-0000-4000-8000-000000000001', 'owner'),
@@ -59,12 +74,12 @@ on conflict (organization_id, user_id) do nothing;
 
 insert into public.customers (
   id, organization_id, created_by, owner_user_id, visibility,
-  company_name, email, status, follow_up_date
+  company_name, email, tags, status, follow_up_date
 ) values
-  ('13000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11000000-0000-4000-8000-000000000003', '11000000-0000-4000-8000-000000000003', 'organization', 'Alpha Kund Egen', 'egen.alpha@example.test', 'active', current_date + 2),
-  ('13000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000001', '11000000-0000-4000-8000-000000000001', '11000000-0000-4000-8000-000000000001', 'organization', 'Alpha Kund Annan', 'annan.alpha@example.test', 'lead', current_date + 5),
-  ('13000000-0000-4000-8000-000000000003', '10000000-0000-4000-8000-000000000001', '11000000-0000-4000-8000-000000000001', '11000000-0000-4000-8000-000000000001', 'owners_only', 'Alpha Privat Kund', 'privat.alpha@example.test', 'active', null),
-  ('23000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000002', '22000000-0000-4000-8000-000000000002', '22000000-0000-4000-8000-000000000002', 'organization', 'Beta Kund', 'kund.beta@example.test', 'active', current_date + 3)
+  ('13000000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11000000-0000-4000-8000-000000000003', '11000000-0000-4000-8000-000000000003', 'organization', 'Alpha Kund Egen', 'egen.alpha@example.test', array['prioriterad', 'pilot'], 'active', current_date + 2),
+  ('13000000-0000-4000-8000-000000000002', '10000000-0000-4000-8000-000000000001', '11000000-0000-4000-8000-000000000001', '11000000-0000-4000-8000-000000000001', 'organization', 'Alpha Kund Annan', 'annan.alpha@example.test', array['prospekt'], 'lead', current_date + 5),
+  ('13000000-0000-4000-8000-000000000003', '10000000-0000-4000-8000-000000000001', '11000000-0000-4000-8000-000000000001', '11000000-0000-4000-8000-000000000001', 'owners_only', 'Alpha Privat Kund', 'privat.alpha@example.test', array['agare'], 'active', null),
+  ('23000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000002', '22000000-0000-4000-8000-000000000002', '22000000-0000-4000-8000-000000000002', 'organization', 'Beta Kund', 'kund.beta@example.test', array['pilot'], 'active', current_date + 3)
 on conflict (id) do nothing;
 
 insert into public.contacts (id, organization_id, customer_id, name, email) values
@@ -149,4 +164,11 @@ insert into public.audit_events (
 ) values
   ('19500000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11000000-0000-4000-8000-000000000001', 'organization', '10000000-0000-4000-8000-000000000001', 'synthetic_seeded', '{"synthetic":true}'),
   ('29500000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000002', '22000000-0000-4000-8000-000000000001', 'organization', '20000000-0000-4000-8000-000000000002', 'synthetic_seeded', '{"synthetic":true}')
+on conflict (id) do nothing;
+
+insert into public.activity_log (
+  id, organization_id, user_id, entity_type, entity_id, action, description
+) values
+  ('19600000-0000-4000-8000-000000000001', '10000000-0000-4000-8000-000000000001', '11000000-0000-4000-8000-000000000001', 'customer', '13000000-0000-4000-8000-000000000001', 'synthetic_follow_up_planned', 'Syntetisk uppfoljning planerad.'),
+  ('29600000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000002', '22000000-0000-4000-8000-000000000001', 'customer', '23000000-0000-4000-8000-000000000001', 'synthetic_follow_up_planned', 'Syntetisk uppfoljning planerad.')
 on conflict (id) do nothing;

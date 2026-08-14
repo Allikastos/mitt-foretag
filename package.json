@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:hub:local": "node scripts/run-local-hub.mjs",
+    "dev:hub:staging": "node scripts/run-staging-hub.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -12,9 +13,17 @@
     "typecheck": "tsc --noEmit",
     "db:migrations:prepare": "node scripts/prepare-supabase-migrations.mjs",
     "db:seed:synthetic": "node scripts/run-synthetic-supabase-seed.mjs",
+    "db:seed:staging:synthetic": "node scripts/run-staging-synthetic-seed.mjs seed",
+    "db:seed:staging:status": "node scripts/run-staging-synthetic-seed.mjs status",
+    "db:seed:staging:cleanup": "node scripts/run-staging-synthetic-seed.mjs cleanup",
+    "db:fixture:staging:onboarding:create": "node scripts/manage-staging-onboarding-fixture.mjs create",
+    "db:fixture:staging:onboarding:cleanup": "node scripts/manage-staging-onboarding-fixture.mjs cleanup",
+    "db:fixture:staging:browser:cleanup": "node scripts/cleanup-staging-browser-artifacts.mjs",
     "db:test": "supabase test db",
     "db:test:integration": "node scripts/test-supabase-integration.mjs",
-    "db:test:integration:local": "node scripts/run-local-supabase-integration.mjs"
+    "db:test:integration:local": "node scripts/run-local-supabase-integration.mjs",
+    "db:test:integration:staging": "node scripts/run-staging-supabase-integration.mjs",
+    "db:test:access:staging": "node scripts/test-staging-seeded-access.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.0",

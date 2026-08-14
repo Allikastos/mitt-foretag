@@ -1,11 +1,17 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import {
+  assertStagingLink,
+  runStagingSql,
+} from "./staging-supabase.mjs";
 
 const url = process.env.SUPABASE_URL;
 const anonKey = process.env.SUPABASE_ANON_KEY;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const confirmation = "LOCAL_SUPABASE_ONLY";
+const confirmation = process.env.ALTURA_INTEGRATION_TEST_CONFIRMATION;
+const stagingProjectRef = process.env.ALTURA_INTEGRATION_TEST_PROJECT_REF;
+const approvedStagingRef = "jtposcdefsmromnouald";
 
 function isLocalUrl(value) {
   try {
@@ -17,15 +23,15 @@ function isLocalUrl(value) {
   }
 }
 
-if (
-  process.env.ALTURA_INTEGRATION_TEST_CONFIRMATION !== confirmation ||
-  !url ||
-  !isLocalUrl(url) ||
-  !anonKey ||
-  !serviceRoleKey
-) {
+const isLocal = confirmation === "LOCAL_SUPABASE_ONLY" && isLocalUrl(url);
+const isStaging =
+  confirmation === "STAGING_SUPABASE_ONLY" &&
+  stagingProjectRef === approvedStagingRef &&
+  url === `https://${approvedStagingRef}.supabase.co`;
+
+if ((!isLocal && !isStaging) || !url || !anonKey || !serviceRoleKey) {
   throw new Error(
-    "Integrationstestet kräver uttryckligen bekräftad lokal Supabase och lokala testnycklar.",
+    "Integrationstestet kräver uttryckligen bekräftad lokal Supabase eller godkänd staging-ref.",
   );
 }
 
@@ -34,10 +40,14 @@ const options = {
 };
 const service = createClient(url, serviceRoleKey, options);
 const suffix = randomUUID().slice(0, 8);
-const password = `Local-test-${randomUUID()}!`;
+const password = `Synthetic-test-${randomUUID()}!`;
 const createdUserIds = [];
 const createdOrganizationIds = [];
 const storagePaths = [];
+
+function assertApprovedTarget() {
+  if (isStaging) assertStagingLink();
+}
 
 async function requireData(promise, label) {
   const { data, error } = await promise;
@@ -47,6 +57,7 @@ async function requireData(promise, label) {
 
 async function createUser(label) {
   const email = `${label}.${suffix}@example.test`;
+  assertApprovedTarget();
   const data = await requireData(
     service.auth.admin.createUser({ email, password, email_confirm: true }),
     `skapa ${label}`,
@@ -75,16 +86,18 @@ async function run() {
   const organizationB = randomUUID();
   createdOrganizationIds.push(organizationA, organizationB);
 
+  assertApprovedTarget();
   await requireData(
     service.from("profiles").upsert(
       [ownerA, memberA, viewerA, ownerB].map((user) => ({
         id: user.id,
         email: user.email,
-        full_name: "Lokal integrationstest",
+        full_name: "Syntetisk integrationstest",
       })),
     ),
     "skapa profiler",
   );
+  assertApprovedTarget();
   await requireData(
     service.from("organizations").insert([
       {
@@ -100,6 +113,7 @@ async function run() {
     ]),
     "skapa organisationer",
   );
+  assertApprovedTarget();
   await requireData(
     service.from("organization_members").insert([
       { organization_id: organizationA, user_id: ownerA.id, role: "owner" },
@@ -113,6 +127,7 @@ async function run() {
   const ownCustomerId = randomUUID();
   const otherCustomerId = randomUUID();
   const privateCustomerId = randomUUID();
+  assertApprovedTarget();
   await requireData(
     service.from("customers").insert([
       {
@@ -151,6 +166,7 @@ async function run() {
       signedInClient(ownerB),
     ]);
 
+  assertApprovedTarget();
   const bootstrappedOrganizationId = await requireData(
     ownerClient.rpc("create_hub_organization", {
       target_name: "Atomisk onboarding",
@@ -179,6 +195,7 @@ async function run() {
     "kontrollera onboardingaktivitet",
   );
   assert.equal(bootstrapActivity.action, "organization_bootstrapped");
+  assertApprovedTarget();
   assert.notEqual(
     (
       await memberClient.from("organizations").insert({
@@ -207,6 +224,7 @@ async function run() {
   );
   assert.equal(foreignCustomers.length, 0);
 
+  assertApprovedTarget();
   const forgedUpdate = await memberClient
     .from("customers")
     .update({ notes: "ska inte sparas" })
@@ -214,6 +232,7 @@ async function run() {
     .select("id");
   assert.equal(forgedUpdate.error, null);
   assert.equal(forgedUpdate.data?.length, 0);
+  assertApprovedTarget();
   const viewerInsert = await viewerClient.from("tasks").insert({
     organization_id: organizationA,
     title: "ska stoppas",
@@ -223,18 +242,21 @@ async function run() {
   const unlockedPath = `${organizationA}/integration/${suffix}-unlocked.txt`;
   const retainedPath = `${organizationA}/integration/${suffix}-retained.txt`;
   storagePaths.push(unlockedPath, retainedPath);
+  assertApprovedTarget();
   await requireData(
     memberClient.storage
       .from("hub-documents")
       .upload(unlockedPath, new Blob(["synthetic unlocked"]), { upsert: false }),
     "ladda upp olåst fil",
   );
+  assertApprovedTarget();
   await requireData(
     memberClient.storage
       .from("hub-documents")
       .upload(retainedPath, new Blob(["synthetic retained"]), { upsert: false }),
     "ladda upp låst fil",
   );
+  assertApprovedTarget();
   await requireData(
     service.from("documents").insert([
       {
@@ -261,6 +283,7 @@ async function run() {
     "registrera dokumentmetadata",
   );
 
+  assertApprovedTarget();
   await requireData(
     memberClient.storage.from("hub-documents").download(unlockedPath),
     "läs egen fil",
@@ -275,10 +298,12 @@ async function run() {
       .error,
     null,
   );
+  assertApprovedTarget();
   await requireData(
     memberClient.storage.from("hub-documents").remove([unlockedPath]),
     "radera olåst fil",
   );
+  assertApprovedTarget();
   await requireData(
     memberClient.storage.from("hub-documents").remove([retainedPath]),
     "försök radera låst fil",
@@ -289,6 +314,7 @@ async function run() {
   );
 
   const year = new Date().getUTCFullYear();
+  assertApprovedTarget();
   await requireData(
     ownerClient.rpc("initialize_accounting_mvp", {
       target_organization_id: organizationA,
@@ -313,6 +339,7 @@ async function run() {
     ],
     target_warnings: [],
   };
+  assertApprovedTarget();
   const draftResults = await Promise.all([
     ownerClient.rpc("save_bookkeeping_draft", draftInput),
     ownerClient.rpc("save_bookkeeping_draft", draftInput),
@@ -321,6 +348,7 @@ async function run() {
   assert.notEqual(draftResults[0].data, null);
   assert.equal(draftResults[0].data, draftResults[1].data);
   const draftId = draftResults[0].data;
+  assertApprovedTarget();
   await requireData(
     ownerClient.rpc("approve_bookkeeping_draft", {
       target_organization_id: organizationA,
@@ -334,6 +362,7 @@ async function run() {
     target_idempotency_key: `posting-${suffix}`,
     target_journal_series: "A",
   };
+  assertApprovedTarget();
   const postingResults = await Promise.all([
     ownerClient.rpc("post_bookkeeping_draft", postingInput),
     ownerClient.rpc("post_bookkeeping_draft", postingInput),
@@ -348,6 +377,7 @@ async function run() {
     "kontrollera verifikation",
   );
   assert.equal(journalRows.length, 1);
+  assertApprovedTarget();
   assert.notEqual(
     (
       await ownerClient
@@ -358,6 +388,7 @@ async function run() {
     null,
   );
 
+  assertApprovedTarget();
   const numberResults = await Promise.all(
     Array.from({ length: 6 }, () =>
       ownerClient.rpc("claim_next_invoice_number", {
@@ -380,6 +411,7 @@ async function run() {
     target_priority: 0,
     target_max_attempts: 3,
   };
+  assertApprovedTarget();
   const jobResults = await Promise.all([
     service.rpc("enqueue_processing_job", jobInput),
     service.rpc("enqueue_processing_job", jobInput),
@@ -387,19 +419,40 @@ async function run() {
   for (const result of jobResults) assert.equal(result.error, null);
   assert.equal(jobResults[0].data, jobResults[1].data);
 
-  console.log("Lokala Supabase-integrationstester passerade.");
+  console.log(
+    `${isStaging ? "Staging" : "Lokala"} Supabase-integrationstester passerade.`,
+  );
 }
 
 try {
   await run();
 } finally {
   if (storagePaths.length) {
-    await service.storage.from("hub-documents").remove(storagePaths);
+    assertApprovedTarget();
+    const removal = service.storage.from("hub-documents").remove(storagePaths);
+    if (isStaging) await requireData(removal, "stada stagingfiler");
+    else await removal;
   }
   if (createdOrganizationIds.length) {
-    await service.from("organizations").delete().in("id", createdOrganizationIds);
+    if (isStaging) {
+      const ids = createdOrganizationIds
+        .map((id) => `'${id}'::uuid`)
+        .join(", ");
+      runStagingSql(`
+        set session_replication_role = replica;
+        delete from public.journal_lines where organization_id in (${ids});
+        delete from public.journal_entries where organization_id in (${ids});
+        set session_replication_role = origin;
+        delete from public.organizations where id in (${ids});
+      `);
+    } else {
+      await service.from("organizations").delete().in("id", createdOrganizationIds);
+    }
   }
   for (const userId of createdUserIds) {
-    await service.auth.admin.deleteUser(userId);
+    assertApprovedTarget();
+    const removal = service.auth.admin.deleteUser(userId);
+    if (isStaging) await requireData(removal, "stada staginganvandare");
+    else await removal;
   }
 }
