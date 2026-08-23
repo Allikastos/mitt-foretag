@@ -1,5 +1,11 @@
 # Altura Nova Hub: produktvision och roadmap
 
+> **Status från 23 augusti 2026:** Detta är en villkorad långsiktsvision, inte
+> den aktuella leveransplanen. Den styrande kortsiktiga strategin finns i
+> [`strategic-pivot-2026-08-23.md`](strategic-pivot-2026-08-23.md). Ingen
+> utbyggnad mot full Spiris- eller Fortnox-bredd ska prioriteras före bevisad
+> efterfrågan, betalningsvilja och återkommande användning.
+
 ## Syfte
 
 Det här dokumentet är den gemensamma produktkompassen för Altura Nova Hub.
@@ -29,7 +35,7 @@ säkerhetsgränser och verifierad svensk domänlogik.
 
 ## Planerad introduktionsmodell
 
-Prismodellen är ett beslutat planeringsantagande, inte en aktiv
+Prismodellen är en framtida hypotes, inte ett aktuellt erbjudande eller en aktiv
 betalningsimplementation:
 
 - Altura Nova Komplett: **399 kr per månad**, inklusive tre fullständiga

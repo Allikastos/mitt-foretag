@@ -1,8 +1,10 @@
 # Altura Nova
 
 Next.js-applikationen innehåller Altura Novas publika webbplats, administration
-och den separata kundhubben. Produktmål, prisantaganden och roadmap för hubben
-finns i [`docs/product-vision-and-roadmap.md`](docs/product-vision-and-roadmap.md).
+och den separata kundhubben. Den aktuella affärsriktningen finns i
+[`docs/strategic-pivot-2026-08-23.md`](docs/strategic-pivot-2026-08-23.md).
+Hubbens villkorade långsiktsvision finns i
+[`docs/product-vision-and-roadmap.md`](docs/product-vision-and-roadmap.md).
 
 ## Lokal utveckling
 

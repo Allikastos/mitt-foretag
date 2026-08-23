@@ -5,20 +5,19 @@ export const SITE_CONFIG = {
   logoPath: "/loggor/logo-colored-two-rows.png",
   footerLogoPath: "/loggor/logo-white-one-row.png",
   description:
-    "Redovisning, rapportering och ekonomisk rådgivning för företag som vill ha bättre kontroll, tydligare siffror och bättre beslutsunderlag.",
+    "Moderna och mobilanpassade hemsidor för småföretag, personligt framtagna till ett tydligt fast pris.",
   domain: "alturanova.se",
   url: "https://alturanova.se",
-  tagline: "Ekonomisk styrning och redovisning",
+  tagline: "Webbstudio för småföretag",
   cta: {
-    primary: "Boka ett första samtal",
-    primaryShort: "Boka samtal",
-    services: "Se tjänster",
+    primary: "Få ett kostnadsfritt förslag",
+    primaryShort: "Få ett förslag",
+    services: "Se paket",
     articles: "Läs artiklar",
-    serviceDetails: "Se upplägg",
+    serviceDetails: "Se paketet",
     readArticle: "Läs artikel",
   },
-  legalNotice:
-    `${BRAND_NAME} är ett varumärke under etablering. Under uppstartsperioden kan bolaget vara registrerat under ett annat namn.`,
+  legalNotice: `${BRAND_NAME} är en personlig webbstudio i Linköping. Alla priser på webbplatsen anges exklusive moms.`,
   contact: {
     email: "kontakt@alturanova.se",
     phoneDisplay: "076-0218499",

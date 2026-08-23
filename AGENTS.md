@@ -6,5 +6,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## Product direction
 
-Read `docs/product-vision-and-roadmap.md` before changing Altura Nova Hub's
-scope, navigation, roles, pricing assumptions, accounting flow, or roadmap.
+Read `docs/strategic-pivot-2026-08-23.md` first for Altura Nova's current
+commercial direction. Read `docs/product-vision-and-roadmap.md` before changing
+the Hub's scope, navigation, roles, pricing assumptions, accounting flow, or
+roadmap.

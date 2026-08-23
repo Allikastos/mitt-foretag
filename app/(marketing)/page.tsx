@@ -1,312 +1,159 @@
-import Image from "next/image";
 import Link from "next/link";
-import { SITE_CONFIG } from "@/config/site";
+import { ContactForm } from "@/components/contact-form";
+import { WebsitePreview } from "@/components/marketing/website-preview";
 import { SectionContainer } from "@/components/section-container";
+import { SITE_CONFIG } from "@/config/site";
 import { createMetadata } from "@/lib/metadata";
+import { demoProjects, processSteps, services } from "@/lib/site";
 
 export const metadata = createMetadata(
-  "Redovisning, rapportering och rådgivning för växande företag",
-  `${SITE_CONFIG.name} hjälper växande och ägarledda bolag med redovisning, rapportering och rådgivning för bättre kontroll, tydligare siffror och snabbare beslut i verksamheten.`,
+  "Moderna hemsidor för småföretag",
+  "Professionella och mobilanpassade hemsidor för småföretag från 4 995 kr till fast pris.",
   { pathname: "/" }
 );
 
-const helpItems = [
-  "tydlig ekonomisk överblick",
-  "bättre uppföljning över tid",
-  "underlag för beslut",
-  "en stabil grund för tillväxt",
+const problems = [
+  { title: "Du saknar hemsida", text: "Kunder söker efter dig men hittar ingen tydlig plats som förklarar vad du gör eller hur de tar kontakt." },
+  { title: "Sidan känns gammal", text: "Verksamheten har utvecklats, men hemsidan visar inte längre nivån på det arbete du faktiskt levererar." },
+  { title: "Mobilen fungerar dåligt", text: "Besökaren behöver zooma, leta eller vänta. Då blir nästa företag i sökresultatet ofta enklare att välja." },
 ];
 
-const serviceSections = [
-  {
-    label: "Redovisning",
-    title: "Redovisning",
-    href: "/tjanster/redovisning",
-    paragraphs: [
-      "Löpande bokföring, moms och avstämningar byggs upp i ett tydligt arbetssätt som fungerar över tid.",
-      "Resultatet är uppdaterade siffror, lägre risk för fel och mer tid till verksamheten.",
-    ],
-  },
-  {
-    label: "Rapportering",
-    title: "Rapportering",
-    href: "/tjanster/rapportering",
-    paragraphs: [
-      "Löpande rapportering visar utveckling, avvikelser och nyckeltal som är relevanta för styrningen.",
-      "Ni får bättre överblick och snabbare underlag för prioriteringar och beslut.",
-    ],
-  },
-  {
-    label: "Rådgivning",
-    title: "Rådgivning",
-    href: "/tjanster/radgivning",
-    paragraphs: [
-      "Rådgivningen utgår från era siffror och fokuserar på lönsamhet, kostnadsstruktur och nästa steg framåt.",
-      "Målet är tydliga rekommendationer som stärker beslutsförmågan i ledning och ägararbete.",
-    ],
-  },
-];
-
-const workItems = [
-  "Tydlig struktur i redovisning och underlag",
-  "Regelbunden uppföljning av ekonomi och avvikelser",
-  "Direkt dialog med fokus på affärsnytta",
-  "Siffror som går att använda i beslut",
+const faqs = [
+  { question: "Vad behöver jag ha klart innan vi börjar?", answer: "Det räcker att du kan beskriva verksamheten, de viktigaste tjänsterna och vilka kunder du vill nå. Jag hjälper dig att strukturera befintligt material och se vad som saknas." },
+  { question: "Ingår domän och publicering?", answer: "Jag hjälper dig med domän och publicering. Eventuella externa kostnader för domän eller särskilda tjänster redovisas tydligt innan något beställs." },
+  { question: "Kan jag ändra innehållet senare?", answer: "Ja. Mindre ändringar kan göras separat eller inom Altura Trygg. Större ombyggnader och nya funktioner offereras innan arbetet startar." },
+  { question: "Är priserna inklusive moms?", answer: "Nej. Alla priser på webbplatsen är introduktionspriser exklusive moms och gäller den tydligt beskrivna omfattningen." },
+  { question: "Bygger du e-handel och avancerade webbappar?", answer: "Inte inom de här paketen. Fokus är tydliga företagshemsidor. Om behovet ligger utanför omfattningen säger jag det tidigt, innan du lägger tid på fel upplägg." },
 ];
 
 export default function HomePage() {
   return (
     <>
-      <section className="pb-16 pt-8 md:pb-20 md:pt-16 lg:pt-20">
+      <section className="overflow-hidden pb-16 pt-10 md:pb-24 md:pt-16">
         <SectionContainer>
-          <div className="overflow-hidden rounded-[2.75rem] border border-black/6 bg-white shadow-[0_36px_90px_-62px_rgba(0,0,0,0.24)]">
-            <div className="grid gap-12 px-8 py-10 md:px-12 md:py-14 lg:grid-cols-[minmax(0,1.06fr)_minmax(18rem,0.94fr)] lg:items-center lg:gap-14 lg:px-14 lg:py-16">
-              <div className="max-w-[39rem]">
-                <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
-                  {SITE_CONFIG.tagline}
-                </p>
-                <p className="mt-6 text-sm font-medium tracking-[0.18em] text-[#6B6B6B] uppercase">
-                  {SITE_CONFIG.name}
-                </p>
-                <h1 className="mt-7 text-4xl font-semibold tracking-[-0.055em] text-[#0B0B0C] text-balance md:text-5xl lg:text-[4.2rem] lg:leading-[0.98]">
-                  Ekonomisk kontroll som faktiskt driver bättre beslut
-                </h1>
-                <p className="mt-7 max-w-2xl text-lg leading-8 text-[#5F5F5F] md:text-[1.125rem]">
-                  {SITE_CONFIG.name} hjälper växande och ägarledda företag att
-                  få tydliga siffror, bättre struktur och ett stabilt
-                  beslutsunderlag - så att du kan fokusera på att driva och
-                  utveckla verksamheten.
-                </p>
-
-                <div className="mt-12 flex flex-col gap-4 sm:flex-row">
-                  <Link
-                    href="/kontakt"
-                    className="inline-flex items-center justify-center rounded-2xl bg-[#0B0B0C] px-6 py-3 text-sm font-medium text-white transition hover:opacity-90"
-                  >
-                    Kontakta oss
-                  </Link>
-                  <Link
-                    href="/tjanster"
-                    className="inline-flex items-center justify-center rounded-2xl border border-black/10 px-6 py-3 text-sm font-medium text-[#0B0B0C] transition hover:bg-[#F7F7F5]"
-                  >
-                    Se våra tjänster
-                  </Link>
-                </div>
+          <div className="grid items-center gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16">
+            <div className="rise-in max-w-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#173f35]/12 bg-white/60 px-4 py-2 text-xs font-semibold tracking-[0.13em] text-[#436357] uppercase">
+                <span className="h-2 w-2 rounded-full bg-[#e86f44]" /> Personlig webbstudio i Linköping
               </div>
+              <h1 className="mt-7 text-5xl font-semibold leading-[0.95] tracking-[-0.065em] text-[#173f35] text-balance md:text-7xl lg:text-[5.2rem]">
+                Behöver ditt företag en <span className="text-[#e86f44]">modern hemsida?</span>
+              </h1>
+              <p className="mt-7 max-w-xl text-lg leading-8 text-[#5c6d65] md:text-xl">
+                Jag bygger professionella och mobilanpassade hemsidor åt småföretag, från 4 995 kr till fast pris.
+              </p>
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+                <Link href="/kontakt" className="inline-flex items-center justify-center rounded-full bg-[#e86f44] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_20px_35px_-20px_rgba(156,66,35,.7)] transition hover:-translate-y-0.5 hover:bg-[#d95f35]">Få ett kostnadsfritt förslag <span aria-hidden="true" className="ml-2">→</span></Link>
+                <Link href="/exempel" className="inline-flex items-center justify-center rounded-full border border-[#173f35]/15 bg-white/55 px-6 py-3.5 text-sm font-semibold text-[#173f35] transition hover:bg-white">Se exempel</Link>
+              </div>
+              <div className="mt-9 flex flex-wrap gap-x-6 gap-y-2 text-sm text-[#5c6d65]">
+                <span>Fast pris</span><span>Mobilanpassat</span><span>Personlig kontakt</span>
+              </div>
+            </div>
 
-              <div className="space-y-6 lg:pl-2">
-                <div className="overflow-hidden rounded-[2.1rem] bg-[#0B0B0C] shadow-[0_26px_60px_-44px_rgba(0,0,0,0.35)]">
-                  <Image
-                    src="https://images.pexels.com/photos/20251480/pexels-photo-20251480.jpeg?auto=compress&cs=tinysrgb&w=1200&h=1500&fit=crop"
-                    alt="Finansiella rapporter, kalkylator och anteckningar på skrivbord"
-                    width={1200}
-                    height={1500}
-                    priority
-                    quality={70}
-                    sizes="(max-width: 1023px) 100vw, 42vw"
-                    className="h-[24rem] w-full object-cover opacity-92 md:h-[30rem]"
-                  />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-[1.6rem] border border-black/8 bg-[#F7F7F5] p-6">
-                    <p className="text-xs font-medium tracking-[0.2em] text-[#C6A15B] uppercase">
-                      Fokus
-                    </p>
-                    <p className="mt-3 text-sm leading-7 text-[#5F5F5F]">
-                      Struktur, kontroll och tydlighet för företag som vill
-                      arbeta mer analytiskt med ekonomin.
-                    </p>
-                  </div>
-                  <div className="rounded-[1.6rem] border border-black/8 bg-[#F7F7F5] p-6">
-                    <p className="text-xs font-medium tracking-[0.2em] text-[#C6A15B] uppercase">
-                      Inriktning
-                    </p>
-                    <p className="mt-3 text-sm leading-7 text-[#5F5F5F]">
-                      Beslutsunderlag som går att agera på i ledning och
-                      planering.
-                    </p>
-                  </div>
-                </div>
+            <div className="rise-in relative [animation-delay:120ms]">
+              <div className="absolute -right-14 -top-10 h-48 w-48 rounded-full bg-[#e86f44]/18 blur-2xl" />
+              <div className="relative rotate-[1.5deg]">
+                <WebsitePreview {...demoProjects[0]} />
+              </div>
+              <div className="absolute -bottom-7 -left-3 max-w-[15rem] -rotate-2 rounded-[1.25rem] border border-[#173f35]/10 bg-[#fffdf8] p-4 shadow-xl shadow-[#173f35]/10 md:-left-8">
+                <p className="text-xs font-bold tracking-[0.15em] text-[#e86f44] uppercase">Byggd för mobilen</p>
+                <p className="mt-2 text-sm leading-6 text-[#51635a]">Tydlig, snabb och enkel att kontakta från första besöket.</p>
               </div>
             </div>
           </div>
         </SectionContainer>
       </section>
 
-      <section className="py-24">
+      <section className="py-16 md:py-24">
         <SectionContainer>
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] lg:items-start lg:gap-12">
-            <div className="max-w-[48rem]">
-              <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
-                Värde
-              </p>
-              <h2 className="mt-5 text-3xl font-semibold tracking-[-0.045em] text-[#0B0B0C] text-balance md:text-4xl">
-                Få mer än bara bokföring
-              </h2>
-              <p className="mt-6 text-lg leading-8 text-[#5F5F5F]">
-                Många företag har sin redovisning på plats - men saknar tydlig
-                uppföljning, struktur och förståelse för vad siffrorna faktiskt
-                innebär.
-              </p>
-              <p className="mt-5 text-lg leading-8 text-[#5F5F5F]">
-                Vi arbetar nära våra kunder för att skapa:
-              </p>
-            </div>
-
-            <div className="rounded-[2rem] border border-black/8 bg-[#F7F7F5] p-6 shadow-[0_22px_60px_-54px_rgba(0,0,0,0.14)] md:p-7">
-              <ul className="space-y-3">
-                {helpItems.map((item) => (
-                  <li
-                    key={item}
-                    className="rounded-[1.25rem] border border-black/8 bg-white px-5 py-4 text-sm leading-6 text-[#5F5F5F]"
-                  >
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="max-w-2xl">
+            <p className="text-xs font-bold tracking-[0.2em] text-[#e86f44] uppercase">Känner du igen läget?</p>
+            <h2 className="mt-5 text-4xl font-semibold tracking-[-0.05em] text-[#173f35] text-balance md:text-5xl">En hemsida ska hjälpa kunden vidare, inte skapa fler frågetecken.</h2>
           </div>
-        </SectionContainer>
-      </section>
-
-      <section className="py-24">
-        <SectionContainer>
-          <div className="grid gap-6 lg:grid-cols-3">
-            {serviceSections.map((service) => (
-              <article
-                key={service.title}
-                className="flex h-full flex-col rounded-[2rem] border border-black/8 bg-white p-7 shadow-[0_22px_60px_-50px_rgba(0,0,0,0.2)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_28px_70px_-48px_rgba(0,0,0,0.24)] md:p-8"
-              >
-                <p className="text-xs font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
-                  {service.label}
-                </p>
-                <h2 className="mt-5 text-2xl font-semibold tracking-[-0.03em] text-[#0B0B0C]">
-                  {service.title}
-                </h2>
-                <div className="mt-5 flex-1 space-y-4 text-base leading-7 text-[#5F5F5F]">
-                  {service.paragraphs.map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                  ))}
-                </div>
-                <Link
-                  href={service.href}
-                  className="mt-8 inline-flex items-center gap-2 rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium text-[#0B0B0C] transition duration-200 hover:border-[#0B0B0C] hover:bg-[#F7F7F5]"
-                >
-                  {SITE_CONFIG.cta.serviceDetails}
-                  <span aria-hidden="true">→</span>
-                </Link>
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {problems.map((problem, index) => (
+              <article key={problem.title} className="rounded-[2rem] border border-[#173f35]/10 bg-white/65 p-7">
+                <span className="text-xs font-bold text-[#e86f44]">0{index + 1}</span>
+                <h3 className="mt-8 text-2xl font-semibold tracking-[-0.035em] text-[#173f35]">{problem.title}</h3>
+                <p className="mt-4 text-base leading-7 text-[#617169]">{problem.text}</p>
               </article>
             ))}
           </div>
         </SectionContainer>
       </section>
 
-      <section className="py-24">
+      <section className="py-16 md:py-24">
         <SectionContainer>
-          <div className="rounded-[2.5rem] bg-[#0B0B0C] px-8 py-12 text-white shadow-[0_34px_90px_-60px_rgba(0,0,0,0.4)] md:px-12 md:py-16">
-            <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)] lg:items-start lg:gap-12">
-              <div className="max-w-[46rem]">
-                <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
-                  Arbetssätt
-                </p>
-                <h2 className="mt-5 text-3xl font-semibold tracking-[-0.045em] text-balance md:text-4xl">
-                  Så byggs ett samarbete som ger kontroll och kontinuitet
-                </h2>
-                <p className="mt-6 text-lg leading-8 text-white/72">
-                  Upplägget är tydligt från start. Ni vet vad som prioriteras,
-                  hur uppföljningen sker och vilket nästa steg som skapar mest
-                  värde.
-                </p>
-              </div>
+          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+            <div className="max-w-2xl">
+              <p className="text-xs font-bold tracking-[0.2em] text-[#e86f44] uppercase">Exempel på nivån</p>
+              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.05em] text-[#173f35] md:text-5xl">Tre branscher. Tre tydliga uttryck.</h2>
+              <p className="mt-5 text-base leading-7 text-[#617169]">Koncepten visar möjlig leveransnivå och är inte riktiga kundprojekt.</p>
+            </div>
+            <Link href="/exempel" className="text-sm font-semibold text-[#173f35] underline decoration-[#e86f44] decoration-2 underline-offset-4">Se alla demokoncept</Link>
+          </div>
+          <div className="mt-10 grid gap-6 lg:grid-cols-3">
+            {demoProjects.map((project) => (
+              <article key={project.slug}>
+                <WebsitePreview {...project} compact />
+                <div className="mt-4 flex items-center justify-between px-1"><div><p className="text-xs font-bold tracking-[0.16em] text-[#e86f44] uppercase">{project.label}</p><h3 className="mt-1 font-semibold text-[#173f35]">{project.name}</h3></div><span className="text-sm text-[#617169]">{project.industry}</span></div>
+              </article>
+            ))}
+          </div>
+        </SectionContainer>
+      </section>
 
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                {workItems.map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-[1.5rem] border border-white/10 bg-white/5 px-5 py-4 text-sm leading-6 text-white/78"
-                  >
-                    {item}
-                  </div>
-                ))}
-              </div>
+      <section className="py-16 md:py-24">
+        <SectionContainer>
+          <div className="rounded-[2.75rem] bg-[#173f35] px-6 py-10 text-white md:px-10 md:py-14 lg:px-14">
+            <div className="max-w-2xl">
+              <p className="text-xs font-bold tracking-[0.2em] text-[#f3b89f] uppercase">Tydliga paket</p>
+              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.05em] text-balance md:text-5xl">Du ska veta vad du köper innan vi börjar.</h2>
+              <p className="mt-5 text-base leading-7 text-white/65">Introduktionspriser exklusive moms. Inga diffusa timbanker eller överraskningar inom avtalad omfattning.</p>
+            </div>
+            <div className="mt-10 grid gap-5 lg:grid-cols-3">
+              {services.map((service, index) => (
+                <article key={service.slug} className={`flex flex-col rounded-[2rem] p-7 ${index === 1 ? "bg-[#e86f44] text-white" : "bg-white/8 text-white"}`}>
+                  <p className={`text-xs font-bold tracking-[0.16em] uppercase ${index === 1 ? "text-white/75" : "text-[#f3b89f]"}`}>{service.label}</p>
+                  <h3 className="mt-5 text-2xl font-semibold">{service.title}</h3>
+                  <p className="mt-3 min-h-20 text-sm leading-7 text-white/70">{service.summary}</p>
+                  <p className="mt-7 text-4xl font-semibold tracking-[-0.05em]">{service.price}<span className="ml-1 text-sm tracking-normal text-white/60">{service.suffix}</span></p>
+                  <p className="mt-1 text-xs text-white/55">exkl. moms</p>
+                  <Link href={service.href} className="mt-8 inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#173f35]">Se vad som ingår</Link>
+                </article>
+              ))}
             </div>
           </div>
         </SectionContainer>
       </section>
 
-      <section className="py-24">
+      <section id="process" className="scroll-mt-28 py-16 md:py-24">
         <SectionContainer>
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.02fr)_minmax(18rem,0.98fr)]">
-            <div className="rounded-[2rem] border border-black/8 bg-white p-8 shadow-[0_24px_60px_-55px_rgba(0,0,0,0.18)] md:p-10">
-              <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
-                För vilka företag
-              </p>
-              <h2 className="mt-5 text-3xl font-semibold tracking-[-0.045em] text-[#0B0B0C] text-balance md:text-4xl">
-                För vilka företag upplägget passar bäst
-              </h2>
-              <p className="mt-6 text-lg leading-8 text-[#5F5F5F]">
-                {SITE_CONFIG.name} arbetar främst med ägarledda och
-                entreprenörsdrivna företag, konsulter och tjänstebolag som vill
-                styra med bättre ekonomiska underlag.
-              </p>
-              <p className="mt-5 text-base leading-7 text-[#5F5F5F]">
-                Upplägget passar er som vill minska osäkerheten i ekonomin och
-                fatta snabbare beslut med större precision.
-              </p>
-            </div>
-
-            <div className="rounded-[2rem] border border-black/8 bg-[#F7F7F5] p-8 md:p-10">
-              <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
-                Om {SITE_CONFIG.name}
-              </p>
-              <h2 className="mt-5 text-3xl font-semibold tracking-[-0.045em] text-[#0B0B0C] text-balance">
-                Om {SITE_CONFIG.name}
-              </h2>
-              <p className="mt-6 text-base leading-7 text-[#5F5F5F]">
-                {SITE_CONFIG.name} arbetar med redovisning och ekonomisk
-                rådgivning för växande företag.
-              </p>
-              <p className="mt-5 text-base leading-7 text-[#5F5F5F]">
-                Fokus ligger på att skapa tydlighet i ekonomin, inte bara leverera
-                siffror utan att göra dem användbara i verksamheten.
-              </p>
-            </div>
+          <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:gap-16">
+            <div><p className="text-xs font-bold tracking-[0.2em] text-[#e86f44] uppercase">Så fungerar det</p><h2 className="mt-5 text-4xl font-semibold tracking-[-0.05em] text-[#173f35] md:text-5xl">Från idé till lanserad sida i fyra lugna steg.</h2><p className="mt-5 text-base leading-7 text-[#617169]">Du behöver inte kunna webb. Jag håller ihop struktur, design och teknik och visar tydligt vad som behövs från dig.</p></div>
+            <ol className="grid gap-4 sm:grid-cols-2">
+              {processSteps.map((step) => <li key={step.number} className="rounded-[1.75rem] border border-[#173f35]/10 bg-white/65 p-6"><span className="text-xs font-bold text-[#e86f44]">{step.number}</span><h3 className="mt-6 text-xl font-semibold text-[#173f35]">{step.title}</h3><p className="mt-3 text-sm leading-7 text-[#617169]">{step.description}</p></li>)}
+            </ol>
           </div>
         </SectionContainer>
       </section>
 
-      <section className="pb-24 pt-4 md:pb-28">
+      <section className="py-16 md:py-24">
         <SectionContainer>
-          <div className="rounded-[2.5rem] bg-[#0B0B0C] px-8 py-12 text-white shadow-[0_34px_90px_-60px_rgba(0,0,0,0.42)] md:px-12 md:py-16">
-            <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-              <div className="max-w-[48rem]">
-                <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
-                  Kontakt
-                </p>
-                <h2 className="mt-5 text-3xl font-semibold tracking-[-0.04em] text-balance md:text-4xl lg:text-[2.9rem] lg:leading-[1.05]">
-                  Vill ni få bättre kontroll, tydligare siffror och tryggare beslut?
-                </h2>
-                <p className="mt-6 text-lg leading-8 text-white/72">
-                  Hör av er så återkommer vi normalt inom en arbetsdag med ett
-                  tydligt nästa steg.
-                </p>
-              </div>
+          <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+            <div className="rounded-[2.25rem] bg-[#e86f44] p-8 text-white md:p-10"><p className="text-xs font-bold tracking-[0.2em] text-white/70 uppercase">Personligt hela vägen</p><h2 className="mt-5 text-4xl font-semibold tracking-[-0.05em]">Hej, jag heter Albin.</h2><p className="mt-6 text-base leading-8 text-white/80">Jag driver Altura Nova och bygger hemsidor för småföretag som vill se professionella ut utan ett onödigt tungt byråprojekt.</p><p className="mt-4 text-base leading-8 text-white/80">Du har samma kontakt från första brief till lansering. Det gör besluten snabbare och ansvarsfördelningen enkel.</p><Link href="/om" className="mt-8 inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#173f35]">Läs mer om Altura Nova</Link></div>
+            <div className="rounded-[2.25rem] border border-[#173f35]/10 bg-[#fffdf8] p-8 md:p-10"><p className="text-xs font-bold tracking-[0.2em] text-[#e86f44] uppercase">Vanliga frågor</p><div className="mt-6 divide-y divide-[#173f35]/10">{faqs.map((faq) => <details key={faq.question} className="group py-5"><summary className="flex cursor-pointer list-none items-center justify-between gap-6 font-semibold text-[#173f35]"><span>{faq.question}</span><span aria-hidden="true" className="text-xl text-[#e86f44] transition group-open:rotate-45">+</span></summary><p className="mt-3 max-w-2xl pr-8 text-sm leading-7 text-[#617169]">{faq.answer}</p></details>)}</div></div>
+          </div>
+        </SectionContainer>
+      </section>
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 lg:justify-items-end">
-                <a
-                  href={`mailto:${SITE_CONFIG.contact.email}`}
-                  className="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3 text-sm font-medium text-[#0B0B0C] transition duration-200 hover:opacity-90"
-                >
-                  {SITE_CONFIG.contact.email}
-                </a>
-                <a
-                  href={SITE_CONFIG.contact.phoneHref}
-                  className="inline-flex items-center justify-center rounded-2xl border border-white/12 px-6 py-3 text-sm font-medium text-white transition duration-200 hover:bg-white/8"
-                >
-                  {SITE_CONFIG.contact.phoneDisplay}
-                </a>
-              </div>
+      <section className="pb-10 pt-16 md:pt-24">
+        <SectionContainer>
+          <div className="marketing-grid overflow-hidden rounded-[2.75rem] border border-[#173f35]/10 bg-[#fffdf8] p-7 md:p-12">
+            <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+              <div><p className="text-xs font-bold tracking-[0.2em] text-[#e86f44] uppercase">Kostnadsfritt första steg</p><h2 className="mt-5 text-4xl font-semibold tracking-[-0.05em] text-[#173f35] md:text-5xl">Berätta kort om företaget.</h2><p className="mt-5 text-base leading-7 text-[#617169]">Jag återkommer normalt inom en arbetsdag med frågor eller ett tydligt nästa steg. Du binder dig inte till något.</p><div className="mt-7 text-sm leading-7 text-[#617169]"><p>{SITE_CONFIG.contact.email}</p><p>{SITE_CONFIG.contact.phoneDisplay}</p></div></div>
+              <ContactForm />
             </div>
           </div>
         </SectionContainer>

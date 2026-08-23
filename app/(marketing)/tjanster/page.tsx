@@ -1,89 +1,17 @@
+import Link from "next/link";
 import { CTABlock } from "@/components/cta-block";
-import { SITE_CONFIG } from "@/config/site";
 import { PageIntro } from "@/components/page-intro";
 import { SectionContainer } from "@/components/section-container";
-import { ServiceCard } from "@/components/service-card";
+import { SITE_CONFIG } from "@/config/site";
 import { createMetadata } from "@/lib/metadata";
-import { companyTypes, services } from "@/lib/site";
+import { services } from "@/lib/site";
 
-export const metadata = createMetadata(
-  "Redovisning, rapportering och rådgivning",
-  "Tjänster inom redovisning, rapportering och ekonomisk rådgivning för växande och ägarledda bolag som vill ha bättre kontroll och tydligare beslutsunderlag.",
-  { pathname: "/tjanster" }
-);
+export const metadata = createMetadata("Paket och priser", "Tydliga hemsidepaket för småföretag från 4 995 kr exklusive moms.", { pathname: "/tjanster" });
 
 export default function ServicesPage() {
-  return (
-    <>
-      <PageIntro
-        eyebrow="Tjänster"
-        title="Tre tjänsteområden för bättre kontroll, tydligare siffror och starkare beslutsunderlag."
-        description={`${SITE_CONFIG.name} erbjuder redovisning, rapportering och rådgivning för företag som vill minska ekonomisk osäkerhet och fatta mer välgrundade beslut i vardagen.`}
-        aside={
-          <div className="rounded-[1.75rem] border border-black/8 bg-white p-6 text-sm leading-7 text-[#5F5F5F] shadow-[0_20px_50px_-45px_rgba(0,0,0,0.2)]">
-            Med bas i Linköping och med uppdrag i hela Sverige passar upplägget
-            verksamheter som vill minska den ekonomiska friktionen i vardagen och
-            få ett mer professionellt stöd i styrningen.
-          </div>
-        }
-      />
-
-      <section className="pb-6 pt-8 md:pb-10 md:pt-10">
-        <SectionContainer>
-          <div className="grid gap-6 md:grid-cols-3">
-            {services.map((service) => (
-              <ServiceCard
-                key={service.slug}
-                title={service.title}
-                summary={service.summary}
-                href={service.href}
-                label={service.label}
-                ctaLabel={SITE_CONFIG.cta.serviceDetails}
-                variant="feature"
-              />
-            ))}
-          </div>
-        </SectionContainer>
-      </section>
-
-      <section className="py-24">
-        <SectionContainer>
-          <div className="grid gap-10 rounded-[2.15rem] border border-black/8 bg-white p-8 shadow-[0_24px_60px_-55px_rgba(0,0,0,0.18)] md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:p-10">
-            <div>
-              <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
-                Passar för
-              </p>
-              <h2 className="mt-5 text-balance text-3xl font-semibold tracking-[-0.045em] text-[#0B0B0C] md:text-4xl">
-                För företag som vill kombinera stabil redovisning med aktiv ekonomisk styrning.
-              </h2>
-              <p className="mt-6 text-lg leading-8 text-[#5F5F5F]">
-                Upplägget passar särskilt bra för växande företag,
-                konsultbolag och entreprenörsdrivna bolag i tillväxt som vill ha
-                mer än traditionell bokföring och behöver siffror som går att
-                använda i praktiken.
-              </p>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              {companyTypes.map((type) => (
-                <div
-                  key={type}
-                  className="rounded-[1.5rem] border border-black/8 bg-[#F7F7F5] p-5 text-sm leading-7 text-[#5F5F5F]"
-                >
-                  {type}
-                </div>
-              ))}
-            </div>
-          </div>
-        </SectionContainer>
-      </section>
-
-      <CTABlock
-        title="Vill du diskutera vilket upplägg som skulle skapa mest värde i ditt företag?"
-        description="Boka ett första samtal så går vi igenom nuläge, arbetssätt och vilken kombination av redovisning, rapportering och rådgivning som passar bäst."
-        primary={{ href: "/kontakt", label: SITE_CONFIG.cta.primary }}
-        secondary={{ href: "/blogg", label: SITE_CONFIG.cta.articles }}
-      />
-    </>
-  );
+  return <>
+    <PageIntro eyebrow="Paket och priser" title="En tydlig omfattning gör både arbetet och beslutet enklare." description="Välj en fokuserad ensideshemsida eller en större företagswebb. Introduktionspriserna gäller den beskrivna omfattningen och anges exklusive moms." />
+    <section className="pb-12"><SectionContainer><div className="grid gap-6 lg:grid-cols-3">{services.map((service, index) => <article key={service.slug} className={`flex flex-col rounded-[2.25rem] border p-7 md:p-8 ${index === 1 ? "border-[#e86f44] bg-[#e86f44] text-white" : "border-[#173f35]/10 bg-white/65 text-[#173f35]"}`}><p className={`text-xs font-bold tracking-[0.16em] uppercase ${index === 1 ? "text-white/70" : "text-[#e86f44]"}`}>{service.label}</p><h2 className="mt-5 text-3xl font-semibold tracking-[-0.04em]">{service.title}</h2><p className={`mt-4 min-h-24 text-sm leading-7 ${index === 1 ? "text-white/75" : "text-[#617169]"}`}>{service.summary}</p><p className="mt-6 text-4xl font-semibold tracking-[-0.05em]">{service.price}<span className={`ml-1 text-sm tracking-normal ${index === 1 ? "text-white/60" : "text-[#617169]"}`}>{service.suffix}</span></p><p className={`mt-1 text-xs ${index === 1 ? "text-white/55" : "text-[#75827c]"}`}>exklusive moms</p><ul className="mt-7 flex-1 space-y-3">{service.included.slice(0, 5).map((item) => <li key={item} className={`flex gap-3 text-sm leading-6 ${index === 1 ? "text-white/80" : "text-[#52645b]"}`}><span aria-hidden="true">✓</span>{item}</li>)}</ul><Link href={service.href} className={`mt-8 rounded-full px-5 py-3 text-center text-sm font-semibold ${index === 1 ? "bg-white text-[#173f35]" : "bg-[#173f35] text-white"}`}>Se hela omfattningen</Link></article>)}</div><div className="mt-8 rounded-[1.5rem] border border-[#173f35]/10 bg-white/55 p-6 text-sm leading-7 text-[#617169]"><strong className="text-[#173f35]">Bra att veta:</strong> E-handel, specialbyggda bokningssystem, avancerade integrationer, omfattande textproduktion och större varumärkesarbeten ingår inte i paketen. Om ditt behov ligger utanför omfattningen får du veta det innan något arbete startar.</div></SectionContainer></section>
+    <CTABlock title="Osäker på vilket paket som passar?" description="Beskriv företaget och vad kunderna behöver kunna göra på sidan, så föreslår jag en rimlig nivå utan kostnad." primary={{ href: "/kontakt", label: SITE_CONFIG.cta.primary }} secondary={{ href: "/exempel", label: "Se exempel" }} />
+  </>;
 }

@@ -1,17 +1,17 @@
 import type { MetadataRoute } from "next";
 import { SITE_CONFIG } from "@/config/site";
 import { services } from "@/lib/site";
-import { getPublishedPosts } from "@/src/lib/supabase-server";
-
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_CONFIG.url;
   const now = new Date();
-  const posts = await getPublishedPosts();
 
   const staticPages: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/exempel`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
     {
       url: `${baseUrl}/`,
       lastModified: now,
@@ -31,16 +31,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
+      url: `${baseUrl}/integritet`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
       url: `${baseUrl}/kontakt`,
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/blogg`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
     },
   ];
 
@@ -51,12 +51,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  const blogPages: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: `${baseUrl}/blogg/${post.slug}`,
-    lastModified: new Date(post.updated_at),
-    changeFrequency: "monthly",
-    priority: 0.7,
-  }));
-
-  return [...staticPages, ...servicePages, ...blogPages];
+  return [...staticPages, ...servicePages];
 }

@@ -19,13 +19,13 @@ export function PageIntro({
       <SectionContainer>
         <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,23rem)] lg:items-end lg:gap-12">
           <div className="max-w-[52rem]">
-            <p className="text-sm font-medium tracking-[0.22em] text-[#C6A15B] uppercase">
+            <p className="text-xs font-bold tracking-[0.2em] text-[#e86f44] uppercase">
               {eyebrow}
             </p>
-            <h1 className="mt-6 text-4xl font-semibold tracking-[-0.045em] text-[#0B0B0C] md:text-5xl lg:text-[3.8rem] lg:leading-[1.02]">
+            <h1 className="mt-6 text-4xl font-semibold tracking-[-0.055em] text-[#173f35] text-balance md:text-6xl lg:text-[4.2rem] lg:leading-[0.98]">
               {title}
             </h1>
-            <p className="mt-7 max-w-3xl text-lg leading-8 text-[#5F5F5F] md:text-[1.125rem]">
+            <p className="mt-7 max-w-3xl text-lg leading-8 text-[#617169] md:text-xl">
               {description}
             </p>
           </div>

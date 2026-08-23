@@ -1,136 +1,49 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { SITE_CONFIG } from "@/config/site";
+import { type ContactPayload, validateContactPayload } from "@/src/lib/contact";
 
-type ContactPayload = {
-  name?: string;
-  company?: string;
-  email?: string;
-  phone?: string;
-  message?: string;
-  website?: string;
-};
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function getSafeString(value: unknown) {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function getConfiguredSender() {
-  return (
-    getSafeString(process.env.CONTACT_FROM_EMAIL) ||
-    `${SITE_CONFIG.name} <${SITE_CONFIG.contact.email}>`
-  );
-}
+const MAX_REQUEST_BYTES = 16_384;
+const success = () => NextResponse.json({ message: "Tack! Jag återkommer normalt inom en arbetsdag." });
+const safeString = (value: unknown) => typeof value === "string" ? value.trim() : "";
+const getConfiguredSender = () => safeString(process.env.CONTACT_FROM_EMAIL) || `${SITE_CONFIG.name} <${SITE_CONFIG.contact.email}>`;
 
 export async function POST(request: Request) {
+  const contentLength = Number(request.headers.get("content-length") || 0);
+  if (contentLength > MAX_REQUEST_BYTES) return NextResponse.json({ error: "Förfrågan är för stor. Korta ned texten och försök igen." }, { status: 413 });
+
+  let body: string;
+  try { body = await request.text(); }
+  catch { return NextResponse.json({ error: "Förfrågan kunde inte läsas. Försök igen." }, { status: 400 }); }
+
+  if (new TextEncoder().encode(body).byteLength > MAX_REQUEST_BYTES) {
+    return NextResponse.json({ error: "Förfrågan är för stor. Korta ned texten och försök igen." }, { status: 413 });
+  }
+
   let payload: ContactPayload;
+  try { payload = JSON.parse(body) as ContactPayload; }
+  catch { return NextResponse.json({ error: "Ogiltig förfrågan. Kontrollera formuläret och försök igen." }, { status: 400 }); }
 
-  try {
-    payload = (await request.json()) as ContactPayload;
-  } catch {
-    return NextResponse.json(
-      { error: "Ogiltig förfrågan. Kontrollera formuläret och försök igen." },
-      { status: 400 }
-    );
-  }
+  const validation = validateContactPayload(payload);
+  if (!validation.ok) return NextResponse.json({ error: validation.error }, { status: 400 });
+  if (validation.isSpam) return success();
+  if (!process.env.RESEND_API_KEY) return NextResponse.json({ error: `Kontaktformuläret är tillfälligt otillgängligt. Mejla gärna ${SITE_CONFIG.contact.email}.` }, { status: 503 });
 
-  const name = getSafeString(payload.name);
-  const company = getSafeString(payload.company);
-  const email = getSafeString(payload.email);
-  const phone = getSafeString(payload.phone);
-  const message = getSafeString(payload.message);
-  const website = getSafeString(payload.website);
-
-  if (website) {
-    return NextResponse.json(
-      {
-        message:
-          "Tack för din förfrågan. Vi återkommer normalt inom en arbetsdag.",
-      },
-      { status: 200 }
-    );
-  }
-
-  if (!name || !email || !message) {
-    return NextResponse.json(
-      { error: "Namn, e-post och meddelande behöver fyllas i." },
-      { status: 400 }
-    );
-  }
-
-  if (!EMAIL_REGEX.test(email)) {
-    return NextResponse.json(
-      { error: "Ange en giltig e-postadress." },
-      { status: 400 }
-    );
-  }
-
-  if (!process.env.RESEND_API_KEY) {
-    return NextResponse.json(
-      {
-        error:
-          "Kontaktformuläret är tillfälligt otillgängligt. Mejla gärna direkt till oss så återkommer vi snabbt.",
-      },
-      { status: 503 }
-    );
-  }
-
+  const { name, company, email, phone, websiteUrl, message } = validation.data;
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const from = getConfiguredSender();
-  const to = process.env.CONTACT_TO_EMAIL || SITE_CONFIG.contact.email;
-
   try {
     const result = await resend.emails.send({
-      from,
-      to,
-      subject: `Ny kontaktförfrågan från ${name}`,
-      text: [
-        `Namn: ${name}`,
-        `Företag: ${company || "-"}`,
-        `E-post: ${email}`,
-        `Telefon: ${phone || "-"}`,
-        "",
-        "Meddelande:",
-        message,
-      ].join("\n"),
+      from: getConfiguredSender(),
+      to: process.env.CONTACT_TO_EMAIL || SITE_CONFIG.contact.email,
+      subject: `Ny hemsideförfrågan från ${company}`,
+      text: [`Kontaktperson: ${name}`, `Företag: ${company}`, `E-post: ${email}`, `Telefon: ${phone || "-"}`, `Befintlig webb: ${websiteUrl || "-"}`, "", "Behov:", message].join("\n"),
       replyTo: email,
     });
-
-    if (result.error) {
-      console.error("Resend rejected contact email", {
-        error: result.error,
-        from,
-        to,
-      });
-
-      return NextResponse.json(
-        {
-          error:
-            "Förfrågan kunde inte skickas just nu. Försök igen eller mejla direkt till oss.",
-        },
-        { status: 500 }
-      );
-    }
-
-    console.info("Contact email sent", {
-      emailId: result.data?.id ?? null,
-      from,
-      to,
-    });
-
-    return NextResponse.json({
-      message: "Tack för din förfrågan. Vi återkommer normalt inom en arbetsdag.",
-    });
+    if (result.error) { console.error("Contact email rejected", { providerCode: result.error.name || "unknown" }); return NextResponse.json({ error: "Förfrågan kunde inte skickas just nu. Försök igen eller mejla direkt." }, { status: 502 }); }
+    console.info("Contact email sent", { delivered: Boolean(result.data?.id) });
+    return success();
   } catch (error) {
-    console.error("Failed to send contact email", error);
-    return NextResponse.json(
-      {
-        error:
-          "Förfrågan kunde inte skickas just nu. Försök igen eller mejla direkt till oss.",
-      },
-      { status: 500 }
-    );
+    console.error("Contact email failed", { errorName: error instanceof Error ? error.name : "unknown" });
+    return NextResponse.json({ error: "Förfrågan kunde inte skickas just nu. Försök igen eller mejla direkt." }, { status: 500 });
   }
 }
