@@ -3,41 +3,50 @@ import { CustomerForm } from "@/components/hub/forms";
 import { HubPagination } from "@/components/hub/pagination";
 import { EmptyState, HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
 import {
-  customerStatusLabel,
   formatDate,
   preferredContactMethodLabel,
 } from "@/src/lib/hub";
 import { getCustomers, requireHubContext } from "@/src/lib/hub-server";
 import {
+  customerSalesStageLabel,
+  customerSalesStageTone,
   getCustomerSalesNextStep,
+  getCustomerSalesStage,
   parseCustomerFollowUpFilter,
+  parseCustomerSalesStage,
   parseCustomerStatusFilter,
 } from "@/src/lib/hub/sales";
-
-function customerTone(status: string) {
-  if (status === "active") return "success";
-  if (status === "lead") return "warning";
-  return "neutral";
-}
 
 export default async function HubCustomersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; status?: string; followUp?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    status?: string;
+    followUp?: string;
+    stage?: string;
+  }>;
 }) {
   const filters = await searchParams;
   const status = parseCustomerStatusFilter(filters.status);
   const followUp = parseCustomerFollowUpFilter(filters.followUp);
+  const stage = parseCustomerSalesStage(filters.stage);
   const [customers, { membership }] = await Promise.all([
-    getCustomers({ page: filters.page, status, followUp }),
+    getCustomers({ page: filters.page, status, followUp, stage }),
     requireHubContext(),
   ]);
-  const filterLinks = [
-    { href: "/hub/kunder", label: "Alla", active: !status && !followUp },
-    { href: "/hub/kunder?status=lead", label: "Prospekt", active: status === "lead" && !followUp },
+  const workFilters = [
+    { href: "/hub/kunder", label: "Alla", active: !status && !followUp && !stage },
+    { href: "/hub/kunder?status=lead", label: "Alla prospekt", active: status === "lead" && !followUp && !stage },
     { href: "/hub/kunder?followUp=due", label: "Återkoppla nu", active: followUp === "due" },
     { href: "/hub/kunder?followUp=missing", label: "Saknar nästa steg", active: followUp === "missing" },
-    { href: "/hub/kunder?status=active", label: "Vunna kunder", active: status === "active" && !followUp },
+  ];
+  const stageFilters = [
+    { href: "/hub/kunder?stage=new", label: "Nya", active: stage === "new" },
+    { href: "/hub/kunder?stage=contacted", label: "Kontaktade", active: stage === "contacted" },
+    { href: "/hub/kunder?stage=meeting", label: "Möten", active: stage === "meeting" },
+    { href: "/hub/kunder?stage=offer", label: "Offerter", active: stage === "offer" },
+    { href: "/hub/kunder?stage=won", label: "Vunna", active: stage === "won" },
   ];
 
   return (
@@ -46,20 +55,32 @@ export default async function HubCustomersPage({
       description="Prioritera nästa kontakt, följ affären och samla överlämningen till leverans på ett ställe."
     >
       <HubCard>
-        <div className="flex flex-wrap gap-2" aria-label="Filtrera kunder och prospekt">
-          {filterLinks.map((filter) => (
-            <Link
-              key={filter.href}
-              href={filter.href}
-              aria-current={filter.active ? "page" : undefined}
-              className={`inline-flex min-h-10 items-center rounded-full border px-4 py-2 text-sm font-medium transition ${
-                filter.active
-                  ? "border-[var(--hub-panel)] bg-[var(--hub-panel)] text-[var(--hub-panel-contrast)]"
-                  : "border-black/10 bg-[var(--hub-card-soft)] text-[var(--hub-text)] hover:border-black/20"
-              }`}
-            >
-              {filter.label}
-            </Link>
+        <div className="grid gap-4 lg:grid-cols-2">
+          {[
+            { label: "Arbetskö", filters: workFilters },
+            { label: "Säljläge", filters: stageFilters },
+          ].map((group) => (
+            <div key={group.label}>
+              <p className="mb-2 text-xs font-medium uppercase tracking-[0.16em] text-[var(--hub-subtle)]">
+                {group.label}
+              </p>
+              <div className="flex flex-wrap gap-2" aria-label={`Filtrera efter ${group.label.toLocaleLowerCase("sv-SE")}`}>
+                {group.filters.map((filter) => (
+                  <Link
+                    key={filter.href}
+                    href={filter.href}
+                    aria-current={filter.active ? "page" : undefined}
+                    className={`inline-flex min-h-10 items-center rounded-full border px-4 py-2 text-sm font-medium transition ${
+                      filter.active
+                        ? "border-[var(--hub-panel)] bg-[var(--hub-panel)] text-[var(--hub-panel-contrast)]"
+                        : "border-black/10 bg-[var(--hub-card-soft)] text-[var(--hub-text)] hover:border-black/20"
+                    }`}
+                  >
+                    {filter.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </HubCard>
@@ -75,6 +96,7 @@ export default async function HubCustomersPage({
             {customers.items.length ? (
               customers.items.map((customer) => {
                 const nextStep = getCustomerSalesNextStep(customer);
+                const salesStage = getCustomerSalesStage(customer);
 
                 return (
                 <Link
@@ -96,8 +118,8 @@ export default async function HubCustomersPage({
                           ? ` · ${formatDate(customer.follow_up_date)}`
                           : ""}
                       </StatusBadge>
-                      <StatusBadge tone={customerTone(customer.status)}>
-                        {customerStatusLabel(customer.status)}
+                      <StatusBadge tone={customerSalesStageTone(salesStage)}>
+                        {customerSalesStageLabel(salesStage)}
                       </StatusBadge>
                     </div>
                   </div>
@@ -125,9 +147,9 @@ export default async function HubCustomersPage({
               })
             ) : (
               <EmptyState
-                title={status || followUp ? "Inga träffar i det här urvalet" : "Lägg till ditt första prospekt"}
+                title={status || followUp || stage ? "Inga träffar i det här urvalet" : "Lägg till ditt första prospekt"}
                 description={
-                  status || followUp
+                  status || followUp || stage
                     ? "Byt filter för att se övriga kunder och prospekt."
                     : "Registrera en kontakt, sätt nästa återkoppling och bygg kundresan vidare därifrån."
                 }
@@ -136,7 +158,7 @@ export default async function HubCustomersPage({
           </div>
           <HubPagination
             basePath="/hub/kunder"
-            query={{ status, followUp }}
+            query={{ status, followUp, stage }}
             {...customers}
           />
         </HubCard>

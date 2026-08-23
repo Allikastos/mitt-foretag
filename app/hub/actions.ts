@@ -18,6 +18,11 @@ import type {
 import { buildInvoicePdf } from "@/src/lib/invoice-pdf";
 import { hubFeatureFlags } from "@/src/lib/hub/feature-flags";
 import { normalizeIdempotencyKey } from "@/src/lib/hub/idempotency";
+import {
+  applyCustomerSalesStage,
+  customerStatusForSalesStage,
+  parseCustomerSalesStage,
+} from "@/src/lib/hub/sales";
 import { assertSafeHubServerEnvironment } from "@/src/lib/hub/runtime-environment-server";
 import { calculateSha256 } from "@/src/lib/hub/providers/supabase-storage-provider";
 import {
@@ -200,6 +205,10 @@ export async function saveCustomerAction(formData: FormData) {
     "organization";
   const ownerUserId =
     parseOptionalString(formData.get("owner_user_id")) ?? user.id;
+  const salesStage = parseCustomerSalesStage(
+    parseOptionalString(formData.get("sales_stage")),
+  );
+  const requestedTags = parseTags(formData.get("tags"));
 
   await requireMemberInOrganization({
     userId: ownerUserId,
@@ -223,11 +232,15 @@ export async function saveCustomerAction(formData: FormData) {
     last_contacted_at: parseOptionalDate(formData.get("last_contacted_at")),
     follow_up_date: parseOptionalDate(formData.get("follow_up_date")),
     relationship_owner: parseOptionalString(formData.get("relationship_owner")),
-    tags: parseTags(formData.get("tags")),
+    tags: salesStage
+      ? applyCustomerSalesStage(requestedTags, salesStage)
+      : requestedTags,
     notes: parseOptionalString(formData.get("notes")),
     status:
-      (parseOptionalString(formData.get("status")) as CustomerStatus | null) ??
-      "lead",
+      salesStage
+        ? customerStatusForSalesStage(salesStage)
+        : (parseOptionalString(formData.get("status")) as CustomerStatus | null) ??
+          "lead",
   };
 
   const writePayload = customerId ? payload : { ...payload, created_by: user.id };

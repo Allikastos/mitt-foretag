@@ -4,7 +4,6 @@ import { ContactForm, CustomerForm } from "@/components/hub/forms";
 import { HubPagination } from "@/components/hub/pagination";
 import { HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
 import {
-  customerStatusLabel,
   customerFieldLabel,
   formatCurrency,
   formatDate,
@@ -16,7 +15,12 @@ import {
   taskStatusLabel,
 } from "@/src/lib/hub";
 import { getCustomerDetail } from "@/src/lib/hub-server";
-import { getCustomerSalesNextStep } from "@/src/lib/hub/sales";
+import {
+  customerSalesStageLabel,
+  customerSalesStageTone,
+  getCustomerSalesNextStep,
+  getCustomerSalesStage,
+} from "@/src/lib/hub/sales";
 
 export default async function HubCustomerDetailPage({
   params,
@@ -37,6 +41,7 @@ export default async function HubCustomerDetailPage({
 
   const visibleFields = getCustomerFieldPreferences(detail.organization);
   const nextStep = getCustomerSalesNextStep(detail.customer);
+  const salesStage = getCustomerSalesStage(detail.customer);
   const deliveryChecklist = [
     {
       label: "Kontaktuppgifter finns",
@@ -127,8 +132,8 @@ export default async function HubCustomerDetailPage({
               <div>
                 <div className="flex flex-wrap items-center gap-3">
                   <h2 className="text-lg font-semibold text-[#0B0B0C]">Kundöversikt</h2>
-                  <StatusBadge tone={detail.customer.status === "active" ? "success" : "warning"}>
-                    {customerStatusLabel(detail.customer.status)}
+                  <StatusBadge tone={customerSalesStageTone(salesStage)}>
+                    {customerSalesStageLabel(salesStage)}
                   </StatusBadge>
                 </div>
                 <p className="mt-2 text-sm leading-6 text-[#6B6B6B]">

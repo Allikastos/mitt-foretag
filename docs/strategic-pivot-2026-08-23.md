@@ -3,7 +3,7 @@
 ## Beslut
 
 Altura Nova ska i första hand skapa verkliga intäkter genom att sälja moderna,
-lättskötta hemsidor till små svenska företag. Distribution, betalningsvilja och
+lättskötta hemsidor till företag i Sverige och Norden. Distribution, betalningsvilja och
 verklig användning ska bevisas innan mer omfattande produktutveckling sker.
 
 Hubben behålls som:
@@ -18,9 +18,10 @@ AI, bankkoppling, betalning, lön eller skarp bokföring prioriteras i denna fas
 
 ## Primärt erbjudande
 
-Altura Nova bygger moderna och mobilanpassade hemsidor åt småföretag, snabbt,
-personligt och till ett tydligt fast pris. Första målgrupper är små svenska
-tjänsteföretag, hantverkare, serviceföretag, konsulter, mindre byråer, salonger
+Altura Nova bygger moderna och mobilanpassade hemsidor åt företag, snabbt,
+personligt och till ett tydligt fast pris. Hela processen ska kunna genomföras
+digitalt oavsett var kunden finns. Första målgrupper är svenska och nordiska
+tjänsteföretag, hantverkare, serviceföretag, konsulter, byråer, salonger
 och behandlare med enkla marknadsföringsbehov.
 
 Alla priser kommuniceras exklusive moms.
@@ -67,7 +68,7 @@ separat godkännande och en godkänd produktionsmiljö för Altura Hub.
 
 ## Sex veckors validering
 
-- Intervjua minst 15 små tjänsteföretag om verkliga tidigare problem.
+- Intervjua minst 15 tjänsteföretag om verkliga tidigare problem.
 - Kontakta minst 100 noggrant valda företag med tydligt webbplatsbehov.
 - Sikta på minst 10 verkliga samtal, 5 behovsmöten eller demonstrationer och
   3 betalande kunder eller piloter.

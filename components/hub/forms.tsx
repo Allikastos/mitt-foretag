@@ -3,8 +3,6 @@ import {
   canEditInvoice,
   customerFieldKeys,
   customerFieldLabel,
-  customerStatusLabel,
-  customerStatuses,
   documentCategoryLabel,
   documentCategories,
   employeeCustomerScopeLabel,
@@ -20,6 +18,11 @@ import {
   taskStatusLabel,
   taskStatuses,
 } from "@/src/lib/hub";
+import {
+  customerSalesStageLabel,
+  customerSalesStages,
+  getCustomerSalesStage,
+} from "@/src/lib/hub/sales";
 import type {
   Customer,
   Invoice,
@@ -115,15 +118,15 @@ export function CustomerForm({ customer }: { customer?: Customer | null }) {
               ))}
             </select>
           </Field>
-          <Field label="Status">
+          <Field label="Säljläge">
             <select
-              name="status"
-              defaultValue={customer?.status ?? "lead"}
+              name="sales_stage"
+              defaultValue={customer ? getCustomerSalesStage(customer) : "new"}
               className={inputClassName}
             >
-              {customerStatuses.map((status) => (
-                <option key={status} value={status}>
-                  {customerStatusLabel(status)}
+              {customerSalesStages.map((stage) => (
+                <option key={stage} value={stage}>
+                  {customerSalesStageLabel(stage)}
                 </option>
               ))}
             </select>
@@ -167,7 +170,7 @@ export function CustomerForm({ customer }: { customer?: Customer | null }) {
               name="tags"
               defaultValue={formatTags(customer?.tags).replace("Ej angivet", "")}
               className={inputClassName}
-              placeholder="hemsida saknas, Altura Start, varm lead"
+              placeholder="hemsida saknas, Altura Start, tips från kund"
             />
           </Field>
         </FormGrid>

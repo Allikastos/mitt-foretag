@@ -35,8 +35,10 @@ import {
 import { createSupabaseServerClient } from "./supabase-server";
 import type {
   CustomerFollowUpFilter,
+  CustomerSalesStage,
   CustomerStatusFilter,
 } from "./hub/sales.ts";
+import { customerSalesStageTag } from "./hub/sales.ts";
 
 type HubContext = {
   supabase: NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>>;
@@ -290,6 +292,7 @@ export async function getCustomers(options: {
   page?: number | string | null;
   status?: CustomerStatusFilter | null;
   followUp?: CustomerFollowUpFilter | null;
+  stage?: CustomerSalesStage | null;
 } = {}) {
   const { supabase, organization, membership, user } = await requireHubContext();
   const pagination = normalizePagination({ page: options.page });
@@ -297,7 +300,7 @@ export async function getCustomers(options: {
   let query = supabase
     .from("customers")
     .select(
-      "id, company_name, contact_name, email, status, follow_up_date, preferred_contact_method, relationship_owner, tags, created_at, created_by, owner_user_id, visibility",
+      "id, company_name, contact_name, email, status, last_contacted_at, follow_up_date, preferred_contact_method, relationship_owner, tags, created_at, created_by, owner_user_id, visibility",
       { count: "exact" },
     )
     .eq("organization_id", organization.id)
@@ -307,6 +310,15 @@ export async function getCustomers(options: {
 
   if (options.status) {
     query = query.eq("status", options.status);
+  }
+
+  if (options.stage === "won") {
+    query = query.eq("status", "active");
+  } else if (options.stage === "paused") {
+    query = query.eq("status", "inactive");
+  } else if (options.stage) {
+    const stageTag = customerSalesStageTag(options.stage);
+    if (stageTag) query = query.eq("status", "lead").contains("tags", [stageTag]);
   }
 
   const today = new Date().toISOString().slice(0, 10);
