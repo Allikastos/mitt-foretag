@@ -33,6 +33,10 @@ import {
   SupabaseStorageProvider,
 } from "./hub/providers/supabase-storage-provider.ts";
 import { createSupabaseServerClient } from "./supabase-server";
+import type {
+  CustomerFollowUpFilter,
+  CustomerStatusFilter,
+} from "./hub/sales.ts";
 
 type HubContext = {
   supabase: NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>>;
@@ -282,9 +286,13 @@ export async function getHubDashboardData() {
   };
 }
 
-export async function getCustomers(paginationInput: PaginationInput = {}) {
+export async function getCustomers(options: {
+  page?: number | string | null;
+  status?: CustomerStatusFilter | null;
+  followUp?: CustomerFollowUpFilter | null;
+} = {}) {
   const { supabase, organization, membership, user } = await requireHubContext();
-  const pagination = normalizePagination(paginationInput);
+  const pagination = normalizePagination({ page: options.page });
   const isOwnerLevel = ["owner", "admin"].includes(membership.role);
   let query = supabase
     .from("customers")
@@ -296,6 +304,24 @@ export async function getCustomers(paginationInput: PaginationInput = {}) {
     .order("follow_up_date", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false })
     .range(pagination.from, pagination.to);
+
+  if (options.status) {
+    query = query.eq("status", options.status);
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  if (options.followUp === "due") {
+    query = query.not("follow_up_date", "is", null).lte("follow_up_date", today);
+  }
+
+  if (options.followUp === "missing") {
+    query = query.eq("status", "lead").is("follow_up_date", null);
+  }
+
+  if (options.followUp === "scheduled") {
+    query = query.gt("follow_up_date", today);
+  }
 
   if (!isOwnerLevel) {
     query = query.eq("visibility", "organization");
@@ -326,7 +352,14 @@ export async function getCustomerDetail(
   const { supabase, organization, membership, user } = await requireHubContext();
   const contactsPagination = normalizePagination({ page: options.contactsPage });
 
-  const [customerResult, contactsResult, tasksResult, invoicesResult, documentsResult] =
+  const [
+    customerResult,
+    contactsResult,
+    tasksResult,
+    invoicesResult,
+    documentsResult,
+    activityResult,
+  ] =
     await Promise.all([
       supabase
         .from("customers")
@@ -364,6 +397,14 @@ export async function getCustomerDetail(
         .eq("customer_id", customerId)
         .order("created_at", { ascending: false })
         .limit(25),
+      supabase
+        .from("activity_log")
+        .select("id, action, description, created_at")
+        .eq("organization_id", organization.id)
+        .eq("entity_type", "customer")
+        .eq("entity_id", customerId)
+        .order("created_at", { ascending: false })
+        .limit(12),
     ]);
 
   if (customerResult.error) {
@@ -395,6 +436,7 @@ export async function getCustomerDetail(
     }),
     tasks: tasksResult.data ?? [],
     invoices: invoicesResult.data ?? [],
+    activity: activityResult.data ?? [],
     documents: await attachSignedUrls(
       supabase,
       organization.id,

@@ -61,7 +61,7 @@ export default async function HubDashboardPage() {
               </p>
             </div>
             <Link
-              href="/hub/kunder"
+              href="/hub/kunder?followUp=due"
               className="inline-flex min-h-10 items-center justify-center rounded-full bg-white px-4 py-2 text-sm font-medium text-[#111111]"
             >
               Öppna kunder
@@ -235,13 +235,13 @@ export default async function HubDashboardPage() {
   return (
     <HubShell
       title="Översikt"
-      description={`En snabb bild av vad som händer just nu i ${organization.name}.`}
+      description={`Prioritera försäljning, leverans och ekonomi i ${organization.name}.`}
       actions={
         <Link
-          href="/hub/fakturor"
+          href="/hub/kunder#nytt-prospekt"
           className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-[#0B0B0C] px-5 py-3 text-sm font-medium text-white transition duration-200 hover:opacity-90"
         >
-          Nytt fakturautkast
+          Nytt prospekt
         </Link>
       }
     >

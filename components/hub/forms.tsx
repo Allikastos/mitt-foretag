@@ -54,6 +54,16 @@ export function CustomerForm({ customer }: { customer?: Customer | null }) {
     <HubCard>
       <form action={saveCustomerAction} className="space-y-4">
         <input type="hidden" name="customer_id" defaultValue={customer?.id ?? ""} />
+        <div>
+          <h2 className="text-lg font-semibold text-[var(--hub-text)]">
+            {customer ? "Redigera kund" : "Nytt prospekt"}
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-[var(--hub-muted)]">
+            {customer
+              ? "Håll kontaktuppgifter, läge och nästa återkoppling aktuella."
+              : "Börja med kontaktuppgifter och ett tydligt nästa steg. Prospektet kan markeras som aktiv kund när affären är vunnen."}
+          </p>
+        </div>
         <FormGrid>
           <Field label="Företagsnamn">
             <input
@@ -108,7 +118,7 @@ export function CustomerForm({ customer }: { customer?: Customer | null }) {
           <Field label="Status">
             <select
               name="status"
-              defaultValue={customer?.status ?? "active"}
+              defaultValue={customer?.status ?? "lead"}
               className={inputClassName}
             >
               {customerStatuses.map((status) => (
@@ -157,7 +167,7 @@ export function CustomerForm({ customer }: { customer?: Customer | null }) {
               name="tags"
               defaultValue={formatTags(customer?.tags).replace("Ej angivet", "")}
               className={inputClassName}
-              placeholder="månadsrapport, prioritet, Q3"
+              placeholder="hemsida saknas, Altura Start, varm lead"
             />
           </Field>
         </FormGrid>
@@ -173,6 +183,7 @@ export function CustomerForm({ customer }: { customer?: Customer | null }) {
             name="notes"
             defaultValue={customer?.notes ?? ""}
             className={textareaClassName}
+            placeholder="Behov, invändningar, offertläge och nästa steg"
           />
         </Field>
         <div className="flex flex-wrap gap-3">

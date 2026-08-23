@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ContactForm, CustomerForm } from "@/components/hub/forms";
 import { HubPagination } from "@/components/hub/pagination";
@@ -15,6 +16,7 @@ import {
   taskStatusLabel,
 } from "@/src/lib/hub";
 import { getCustomerDetail } from "@/src/lib/hub-server";
+import { getCustomerSalesNextStep } from "@/src/lib/hub/sales";
 
 export default async function HubCustomerDetailPage({
   params,
@@ -34,6 +36,33 @@ export default async function HubCustomerDetailPage({
   }
 
   const visibleFields = getCustomerFieldPreferences(detail.organization);
+  const nextStep = getCustomerSalesNextStep(detail.customer);
+  const deliveryChecklist = [
+    {
+      label: "Kontaktuppgifter finns",
+      complete: Boolean(detail.customer.email || detail.customer.phone),
+    },
+    {
+      label: "Nästa återkoppling är planerad",
+      complete: Boolean(detail.customer.follow_up_date),
+    },
+    {
+      label: "Behov och offertläge är dokumenterat",
+      complete: Boolean(detail.customer.notes),
+    },
+    {
+      label: "Leveransuppgift är skapad",
+      complete: detail.tasks.some((task) => task.status !== "done"),
+    },
+    {
+      label: "Kundmaterial är uppladdat",
+      complete: detail.documents.length > 0,
+    },
+    {
+      label: "Fakturautkast finns",
+      complete: detail.invoices.length > 0,
+    },
+  ];
   const customerFieldValues = {
     org_number: detail.customer.org_number || "Ej angivet",
     contact_name: detail.customer.contact_name || "Ej angivet",
@@ -53,8 +82,44 @@ export default async function HubCustomerDetailPage({
   return (
     <HubShell
       title={detail.customer.company_name}
-      description="Kundkort med kopplade kontakter, uppgifter, fakturor och dokument."
+      description="Samlad relation från första kontakt till leverans, dokument och faktura."
     >
+      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <HubCard className="bg-[var(--hub-panel)] text-[var(--hub-panel-contrast)]">
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--hub-accent)]">
+              Nästa steg
+            </p>
+            <StatusBadge tone={nextStep.tone}>{nextStep.label}</StatusBadge>
+          </div>
+          <p className="mt-4 text-sm leading-6 text-white/68">{nextStep.description}</p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link href="/hub/uppgifter" className="rounded-full bg-white px-4 py-2 text-sm font-medium text-[#111111]">
+              Öppna uppgifter
+            </Link>
+            <Link href="/hub/fakturor" className="rounded-full border border-white/16 px-4 py-2 text-sm font-medium text-white">
+              Öppna fakturor
+            </Link>
+          </div>
+        </HubCard>
+        <HubCard>
+          <h2 className="text-lg font-semibold text-[var(--hub-text)]">Arbetsstöd för överlämning</h2>
+          <p className="mt-2 text-sm leading-6 text-[var(--hub-muted)]">
+            Bygger på information som redan finns på kundkortet. Punkterna sparas inte som en separat checklista.
+          </p>
+          <div className="mt-4 grid gap-2">
+            {deliveryChecklist.map((item) => (
+              <div key={item.label} className="flex items-center gap-3 rounded-2xl bg-[var(--hub-card-soft)] px-4 py-3 text-sm">
+                <span aria-hidden="true" className={`size-2.5 rounded-full ${item.complete ? "bg-emerald-500" : "bg-amber-400"}`} />
+                <span className="flex-1 text-[var(--hub-text)]">{item.label}</span>
+                <span className="text-xs font-medium text-[var(--hub-muted)]">
+                  {item.complete ? "Klart" : "Återstår"}
+                </span>
+              </div>
+            ))}
+          </div>
+        </HubCard>
+      </div>
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-6">
           <HubCard>
@@ -190,6 +255,24 @@ export default async function HubCustomerDetailPage({
                 ))
               ) : (
                 <p className="text-sm text-[#6B6B6B]">Inga dokument kopplade till kunden ännu.</p>
+              )}
+            </div>
+          </HubCard>
+
+          <HubCard>
+            <h2 className="text-lg font-semibold text-[var(--hub-text)]">Relationshistorik</h2>
+            <div className="mt-5 space-y-3">
+              {detail.activity.length ? (
+                detail.activity.map((entry) => (
+                  <div key={entry.id} className="rounded-[1.25rem] border border-black/8 bg-[var(--hub-card-soft)] p-4">
+                    <p className="font-medium text-[var(--hub-text)]">{entry.description ?? entry.action}</p>
+                    <p className="mt-2 text-xs uppercase tracking-[0.16em] text-[var(--hub-subtle)]">
+                      {formatDate(entry.created_at)}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-[var(--hub-muted)]">Historiken fylls på när kundkortet skapas och uppdateras.</p>
               )}
             </div>
           </HubCard>

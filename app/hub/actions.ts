@@ -227,7 +227,7 @@ export async function saveCustomerAction(formData: FormData) {
     notes: parseOptionalString(formData.get("notes")),
     status:
       (parseOptionalString(formData.get("status")) as CustomerStatus | null) ??
-      "active",
+      "lead",
   };
 
   const writePayload = customerId ? payload : { ...payload, created_by: user.id };
