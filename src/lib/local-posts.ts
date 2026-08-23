@@ -28,8 +28,8 @@ export const LOCAL_SEO_POSTS: PostRow[] = [
       <h2>Vanliga frågor</h2>
       <h3>Hur ofta bör man se över sitt redovisningsupplägg?</h3>
       <p>Minst en gång per år, och alltid vid större förändringar i bolaget.</p>
-      <h3>Är billigast alternativ bäst för småföretag?</h3>
-      <p>Inte alltid. För småföretag är tydlig uppföljning ofta viktigare än lägsta timpris.</p>
+      <h3>Är billigast alternativ bäst för företag?</h3>
+      <p>Inte alltid. För företag är tydlig uppföljning ofta viktigare än lägsta timpris.</p>
       <p>Vill ni jämföra ert nuvarande upplägg med ett mer styrningsorienterat arbetssätt? <a href="/kontakt">Boka ett första samtal</a> eller läs mer om <a href="/tjanster/redovisning">redovisning</a>.</p>
     `,
     image_url: null,
@@ -66,7 +66,7 @@ export const LOCAL_SEO_POSTS: PostRow[] = [
       <h2>Vanliga frågor</h2>
       <h3>Räcker kvartalsvis uppföljning i ett konsultbolag?</h3>
       <p>För de flesta bolag är månadsvis uppföljning mer träffsäker när beläggning och intäkter varierar.</p>
-      <h3>Behöver även småföretag i konsultbranschen avancerad rapportering?</h3>
+      <h3>Behöver även företag i konsultbranschen avancerad rapportering?</h3>
       <p>Inte avancerad, men regelbunden och relevant. Enkel struktur räcker långt om den följs konsekvent.</p>
       <p>Vill ni skärpa ekonomiarbetet i ert konsultbolag? Läs mer om <a href="/tjanster/redovisning">redovisning</a> och <a href="/tjanster/rapportering">rapportering</a>.</p>
     `,
@@ -104,8 +104,8 @@ export const LOCAL_SEO_POSTS: PostRow[] = [
       <h2>Vanliga frågor</h2>
       <h3>Räcker en resultatrapport varje månad?</h3>
       <p>Ofta behövs även kommentarer kring avvikelser och en prioriterad åtgärdslista.</p>
-      <h3>Passar månadsrapportering även småföretag?</h3>
-      <p>Ja, särskilt när småföretag växer eller får mer komplexa kostnads- och intäktsflöden.</p>
+      <h3>Passar månadsrapportering även företag?</h3>
+      <p>Ja, särskilt när företag växer eller får mer komplexa kostnads- och intäktsflöden.</p>
       <p>Vill ni utforma en rapportering som går att använda i vardagen? Läs mer om <a href="/tjanster/rapportering">rapportering</a> eller <a href="/kontakt">kontakta oss</a>.</p>
     `,
     image_url: null,
@@ -182,8 +182,8 @@ export const LOCAL_SEO_POSTS: PostRow[] = [
       <h2>Vanliga frågor</h2>
       <h3>Hur ofta bör bokföringen stämmas av?</h3>
       <p>Normalt varje månad, och oftare i verksamheter med hög transaktionsvolym.</p>
-      <h3>Är detta relevant även för småföretag?</h3>
-      <p>Ja. Småföretag är ofta mer känsliga för fel i likviditet och rapportering, vilket gör rutiner extra viktiga.</p>
+      <h3>Är detta relevant även för företag?</h3>
+      <p>Ja. Företag kan vara känsliga för fel i likviditet och rapportering, vilket gör rutiner extra viktiga.</p>
       <p>Vill ni minska felrisk och få bättre ekonomisk kontroll? Läs mer om <a href="/tjanster/redovisning">redovisning</a> och <a href="/tjanster/radgivning">rådgivning</a>.</p>
     `,
     image_url: null,

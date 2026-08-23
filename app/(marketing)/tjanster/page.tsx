@@ -6,7 +6,7 @@ import { SITE_CONFIG } from "@/config/site";
 import { createMetadata } from "@/lib/metadata";
 import { services } from "@/lib/site";
 
-export const metadata = createMetadata("Paket och priser", "Tydliga hemsidepaket för småföretag från 4 995 kr exklusive moms.", { pathname: "/tjanster" });
+export const metadata = createMetadata("Paket och priser", "Tydliga hemsidepaket för företag från 4 995 kr exklusive moms.", { pathname: "/tjanster" });
 
 export default function ServicesPage() {
   return <>

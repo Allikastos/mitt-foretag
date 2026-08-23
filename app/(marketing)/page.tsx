@@ -7,8 +7,8 @@ import { createMetadata } from "@/lib/metadata";
 import { demoProjects, processSteps, services } from "@/lib/site";
 
 export const metadata = createMetadata(
-  "Moderna hemsidor för småföretag",
-  "Professionella och mobilanpassade hemsidor för småföretag från 4 995 kr till fast pris.",
+  "Moderna hemsidor för företag",
+  "Professionella och mobilanpassade hemsidor för företag från 4 995 kr till fast pris.",
   { pathname: "/" }
 );
 
@@ -34,13 +34,13 @@ export default function HomePage() {
           <div className="grid items-center gap-12 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16">
             <div className="rise-in max-w-2xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#173f35]/12 bg-white/60 px-4 py-2 text-xs font-semibold tracking-[0.13em] text-[#436357] uppercase">
-                <span className="h-2 w-2 rounded-full bg-[#e86f44]" /> Personlig webbstudio i Linköping
+                <span className="h-2 w-2 rounded-full bg-[#e86f44]" /> Din personliga webbstudio
               </div>
               <h1 className="mt-7 text-5xl font-semibold leading-[0.95] tracking-[-0.065em] text-[#173f35] text-balance md:text-7xl lg:text-[5.2rem]">
                 Behöver ditt företag en <span className="text-[#e86f44]">modern hemsida?</span>
               </h1>
               <p className="mt-7 max-w-xl text-lg leading-8 text-[#5c6d65] md:text-xl">
-                Jag bygger professionella och mobilanpassade hemsidor åt småföretag, från 4 995 kr till fast pris.
+                Jag bygger professionella och mobilanpassade hemsidor för företag, från 4 995 kr till fast pris. Hela processen sker digitalt, oavsett var ditt företag finns.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <Link href="/kontakt" className="inline-flex items-center justify-center rounded-full bg-[#e86f44] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_20px_35px_-20px_rgba(156,66,35,.7)] transition hover:-translate-y-0.5 hover:bg-[#d95f35]">Få ett kostnadsfritt förslag <span aria-hidden="true" className="ml-2">→</span></Link>
@@ -142,7 +142,7 @@ export default function HomePage() {
       <section className="py-16 md:py-24">
         <SectionContainer>
           <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-            <div className="rounded-[2.25rem] bg-[#e86f44] p-8 text-white md:p-10"><p className="text-xs font-bold tracking-[0.2em] text-white/70 uppercase">Personligt hela vägen</p><h2 className="mt-5 text-4xl font-semibold tracking-[-0.05em]">Hej, jag heter Albin.</h2><p className="mt-6 text-base leading-8 text-white/80">Jag driver Altura Nova och bygger hemsidor för småföretag som vill se professionella ut utan ett onödigt tungt byråprojekt.</p><p className="mt-4 text-base leading-8 text-white/80">Du har samma kontakt från första brief till lansering. Det gör besluten snabbare och ansvarsfördelningen enkel.</p><Link href="/om" className="mt-8 inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#173f35]">Läs mer om Altura Nova</Link></div>
+            <div className="rounded-[2.25rem] bg-[#e86f44] p-8 text-white md:p-10"><p className="text-xs font-bold tracking-[0.2em] text-white/70 uppercase">Personligt hela vägen</p><h2 className="mt-5 text-4xl font-semibold tracking-[-0.05em]">Hej, jag heter Albin.</h2><p className="mt-6 text-base leading-8 text-white/80">Jag driver Altura Nova och bygger hemsidor för företag som vill se professionella ut utan ett onödigt tungt byråprojekt.</p><p className="mt-4 text-base leading-8 text-white/80">Du har samma kontakt från första brief till lansering. Det gör besluten snabbare och ansvarsfördelningen enkel.</p><Link href="/om" className="mt-8 inline-flex rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#173f35]">Läs mer om Altura Nova</Link></div>
             <div className="rounded-[2.25rem] border border-[#173f35]/10 bg-[#fffdf8] p-8 md:p-10"><p className="text-xs font-bold tracking-[0.2em] text-[#e86f44] uppercase">Vanliga frågor</p><div className="mt-6 divide-y divide-[#173f35]/10">{faqs.map((faq) => <details key={faq.question} className="group py-5"><summary className="flex cursor-pointer list-none items-center justify-between gap-6 font-semibold text-[#173f35]"><span>{faq.question}</span><span aria-hidden="true" className="text-xl text-[#e86f44] transition group-open:rotate-45">+</span></summary><p className="mt-3 max-w-2xl pr-8 text-sm leading-7 text-[#617169]">{faq.answer}</p></details>)}</div></div>
           </div>
         </SectionContainer>

@@ -51,8 +51,8 @@ export const services: Service[] = [
     delivery: "Normalt 7-10 arbetsdagar efter komplett material och godkänd brief",
     ctaTitle: "Är Altura Start rätt nivå för ditt företag?",
     ctaDescription: "Beskriv verksamheten kort så återkommer jag med ett kostnadsfritt och tydligt förslag.",
-    seoTitle: "Altura Start - ensideshemsida för småföretag",
-    seoDescription: "Modern ensideshemsida för småföretag till introduktionspris 4 995 kr exklusive moms.",
+    seoTitle: "Altura Start - modern ensideshemsida för företag",
+    seoDescription: "Modern ensideshemsida för företag till introduktionspris 4 995 kr exklusive moms.",
   },
   {
     slug: "foretag",
