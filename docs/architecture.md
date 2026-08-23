@@ -1,9 +1,12 @@
 # Altura Nova Hub Architecture
 
-Last updated: 2026-08-12
+Last updated: 2026-08-14
 
 This document describes the intended SaaS foundation for Altura Nova Hub. It is
 written to guide development without requiring new paid services.
+
+Product scope, pricing assumptions and the staged functional roadmap are defined
+in `docs/product-vision-and-roadmap.md`.
 
 ## Current Stack
 
@@ -108,8 +111,9 @@ It must explicitly reject or mark as unsupported:
 
 ## Accounting Data Model
 
-The proposed additive schema is in `supabase/accounting.sql`. It should not be
-applied to production until reviewed.
+The additive schema in `supabase/accounting.sql` is installed and verified in
+the isolated staging project. It must not be applied to production without a
+separate review and explicit approval.
 
 Core tables:
 

@@ -1,10 +1,10 @@
 # Phase D: Manual Document Review
 
-Last updated: 2026-08-12
+Last updated: 2026-08-14
 
-Phase D is implemented locally as a guarded document inbox and review flow. No
-Phase D SQL has been applied to Supabase, no OCR provider has been connected,
-no feature flag has been enabled and nothing has been deployed.
+Phase D is implemented as a guarded document inbox and review flow. Its reviewed
+migration is installed and verified only in `altura-nova-hub-staging`; no OCR
+provider is connected. Bidewind Consulting and production remain untouched.
 
 ## What Is Available Locally
 

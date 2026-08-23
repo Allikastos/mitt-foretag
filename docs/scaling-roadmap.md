@@ -1,6 +1,10 @@
 # Scaling Roadmap
 
-Last updated: 2026-08-12
+Last updated: 2026-08-14
+
+The product-level direction, pricing assumptions and longer functional roadmap
+live in `docs/product-vision-and-roadmap.md`. This file remains the technical
+scaling view.
 
 The goal is a stable SaaS foundation for roughly 100 active customer companies
 first, with a path toward 1,000 without rewriting everything.
@@ -25,8 +29,8 @@ first, with a path toward 1,000 without rewriting everything.
 
 ## Phase 3: Accounting MVP
 
-Local guarded implementation completed. Database installation, specialist
-review and feature activation remain deliberately pending.
+Guarded implementation is installed and verified in isolated staging only.
+Specialist review and any production activation remain deliberately pending.
 
 - Enable accounting settings per organization.
 - Seed a minimal reviewed account list.
@@ -39,8 +43,8 @@ review and feature activation remain deliberately pending.
 
 ## Phase 4: Documents Without Paid AI
 
-Local guarded implementation completed. Database installation and feature
-activation remain deliberately pending; no OCR provider is connected.
+Guarded implementation is installed and verified in isolated staging only.
+Production activation remains deliberately pending; no OCR provider is connected.
 
 - Expand document metadata.
 - Let users manually enter receipt/invoice facts.
@@ -50,8 +54,8 @@ activation remain deliberately pending; no OCR provider is connected.
 
 ## Phase 5: Background Jobs
 
-Local guarded implementation completed. Database installation, production
-worker selection and feature activation remain deliberately pending.
+The durable schema is installed and verified in isolated staging only.
+Production worker selection and feature activation remain deliberately pending.
 
 - Use `processing_jobs` as the durable status model.
 - Keep local/dev adapters clearly marked as non-production.
@@ -59,8 +63,8 @@ worker selection and feature activation remain deliberately pending.
 
 ## Phase 6: External Services
 
-Local guarded readiness is complete. Provider installation, cost approval,
-database installation and feature activation remain deliberately pending.
+Staging database readiness is verified. Provider installation, cost approval
+and feature activation remain deliberately pending.
 
 - A Swedish integration center makes readiness, data sharing and cost gates
   visible to owners and employees.

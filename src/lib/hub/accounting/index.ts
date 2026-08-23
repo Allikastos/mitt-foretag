@@ -1,6 +1,7 @@
 export * from "./accounts.ts";
 export * from "./access.ts";
 export * from "./engine.ts";
+export * from "./interpretation/index.ts";
 export * from "./ledger.ts";
 export * from "./presentation.ts";
 export * from "./rules.ts";

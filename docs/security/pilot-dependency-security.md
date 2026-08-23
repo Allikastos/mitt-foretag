@@ -108,6 +108,8 @@ formulär på list- eller detaljsidor.
   överlappande läspolicies och två `auth.uid()`-initplaner. Behörighetsutfallet
   är verifierat, men dessa bör optimeras före större datamängder.
 
-Projektet är tekniskt redo för en isolerad preview-push när en separat
-Supabase-testmiljö och preview-branch skapas. Previewn ska fortsätta använda
-syntetiska data, avstängd skarp bokföring och inga riktiga kunduppgifter.
+Den här rapportens dåvarande nästa steg är nu genomfört: en separat
+Supabase-stagingmiljö och en skyddad Netlify-draft finns verifierade enligt
+`docs/staging-night-verification.md`. De använder fortsatt syntetiska data,
+avstängd skarp bokföring och inga riktiga kunduppgifter. Detta ändrar inte
+rapportens historiska auditresultat eller ger tillstånd till produktion.

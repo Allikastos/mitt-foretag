@@ -1,8 +1,10 @@
 # Testberedskap för hubben
 
-Status: 2026-08-13. Den lokala valideringen utgår från `7ac0b13` och har körts
-mot en isolerad Supabase-stack i Rancher Desktop. Inga ändringar eller tester i
-dokumentet innebär att SQL får köras mot produktion.
+Status: 2026-08-14. Den lokala valideringen har körts mot en isolerad
+Supabase-stack i Rancher Desktop. Samma nio granskade migrationer är installerade
+i `altura-nova-hub-staging`, ref `jtposcdefsmromnouald`. Inga instruktioner i
+dokumentet ger tillstånd att röra Bidewind Consulting, ref
+`zshdbqhuiuwjdpsavnml`, eller någon produktion.
 
 ## Granskat nuläge
 
@@ -14,8 +16,8 @@ dokumentet innebär att SQL får köras mot produktion.
 - `9b6eb15` lägger kontrakt för externa integrationer utan leverantörsanslutning.
 - Ingen committad hemlighet, API-nyckel eller produktionsreferens hittades.
 - Alla avancerade hubbflaggor är `false` i `.env.example`.
-- Den lokala `.env.local` pekar på en fjärr-Supabase men saknar datamiljömarkörer.
-  Hubben blockeras därför nu tills miljön klassificerats uttryckligen.
+- Lokala och previewmiljöer har uttryckliga datamiljömarkörer och stoppar
+  anslutning till produktionsrefen med fail-closed-skydd.
 
 ## Miljömodell
 
@@ -105,13 +107,14 @@ onboarding med organisation, ägarskap och auditpost i samma RPC.
 
 - Två fullständiga `db reset --local --no-seed` från tom databas passerade.
 - Syntetisk seed laddades efter båda återställningarna med båda spärrmarkörerna.
-- Fem pgTAP-filer med totalt 88 kontroller passerade.
+- pgTAP-sviten med totalt 90 kontroller passerade.
 - Auth-, REST-, RPC-, Storage- och samtidighetstester passerade.
 - `db lint` för `public` och `private` rapporterade inga schemafel.
 - Supabase Security Advisor rapporterade inga problem.
 - Tre duplicerade index togs bort efter Performance Advisor-granskning.
-- `npm test` passerade 82 av 82 tester, och ESLint, TypeScript samt Next.js
-  produktionsbuild passerade.
+- `npm test` passerar 99 av 99 tester efter navigations- och
+  fritexttolkningstesterna. ESLint, TypeScript samt Next.js produktionsbuild
+  passerar enligt den senaste fullständiga verifieringen.
 - `/hub/login` renderades utan console-fel. En äldre dev-process på port 3000
   saknade miljömarkörer; skyddade `/hub` stoppades då korrekt av fail-closed-spärren.
 - Performance Advisor har kvar icke-blockerande varningar om överlappande
@@ -129,13 +132,14 @@ onboarding med organisation, ägarskap och auditpost i samma RPC.
 ## Kvar före pilot
 
 - Kör ett separat återställningstest för databas och Storage-filer.
-- Skapa ett separat Supabase-testprojekt för Vercel preview.
+- Behåll den skyddade Netlify-draften kopplad endast till den isolerade
+  Supabase-stagingmiljön; se `docs/staging-night-verification.md`.
 - Next.js är verifierat på exakt `16.2.11`. Både fullständig och production-only
   npm audit rapporterar 0 sårbarheter; se
   `docs/security/pilot-dependency-security.md` för versionsbeslut och testlogg.
-- Kör `npm run dev:hub:local` för ett fullständigt autentiserat visuellt
-  smoke-test. Skriptet lämnar den äldre processen på port 3000 orörd och väljer
-  automatiskt en annan ledig lokal port.
+- Kör `npm run dev:hub:local` och ett autentiserat visuellt smoke-test efter
+  relevanta gränssnittsändringar. Runnern väljer en ledig port utan att ändra
+  fjärrmiljöer.
 - Optimera överlappande RLS-läspolicies och komplettera index efter verkliga queryplaner.
 - Granska resultat och migrationsdiff innan någon fjärrlänkning eller flaggaktivering.
 - Håll OCR, bankkoppling, abonnemangsbetalning, e-postautomation och externa köer avstängda.

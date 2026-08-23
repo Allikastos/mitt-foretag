@@ -110,7 +110,11 @@ export default async function HubAccountingPage() {
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
-        <AccountingPreview organizationId={overview.organization.id} canPersist={canPersist} />
+        <AccountingPreview
+          organizationId={overview.organization.id}
+          canPersist={canPersist}
+          smartInputEnabled={overview.featureFlags.smartAccountingInput}
+        />
         <div className="space-y-6">
           <HubCard>
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--hub-accent-strong)]">Din åtkomst</p>

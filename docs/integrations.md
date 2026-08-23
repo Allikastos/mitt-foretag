@@ -1,10 +1,10 @@
 # Integrationsguide
 
-Senast uppdaterad: 2026-08-12
+Senast uppdaterad: 2026-08-14
 
 Ingen ny extern tjänst i den här guiden är aktiverad. En koppling får installeras
 först när behov, kostnad, personuppgiftsflöde, ägare, testplan och rollback är
-godkända. Hemligheter ska ligga i leverantörens eller Vercels servermiljö och
+godkända. Hemligheter ska ligga i leverantörens eller hostingplattformens servermiljö och
 får aldrig klistras in i chatt, kod eller databasens anslutningstabell.
 
 ## Gemensam aktiveringsordning
@@ -103,7 +103,8 @@ får aldrig klistras in i chatt, kod eller databasens anslutningstabell.
 - **Miljövariabler:** `HUB_EMAIL_DELIVERY_PROVIDER`, leverantörens API-nyckel,
   verifierad avsändare, webhook-hemlighet och `HUB_FEATURE_EMAIL_AUTOMATION`.
 - **Dashboard och CLI:** Verifiera domän, SPF/DKIM, avsändare och webhook i vald
-  leverantörs dashboard. Lägg variabler med `vercel env add` först efter beslut.
+  leverantörs dashboard. Lägg servervariabler i den uttryckligen godkända
+  testmiljön först efter beslut.
 - **Test och rollback:** Skicka bara till en godkänd testadress, prova bounce,
   dublett och avregistrering. Stäng flaggan och återkalla webhook/nyckel vid rollback.
 - **Säkerhet:** Mallar ska få minsta nödvändiga data; fullständiga dokument och
@@ -163,9 +164,10 @@ får aldrig klistras in i chatt, kod eller databasens anslutningstabell.
 
 ## Felspårning och driftövervakning
 
-- **Varför och när:** Ska upptäcka fel innan betalande kunder påverkas. Vercel
-  Analytics och runtime logs finns, men är inte full hubbspecifik felspårning.
-- **Kostnad:** Vercels grundfunktioner beror på plan; externa verktyg kostar ofta
+- **Varför och när:** Ska upptäcka fel innan betalande kunder påverkas. Den
+  nuvarande Netlify-previewens bygg- och funktionsloggar är inte full
+  hubbspecifik felspårning.
+- **Kostnad:** Hostingplattformens grundfunktioner beror på plan; externa verktyg kostar ofta
   efter händelser, loggvolym och lagringstid.
 - **Förberedd kod:** `ErrorReporter` accepterar bara fel, korrelations-ID och
   primitiv, uttryckligen tillåten kontext. Avstängd adapter skickar ingenting.

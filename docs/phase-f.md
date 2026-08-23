@@ -1,11 +1,12 @@
 # Fas F: Säkra externa kopplingar
 
-Senast uppdaterad: 2026-08-12
+Senast uppdaterad: 2026-08-14
 
 Fas F är implementerad lokalt som ett svenskt integrationscenter, gemensamma
-provider-kontrakt och ett additivt databaskontrakt. Ingen leverantör har köpts,
-installerats eller aktiverats. Ingen Phase F-SQL har körts och inget har
-publicerats.
+provider-kontrakt och ett additivt databaskontrakt. Den granskade migrationen är
+installerad och verifierad endast i `altura-nova-hub-staging`. Ingen extern
+leverantör har köpts, installerats eller aktiverats. Bidewind Consulting och
+produktion är orörda.
 
 ## Tillgängligt lokalt
 

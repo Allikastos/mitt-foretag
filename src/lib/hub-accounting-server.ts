@@ -33,6 +33,7 @@ export async function getAccountingOverview() {
     role: membership.role,
     featureFlags: {
       accounting: hubFeatureFlags.accounting,
+      smartAccountingInput: hubFeatureFlags.smartAccountingInput,
       safeMutations: hubFeatureFlags.safeMutations,
     },
     runtimeEnabled,

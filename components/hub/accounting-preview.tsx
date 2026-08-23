@@ -10,6 +10,7 @@ import {
   type PostingResult,
   type SupportedBusinessEventType,
 } from "@/src/lib/hub/accounting";
+import { AccountingSmartInput } from "./accounting-smart-input";
 import { Field, FormGrid, inputClassName, textareaClassName } from "./ui";
 
 function formatMinor(amountMinor: number) {
@@ -22,9 +23,11 @@ function formatMinor(amountMinor: number) {
 export function AccountingPreview({
   organizationId,
   canPersist,
+  smartInputEnabled,
 }: {
   organizationId: string;
   canPersist: boolean;
+  smartInputEnabled: boolean;
 }) {
   const requestId = useId().replace(/:/g, "");
   const formRef = useRef<HTMLFormElement>(null);
@@ -63,24 +66,8 @@ export function AccountingPreview({
     if (formRef.current) preview(new FormData(formRef.current));
   }
 
-  return (
-    <div className="overflow-hidden rounded-[1.6rem] border border-black/8 bg-[var(--hub-card)] shadow-[0_24px_60px_-48px_rgba(0,0,0,0.35)]">
-      <div className="border-b border-black/8 bg-[var(--hub-panel)] px-5 py-5 text-[var(--hub-panel-contrast)] md:px-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--hub-accent)]">
-              Vad har hänt?
-            </p>
-            <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em]">
-              Skapa ett bokföringsunderlag
-            </h2>
-          </div>
-          <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs text-[var(--hub-panel-muted)]">
-            {canPersist ? "Kan sparas som utkast" : "Förhandsläge"}
-          </span>
-        </div>
-      </div>
-
+  const manualInput = (
+    <>
       <form
         ref={formRef}
         action={canPersist ? saveBookkeepingDraftAction : preview}
@@ -234,6 +221,40 @@ export function AccountingPreview({
           </p>
         </div>
       ) : null}
+    </>
+  );
+
+  return (
+    <div className="overflow-hidden rounded-[1.6rem] border border-black/8 bg-[var(--hub-card)] shadow-[0_24px_60px_-48px_rgba(0,0,0,0.35)]">
+      <div className="border-b border-black/8 bg-[var(--hub-panel)] px-5 py-5 text-[var(--hub-panel-contrast)] md:px-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--hub-accent)]">
+              Vad har hänt?
+            </p>
+            <h2 className="mt-2 text-xl font-semibold tracking-[-0.03em]">
+              Skapa ett bokföringsunderlag
+            </h2>
+          </div>
+          <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs text-[var(--hub-panel-muted)]">
+            {smartInputEnabled ? "Fritext – förhandsversion" : canPersist ? "Kan sparas som utkast" : "Förhandsläge"}
+          </span>
+        </div>
+      </div>
+
+      {smartInputEnabled ? (
+        <>
+          <AccountingSmartInput organizationId={organizationId} />
+          <details className="border-t border-black/8 bg-[var(--hub-card-soft)]">
+            <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-[var(--hub-text)] outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--hub-accent-strong)] md:px-6">
+              Välj händelse manuellt
+            </summary>
+            <div className="border-t border-black/8 bg-[var(--hub-card)]">
+              {manualInput}
+            </div>
+          </details>
+        </>
+      ) : manualInput}
     </div>
   );
 }

@@ -1,11 +1,11 @@
 # Phase E: Durable Background Jobs
 
-Last updated: 2026-08-12
+Last updated: 2026-08-14
 
-Phase E is implemented locally as a guarded process status center and a durable
-Postgres job contract. No Phase E SQL has been applied to Supabase, no production
-worker or external queue has been connected, no feature flag has been enabled
-and nothing has been deployed.
+Phase E is implemented as a guarded process status center and a durable
+Postgres job contract. Its reviewed migration is installed and verified only in
+`altura-nova-hub-staging`. No production worker or external queue is connected,
+and Bidewind Consulting and production remain untouched.
 
 ## What Is Available Locally
 

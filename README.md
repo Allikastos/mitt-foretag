@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Altura Nova
 
-## Getting Started
+Next.js-applikationen innehåller Altura Novas publika webbplats, administration
+och den separata kundhubben. Produktmål, prisantaganden och roadmap för hubben
+finns i [`docs/product-vision-and-roadmap.md`](docs/product-vision-and-roadmap.md).
 
-First, run the development server:
+## Lokal utveckling
+
+Installera låsta beroenden och starta webbplatsen:
 
 ```bash
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Hubben ska köras med den fail-closed lokala Supabase-runnern:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run dev:hub:local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Runnern accepterar endast localhost/127.0.0.1 som datamiljö. Använd inte
+stagingkommandon eller fjärrdatabas utan ett uttryckligt, avgränsat godkännande.
 
-## Learn More
+## Verifiering
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm test
+npm run lint
+npm run typecheck
+npm run build
+npm audit
+npm audit --omit=dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Databas-, RLS-, Storage- och samtidighetstesternas säkra lokala ordning finns i
+[`docs/test-readiness.md`](docs/test-readiness.md).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Miljöer
 
-## Deploy on Vercel
+- Produktion och Bidewind Consulting får inte användas för hubbtester.
+- Supabase-projektet `altura-nova-hub-staging` är den isolerade testdatabasen.
+- `altura-nova-hub-preview` är en separat, inloggningsskyddad Netlify-draft som
+  endast får använda staging och syntetiska uppgifter.
+- Ingen preview eller lokal körning innebär att skarp bokföring, billing,
+  e-postautomation eller externa leverantörer är aktiverade.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Aktuell verifieringsrapport finns i
+[`docs/staging-night-verification.md`](docs/staging-night-verification.md).

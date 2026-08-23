@@ -1,10 +1,11 @@
 # Phase C: Accounting MVP
 
-Last updated: 2026-08-12
+Last updated: 2026-08-14
 
-Phase C is implemented locally as a guarded accounting studio. No Phase C SQL
-has been applied to Supabase, no feature flag has been enabled and nothing has
-been deployed.
+Phase C is implemented as a guarded accounting studio. Its reviewed migration
+is installed and verified only in `altura-nova-hub-staging`; the protected
+Netlify draft uses that staging project. No Phase C SQL or feature activation
+has been applied to Bidewind Consulting or production.
 
 ## What Is Available Locally
 

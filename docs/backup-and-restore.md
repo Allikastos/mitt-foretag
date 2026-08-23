@@ -8,7 +8,7 @@ Denna rutin ska provas mot en isolerad testmiljö innan första piloten. En back
 - Databas: schema, data, roller, RLS, funktioner och migrationshistorik.
 - Supabase Auth: användare och identitetskopplingar enligt vald backupmetod.
 - Storage: både metadata i databasen och de faktiska privata filobjekten.
-- Konfiguration: Vercel/Supabase-miljövariabler dokumenteras med namn, aldrig värden.
+- Konfiguration: Hosting-/Supabase-miljövariabler dokumenteras med namn, aldrig värden.
 - Externa leverantörer: kund-ID och eventkvitton, men inga hemligheter i databasen.
 
 En databasdump återställer inte automatiskt borttagna Storage-objekt. Filer måste

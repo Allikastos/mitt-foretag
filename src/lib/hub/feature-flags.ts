@@ -6,6 +6,7 @@ function readFlag(name: string) {
 
 export const hubFeatureFlags = {
   accounting: readFlag("HUB_FEATURE_ACCOUNTING"),
+  smartAccountingInput: readFlag("HUB_FEATURE_SMART_ACCOUNTING_INPUT"),
   documentProcessing: readFlag("HUB_FEATURE_DOCUMENT_PROCESSING"),
   backgroundJobs: readFlag("HUB_FEATURE_BACKGROUND_JOBS"),
   emailAutomation: readFlag("HUB_FEATURE_EMAIL_AUTOMATION"),

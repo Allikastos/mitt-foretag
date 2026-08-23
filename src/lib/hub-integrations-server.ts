@@ -11,6 +11,7 @@ import { requireHubContext } from "./hub-server.ts";
 
 const featureFlagEnvironmentNames = {
   accounting: "HUB_FEATURE_ACCOUNTING",
+  smartAccountingInput: "HUB_FEATURE_SMART_ACCOUNTING_INPUT",
   documentProcessing: "HUB_FEATURE_DOCUMENT_PROCESSING",
   backgroundJobs: "HUB_FEATURE_BACKGROUND_JOBS",
   emailAutomation: "HUB_FEATURE_EMAIL_AUTOMATION",
