@@ -40,6 +40,7 @@ import {
 } from "./ui";
 import { SubmitButton } from "./submit-button";
 import { ThemePicker } from "./theme-picker";
+import { CustomerCombobox } from "./customer-combobox";
 import {
   finalizeInvoiceAction,
   saveContactAction,
@@ -246,20 +247,12 @@ export function TaskForm({
               required
             />
           </Field>
-          <Field label="Kund">
-            <select
-              name="customer_id"
-              defaultValue={task?.customer_id ?? ""}
-              className={inputClassName}
-            >
-              <option value="">Ingen kund kopplad</option>
-              {customers.map((customer) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.company_name}
-                </option>
-              ))}
-            </select>
-          </Field>
+          <CustomerCombobox
+            label="Kund"
+            customers={customers}
+            defaultValue={task?.customer_id ?? ""}
+            emptyLabel="Ingen kund kopplad"
+          />
           <Field label="Status">
             <select
               name="status"
@@ -324,21 +317,13 @@ export function InvoiceForm({
       <form action={saveInvoiceAction} className="space-y-4">
         <input type="hidden" name="invoice_id" defaultValue={invoice?.id ?? ""} />
         <FormGrid>
-          <Field label="Kund">
-            <select
-              name="customer_id"
-              defaultValue={invoice?.customer_id ?? ""}
-              className={inputClassName}
-              disabled={isLocked}
-            >
-              <option value="">Välj kund</option>
-              {customers.map((customer) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.company_name}
-                </option>
-              ))}
-            </select>
-          </Field>
+          <CustomerCombobox
+            label="Kund"
+            customers={customers}
+            defaultValue={invoice?.customer_id ?? ""}
+            emptyLabel="Ingen kund vald"
+            disabled={isLocked}
+          />
           <Field label="Status">
             <input
               value={invoiceStatusLabel(invoice?.status ?? "draft")}
@@ -594,16 +579,11 @@ export function DocumentUploadForm({
               ))}
             </select>
           </Field>
-          <Field label="Koppla till kund">
-            <select name="customer_id" defaultValue="" className={inputClassName}>
-              <option value="">Ingen kund</option>
-              {customers.map((customer) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.company_name}
-                </option>
-              ))}
-            </select>
-          </Field>
+          <CustomerCombobox
+            label="Koppla till kund"
+            customers={customers}
+            emptyLabel="Ingen kund"
+          />
           <Field label="Koppla till faktura">
             <select name="invoice_id" defaultValue="" className={inputClassName}>
               <option value="">Ingen faktura</option>
