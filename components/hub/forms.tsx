@@ -23,6 +23,10 @@ import {
   customerSalesStages,
   getCustomerSalesStage,
 } from "@/src/lib/hub/sales";
+import {
+  salesValidationActivityLabel,
+  salesValidationActivityTypes,
+} from "@/src/lib/hub/sales-validation";
 import type {
   Customer,
   Invoice,
@@ -43,6 +47,7 @@ import { ThemePicker } from "./theme-picker";
 import { CustomerCombobox } from "./customer-combobox";
 import {
   finalizeInvoiceAction,
+  registerSalesValidationActivityAction,
   saveContactAction,
   saveCustomerAction,
   saveInvoiceAction,
@@ -52,6 +57,58 @@ import {
   updateOrganizationSettingsAction,
   uploadDocumentAction,
 } from "@/app/hub/actions";
+
+export function SalesValidationActivityForm({
+  customerId,
+}: {
+  customerId: string;
+}) {
+  return (
+    <HubCard>
+      <form
+        action={registerSalesValidationActivityAction}
+        className="space-y-4"
+      >
+        <input type="hidden" name="customer_id" value={customerId} />
+        <div>
+          <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--hub-accent-strong)]">
+            Sex veckors validering
+          </p>
+          <h2 className="mt-2 text-lg font-semibold text-[var(--hub-text)]">
+            Registrera verkligt utfall
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-[var(--hub-muted)]">
+            Händelsen räknas i valideringspanelen och sparas i kundens
+            relationshistorik.
+          </p>
+        </div>
+        <Field label="Händelse">
+          <select
+            name="activity_type"
+            defaultValue="personal_contact"
+            className={inputClassName}
+          >
+            {salesValidationActivityTypes.map((type) => (
+              <option key={type} value={type}>
+                {salesValidationActivityLabel(type)}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Utfall och nästa lärdom">
+          <textarea
+            name="outcome"
+            className={textareaClassName}
+            maxLength={400}
+            placeholder="Vad hände, vilket behov återkom och vad är nästa steg?"
+            required
+          />
+        </Field>
+        <SubmitButton>Registrera utfall</SubmitButton>
+      </form>
+    </HubCard>
+  );
+}
 
 export function CustomerForm({ customer }: { customer?: Customer | null }) {
   return (

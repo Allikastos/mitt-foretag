@@ -39,6 +39,13 @@ import type {
   CustomerStatusFilter,
 } from "./hub/sales.ts";
 import { customerSalesStageTag } from "./hub/sales.ts";
+import {
+  buildSalesValidationSummary,
+  SALES_VALIDATION_END_EXCLUSIVE,
+  SALES_VALIDATION_START,
+  SALES_VALIDATION_WON_ACTION,
+  salesValidationActivityActions,
+} from "./hub/sales-validation.ts";
 
 type HubContext = {
   supabase: NonNullable<Awaited<ReturnType<typeof createSupabaseServerClient>>>;
@@ -188,6 +195,13 @@ export async function getHubDashboardData() {
     .lte("follow_up_date", new Date().toISOString().slice(0, 10))
     .order("follow_up_date", { ascending: true })
     .limit(5);
+  let validationCustomersQuery = supabase
+    .from("customers")
+    .select(
+      "id, status, last_contacted_at, created_at, updated_at, created_by, owner_user_id, visibility",
+    )
+    .eq("organization_id", organization.id)
+    .limit(2000);
 
   if (!isOwnerLevel) {
     followUpCustomersQuery = followUpCustomersQuery.eq(
@@ -199,7 +213,15 @@ export async function getHubDashboardData() {
       followUpCustomersQuery = followUpCustomersQuery.or(
         `created_by.eq.${user.id},owner_user_id.eq.${user.id}`,
       );
+      validationCustomersQuery = validationCustomersQuery.or(
+        `created_by.eq.${user.id},owner_user_id.eq.${user.id}`,
+      );
     }
+
+    validationCustomersQuery = validationCustomersQuery.eq(
+      "visibility",
+      "organization",
+    );
   }
 
   const [
@@ -213,6 +235,8 @@ export async function getHubDashboardData() {
     documentsResult,
     activityResult,
     followUpCustomersResult,
+    validationCustomersResult,
+    validationActivitiesResult,
   ] = await Promise.all([
     supabase
       .from("tasks")
@@ -262,6 +286,19 @@ export async function getHubDashboardData() {
       .order("created_at", { ascending: false })
       .limit(6),
     followUpCustomersQuery,
+    validationCustomersQuery,
+    supabase
+      .from("activity_log")
+      .select("action, entity_id, created_at")
+      .eq("organization_id", organization.id)
+      .eq("entity_type", "customer")
+      .in("action", [
+        ...Object.values(salesValidationActivityActions),
+        SALES_VALIDATION_WON_ACTION,
+      ])
+      .gte("created_at", `${SALES_VALIDATION_START}T00:00:00.000Z`)
+      .lt("created_at", `${SALES_VALIDATION_END_EXCLUSIVE}T00:00:00.000Z`)
+      .limit(2000),
   ]);
 
   const tasks = tasksResult.data ?? [];
@@ -269,6 +306,12 @@ export async function getHubDashboardData() {
   const documents = documentsResult.data ?? [];
   const activity = activityResult.data ?? [];
   const followUpCustomers = followUpCustomersResult.data ?? [];
+  const salesValidation = buildSalesValidationSummary(
+    validationCustomersResult.data ?? [],
+    validationActivitiesResult.data ?? [],
+  );
+  const isSalesValidationAvailable =
+    !validationCustomersResult.error && !validationActivitiesResult.error;
 
   return {
     organization,
@@ -285,6 +328,10 @@ export async function getHubDashboardData() {
     documents,
     activity,
     followUpCustomers,
+    salesValidation: {
+      ...salesValidation,
+      isAvailable: isSalesValidationAvailable,
+    },
   };
 }
 

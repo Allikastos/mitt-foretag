@@ -21,8 +21,16 @@ import { normalizeIdempotencyKey } from "@/src/lib/hub/idempotency";
 import {
   applyCustomerSalesStage,
   customerStatusForSalesStage,
+  getCustomerSalesStage,
   parseCustomerSalesStage,
 } from "@/src/lib/hub/sales";
+import {
+  advanceSalesStageForActivity,
+  parseSalesValidationActivity,
+  SALES_VALIDATION_WON_ACTION,
+  salesValidationActivityActions,
+  salesValidationActivityLabel,
+} from "@/src/lib/hub/sales-validation";
 import { assertSafeHubServerEnvironment } from "@/src/lib/hub/runtime-environment-server";
 import { calculateSha256 } from "@/src/lib/hub/providers/supabase-storage-provider";
 import {
@@ -161,7 +169,9 @@ async function requireCustomerInOrganization(params: {
   const { supabase } = await requireHubContext();
   const { data, error } = await supabase
     .from("customers")
-    .select("id, company_name, address, email")
+    .select(
+      "id, company_name, address, email, status, tags, last_contacted_at, created_at, updated_at",
+    )
     .eq("organization_id", params.organizationId)
     .eq("id", params.customerId)
     .maybeSingle();
@@ -171,6 +181,56 @@ async function requireCustomerInOrganization(params: {
   }
 
   return data;
+}
+
+export async function registerSalesValidationActivityAction(formData: FormData) {
+  const { supabase, organization, membership, user } = await requireHubContext();
+
+  if (membership.role === "viewer") {
+    throw new Error("Du har inte behörighet att registrera säljhändelser.");
+  }
+
+  const customerId = requireString(formData.get("customer_id"), "Kund");
+  const activityType = parseSalesValidationActivity(
+    parseOptionalString(formData.get("activity_type")),
+  );
+  const outcome = requireString(formData.get("outcome"), "Utfall").slice(0, 400);
+
+  if (!activityType) {
+    throw new Error("Välj en giltig säljhändelse.");
+  }
+
+  const customer = await requireCustomerInOrganization({
+    customerId,
+    organizationId: organization.id,
+  });
+  const nextStage = advanceSalesStageForActivity(customer, activityType);
+  const { error } = await supabase
+    .from("customers")
+    .update({
+      status: nextStage.status,
+      tags: nextStage.tags,
+      last_contacted_at: new Date().toISOString().slice(0, 10),
+    })
+    .eq("organization_id", organization.id)
+    .eq("id", customer.id);
+
+  if (error) {
+    throw new Error("Säljhändelsen kunde inte registreras.");
+  }
+
+  await logHubActivity({
+    organizationId: organization.id,
+    userId: user.id,
+    action: salesValidationActivityActions[activityType],
+    entityType: "customer",
+    entityId: customer.id,
+    description: `${salesValidationActivityLabel(activityType)}: ${outcome}`,
+  });
+
+  revalidatePath("/hub");
+  revalidatePath("/hub/kunder");
+  revalidatePath(`/hub/kunder/${customer.id}`);
 }
 
 async function requireMemberInOrganization(params: {
@@ -209,6 +269,12 @@ export async function saveCustomerAction(formData: FormData) {
     parseOptionalString(formData.get("sales_stage")),
   );
   const requestedTags = parseTags(formData.get("tags"));
+  const existingCustomer = customerId
+    ? await requireCustomerInOrganization({
+        customerId,
+        organizationId: organization.id,
+      })
+    : null;
 
   await requireMemberInOrganization({
     userId: ownerUserId,
@@ -269,6 +335,20 @@ export async function saveCustomerAction(formData: FormData) {
     entityId: data.id,
     description: `${payload.company_name} sparades i kundregistret.`,
   });
+
+  if (
+    salesStage === "won" &&
+    (!existingCustomer || getCustomerSalesStage(existingCustomer) !== "won")
+  ) {
+    await logHubActivity({
+      organizationId: organization.id,
+      userId: user.id,
+      action: SALES_VALIDATION_WON_ACTION,
+      entityType: "customer",
+      entityId: data.id,
+      description: `${payload.company_name} markerades som vunnen kund.`,
+    });
+  }
 
   revalidatePath("/hub");
   revalidatePath("/hub/kunder");

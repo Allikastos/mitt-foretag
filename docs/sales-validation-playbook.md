@@ -54,6 +54,23 @@ Ett aktivt prospekt utan nästa återkoppling ska betraktas som ofullständigt.
 - **Vunnen kund:** kunden har uttryckligen accepterat upplägget. Positiv respons
   eller ett bokat möte räknas inte som vunnet.
 
+## Stöd i Hubben
+
+Översikten visar en valideringspanel för perioden 24 augusti till 4 oktober
+2026. Målen följer den här planen. Personliga kontakter räknas per kund utifrån
+registrerad kontakt under perioden. Problemintervjuer, säljsamtal och
+behovsmöten räknas när ett verkligt utfall registreras på kundkortet. Vunna
+kunder räknas när ett nytt kundkort är vunnet under perioden eller när ett
+befintligt prospekt uttryckligen flyttas till vunnen kund.
+
+Aktivitetsformuläret ska användas för genomförda händelser, inte planerade
+försök. Varje registrering kräver en kort anteckning om utfall och lärdom.
+Panelen ersätter inte fredagens kvalitativa genomgång av invändningar, behov och
+marginal.
+
+Om underliggande data inte kan hämtas ska panelen visa att mätningen är
+otillgänglig i stället för missvisande nollvärden.
+
 ## Veckorytm
 
 ### Måndag

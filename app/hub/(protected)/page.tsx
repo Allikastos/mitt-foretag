@@ -26,8 +26,16 @@ function invoiceTone(status: string) {
 }
 
 export default async function HubDashboardPage() {
-  const { organization, stats, tasks, invoices, documents, activity, followUpCustomers } =
-    await getHubDashboardData();
+  const {
+    organization,
+    stats,
+    tasks,
+    invoices,
+    documents,
+    activity,
+    followUpCustomers,
+    salesValidation,
+  } = await getHubDashboardData();
   const dashboardSections = [
     {
       id: "stats",
@@ -40,6 +48,94 @@ export default async function HubDashboardPage() {
           <StatCard label="Återkoppla" value={stats.dueFollowUps} hint="kunder" />
           <StatCard label="Dokument" value={stats.documents} hint="uppladdade" />
         </div>
+      ),
+    },
+    {
+      id: "sales-validation",
+      title: "Säljvalidering",
+      children: (
+        <HubCard className="overflow-hidden">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.22em] text-[var(--hub-accent-strong)]">
+                Sex veckors validering
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-[var(--hub-text)]">
+                Bevisa efterfrågan före mer produktutveckling
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--hub-muted)]">
+                Period {formatDate(salesValidation.startDate)} till{" "}
+                {formatDate(salesValidation.endDate)}. Registrera verkliga utfall
+                på respektive kundkort.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <StatusBadge tone={salesValidation.isActive ? "success" : "neutral"}>
+                {salesValidation.isActive
+                  ? `${salesValidation.daysRemaining} dagar kvar`
+                  : "Perioden är avslutad"}
+              </StatusBadge>
+              <Link
+                href="/hub/kunder?followUp=due"
+                className="inline-flex min-h-10 items-center justify-center rounded-full bg-[var(--hub-panel)] px-4 py-2 text-sm font-medium text-[var(--hub-panel-contrast)]"
+              >
+                Öppna arbetskön
+              </Link>
+            </div>
+          </div>
+          {salesValidation.isAvailable ? (
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+              {salesValidation.goals.map((goal) => (
+                <article
+                  key={goal.key}
+                  className="rounded-[1.35rem] border border-black/8 bg-[var(--hub-card-soft)] p-4"
+                >
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="text-2xl font-semibold tracking-[-0.04em] text-[var(--hub-text)]">
+                      {goal.value}
+                      <span className="ml-1 text-sm font-medium text-[var(--hub-subtle)]">
+                        / {goal.target}
+                      </span>
+                    </p>
+                    <span className="text-xs font-medium text-[var(--hub-accent-strong)]">
+                      {goal.progress}%
+                    </span>
+                  </div>
+                  <div
+                    className="mt-2 min-h-10 text-sm font-medium leading-5 text-[var(--hub-text)]"
+                  >
+                    {goal.label}
+                  </div>
+                  <div
+                    className="mt-3 h-1.5 overflow-hidden rounded-full bg-black/8"
+                    role="progressbar"
+                    aria-label={goal.label}
+                    aria-valuemin={0}
+                    aria-valuemax={goal.target}
+                    aria-valuenow={Math.min(goal.value, goal.target)}
+                  >
+                    <div
+                      className="h-full rounded-full bg-[var(--hub-accent-strong)]"
+                      style={{ width: `${goal.progress}%` }}
+                    />
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              Valideringsdata kunde inte hämtas just nu. Inga nollvärden visas
+              eftersom de skulle kunna ge en felaktig bild av utfallet.
+            </p>
+          )}
+          {salesValidation.isAvailable ? (
+            <p className="mt-4 text-xs leading-5 text-[var(--hub-subtle)]">
+              Personliga kontakter räknas per kund. Intervjuer, samtal och möten
+              räknas när ett utfall registreras. Vunna kunder räknas från kundens
+              status under perioden.
+            </p>
+          ) : null}
+        </HubCard>
       ),
     },
     {

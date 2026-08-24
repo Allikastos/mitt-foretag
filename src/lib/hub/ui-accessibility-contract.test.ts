@@ -30,6 +30,20 @@ const customerSearchRouteSource = readFileSync(
   new URL("../../../app/api/hub/customers/search/route.ts", import.meta.url),
   "utf8",
 );
+const dashboardSource = readFileSync(
+  new URL("../../../app/hub/(protected)/page.tsx", import.meta.url),
+  "utf8",
+);
+const hubActionsSource = readFileSync(
+  new URL("../../../app/hub/actions.ts", import.meta.url),
+  "utf8",
+);
+const salesValidationActionSource = hubActionsSource.slice(
+  hubActionsSource.indexOf(
+    "export async function registerSalesValidationActivityAction",
+  ),
+  hubActionsSource.indexOf("async function requireMemberInOrganization"),
+);
 
 test("expandable navigation exposes state and controlled regions", () => {
   assert.match(navSource, /aria-expanded=\{isExpanded\}/);
@@ -73,4 +87,16 @@ test("remote customer search stays tenant and role scoped", () => {
   );
   assert.match(customerSearchRouteSource, /\.eq\("visibility", "organization"\)/);
   assert.match(customerSearchRouteSource, /employee_customer_scope === "assigned_only"/);
+});
+
+test("sales validation exposes honest progress and protects mutations", () => {
+  assert.match(dashboardSource, /id: "sales-validation"/);
+  assert.match(dashboardSource, /role="progressbar"/);
+  assert.match(dashboardSource, /Inga nollvärden visas/);
+  assert.match(salesValidationActionSource, /membership\.role === "viewer"/);
+  assert.match(
+    salesValidationActionSource,
+    /\.eq\("organization_id", organization\.id\)/,
+  );
+  assert.match(salesValidationActionSource, /parseSalesValidationActivity/);
 });

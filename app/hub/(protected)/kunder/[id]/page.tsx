@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ContactForm, CustomerForm } from "@/components/hub/forms";
+import {
+  ContactForm,
+  CustomerForm,
+  SalesValidationActivityForm,
+} from "@/components/hub/forms";
 import { HubPagination } from "@/components/hub/pagination";
 import { HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
 import {
@@ -293,6 +297,7 @@ export default async function HubCustomerDetailPage({
             </HubCard>
           ) : (
             <>
+              <SalesValidationActivityForm customerId={detail.customer.id} />
               <CustomerForm customer={detail.customer} />
               <ContactForm customerId={detail.customer.id} />
             </>
