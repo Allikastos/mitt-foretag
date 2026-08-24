@@ -38,7 +38,6 @@ export function SiteHeader() {
                 </Link>
               ))}
             </nav>
-            <Link href="/hub" className="text-sm font-medium text-[#53635c] transition hover:text-[#173f35]">Logga in</Link>
             <Link href="/kontakt" className="inline-flex items-center justify-center rounded-full bg-[#e86f44] px-5 py-3 text-sm font-semibold text-white shadow-[0_16px_30px_-18px_rgba(156,66,35,0.65)] transition hover:-translate-y-0.5 hover:bg-[#d95f35]">
               {SITE_CONFIG.cta.primaryShort}
             </Link>
@@ -58,9 +57,8 @@ export function SiteHeader() {
               {navigationItems.map((item) => (
                 <Link key={item.href} href={item.href} onClick={() => setIsMenuOpen(false)} className="block rounded-xl px-4 py-3 text-sm font-medium text-[#45564f] hover:bg-[#eef2ec]">{item.label}</Link>
               ))}
-              <div className="mt-2 grid gap-2 border-t border-[#173f35]/10 pt-3 sm:grid-cols-2">
-                <Link href="/hub" onClick={() => setIsMenuOpen(false)} className="rounded-xl px-4 py-3 text-sm font-medium text-[#45564f]">Logga in</Link>
-                <Link href="/kontakt" onClick={() => setIsMenuOpen(false)} className="rounded-xl bg-[#e86f44] px-4 py-3 text-center text-sm font-semibold text-white">Få ett kostnadsfritt förslag</Link>
+              <div className="mt-2 border-t border-[#173f35]/10 pt-3">
+                <Link href="/kontakt" onClick={() => setIsMenuOpen(false)} className="block rounded-xl bg-[#e86f44] px-4 py-3 text-center text-sm font-semibold text-white">Få ett kostnadsfritt förslag</Link>
               </div>
             </nav>
           </div>

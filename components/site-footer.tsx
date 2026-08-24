@@ -19,7 +19,6 @@ export function SiteFooter() {
             <ul className="mt-5 space-y-3 text-sm text-white/70">
               {navigationItems.map((item) => <li key={item.href}><Link href={item.href} className="hover:text-white">{item.label}</Link></li>)}
               <li><Link href="/integritet" className="hover:text-white">Integritet</Link></li>
-              <li><Link href="/hub" className="hover:text-white">Logga in i Hubben</Link></li>
             </ul>
           </div>
           <div>
