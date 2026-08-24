@@ -1,21 +1,50 @@
 import Link from "next/link";
 import { CustomerForm } from "@/components/hub/forms";
 import { HubPagination } from "@/components/hub/pagination";
-import { EmptyState, HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
+import {
+  EmptyState,
+  HubCard,
+  HubShell,
+  StatusBadge,
+  inputClassName,
+} from "@/components/hub/ui";
 import {
   formatDate,
   preferredContactMethodLabel,
 } from "@/src/lib/hub";
 import { getCustomers, requireHubContext } from "@/src/lib/hub-server";
 import {
+  customerReadinessGapLabel,
   customerSalesStageLabel,
   customerSalesStageTone,
+  getCustomerReadinessGaps,
   getCustomerSalesNextStep,
   getCustomerSalesStage,
+  normalizeCustomerRegistrySearch,
   parseCustomerFollowUpFilter,
+  parseCustomerReadinessFilter,
   parseCustomerSalesStage,
   parseCustomerStatusFilter,
 } from "@/src/lib/hub/sales";
+
+type CustomerListFilters = {
+  q?: string | null;
+  status?: string | null;
+  followUp?: string | null;
+  stage?: string | null;
+  readiness?: string | null;
+};
+
+function customerListHref(filters: CustomerListFilters) {
+  const params = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(filters)) {
+    if (value) params.set(key, value);
+  }
+
+  const query = params.toString();
+  return query ? `/hub/kunder?${query}` : "/hub/kunder";
+}
 
 export default async function HubCustomersPage({
   searchParams,
@@ -25,28 +54,78 @@ export default async function HubCustomersPage({
     status?: string;
     followUp?: string;
     stage?: string;
+    readiness?: string;
+    q?: string;
   }>;
 }) {
   const filters = await searchParams;
   const status = parseCustomerStatusFilter(filters.status);
   const followUp = parseCustomerFollowUpFilter(filters.followUp);
   const stage = parseCustomerSalesStage(filters.stage);
+  const readiness = parseCustomerReadinessFilter(filters.readiness);
+  const search = normalizeCustomerRegistrySearch(filters.q);
   const [customers, { membership }] = await Promise.all([
-    getCustomers({ page: filters.page, status, followUp, stage }),
+    getCustomers({
+      page: filters.page,
+      status,
+      followUp,
+      stage,
+      readiness,
+      search,
+    }),
     requireHubContext(),
   ]);
   const workFilters = [
-    { href: "/hub/kunder", label: "Alla", active: !status && !followUp && !stage },
-    { href: "/hub/kunder?status=lead", label: "Alla prospekt", active: status === "lead" && !followUp && !stage },
-    { href: "/hub/kunder?followUp=due", label: "Återkoppla nu", active: followUp === "due" },
-    { href: "/hub/kunder?followUp=missing", label: "Saknar nästa steg", active: followUp === "missing" },
+    {
+      href: customerListHref({ q: search }),
+      label: "Alla",
+      active: !status && !followUp && !stage && !readiness,
+    },
+    {
+      href: customerListHref({ q: search, status: "lead" }),
+      label: "Alla prospekt",
+      active: status === "lead" && !followUp && !stage && !readiness,
+    },
+    {
+      href: customerListHref({ q: search, followUp: "due" }),
+      label: "Återkoppla nu",
+      active: followUp === "due",
+    },
+    {
+      href: customerListHref({ q: search, followUp: "missing" }),
+      label: "Saknar nästa steg",
+      active: followUp === "missing",
+    },
   ];
   const stageFilters = [
-    { href: "/hub/kunder?stage=new", label: "Nya", active: stage === "new" },
-    { href: "/hub/kunder?stage=contacted", label: "Kontaktade", active: stage === "contacted" },
-    { href: "/hub/kunder?stage=meeting", label: "Möten", active: stage === "meeting" },
-    { href: "/hub/kunder?stage=offer", label: "Offerter", active: stage === "offer" },
-    { href: "/hub/kunder?stage=won", label: "Vunna", active: stage === "won" },
+    { href: customerListHref({ q: search, stage: "new" }), label: "Nya", active: stage === "new" },
+    { href: customerListHref({ q: search, stage: "contacted" }), label: "Kontaktade", active: stage === "contacted" },
+    { href: customerListHref({ q: search, stage: "meeting" }), label: "Möten", active: stage === "meeting" },
+    { href: customerListHref({ q: search, stage: "offer" }), label: "Offerter", active: stage === "offer" },
+    { href: customerListHref({ q: search, stage: "won" }), label: "Vunna", active: stage === "won" },
+    { href: customerListHref({ q: search, stage: "paused" }), label: "Pausade", active: stage === "paused" },
+  ];
+  const readinessFilters = [
+    {
+      href: customerListHref({ q: search, readiness: "missing_contact" }),
+      label: "Kontaktväg",
+      active: readiness === "missing_contact",
+    },
+    {
+      href: customerListHref({ q: search, readiness: "missing_owner" }),
+      label: "Ansvarig",
+      active: readiness === "missing_owner",
+    },
+    {
+      href: customerListHref({ q: search, readiness: "missing_notes" }),
+      label: "Behovsanteckning",
+      active: readiness === "missing_notes",
+    },
+    {
+      href: customerListHref({ q: search, readiness: "missing_follow_up" }),
+      label: "Nästa återkoppling",
+      active: readiness === "missing_follow_up",
+    },
   ];
 
   return (
@@ -55,10 +134,50 @@ export default async function HubCustomersPage({
       description="Prioritera nästa kontakt, följ affären och samla överlämningen till leverans på ett ställe."
     >
       <HubCard>
-        <div className="grid gap-4 lg:grid-cols-2">
+        <form
+          action="/hub/kunder"
+          method="get"
+          className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end"
+        >
+          <label className="min-w-0 flex-1" htmlFor="customer-search">
+            <span className="mb-2 block text-sm font-medium text-[var(--hub-text)]">
+              Sök kund eller prospekt
+            </span>
+            <input
+              id="customer-search"
+              type="search"
+              name="q"
+              defaultValue={search}
+              placeholder="Sök på företagsnamn"
+              className={inputClassName}
+            />
+          </label>
+          {status ? <input type="hidden" name="status" value={status} /> : null}
+          {followUp ? <input type="hidden" name="followUp" value={followUp} /> : null}
+          {stage ? <input type="hidden" name="stage" value={stage} /> : null}
+          {readiness ? (
+            <input type="hidden" name="readiness" value={readiness} />
+          ) : null}
+          <button
+            type="submit"
+            className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-[var(--hub-panel)] px-6 py-3 text-sm font-semibold text-[var(--hub-panel-contrast)] transition hover:opacity-90"
+          >
+            Sök
+          </button>
+          {search ? (
+            <Link
+              href={customerListHref({ status, followUp, stage, readiness })}
+              className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-black/10 px-5 py-3 text-sm font-medium text-[var(--hub-text)]"
+            >
+              Rensa sökning
+            </Link>
+          ) : null}
+        </form>
+        <div className="grid gap-4 lg:grid-cols-3">
           {[
             { label: "Arbetskö", filters: workFilters },
             { label: "Säljläge", filters: stageFilters },
+            { label: "Komplettera", filters: readinessFilters },
           ].map((group) => (
             <div key={group.label}>
               <p className="mb-2 text-xs font-medium uppercase tracking-[0.16em] text-[var(--hub-subtle)]">
@@ -97,6 +216,7 @@ export default async function HubCustomersPage({
               customers.items.map((customer) => {
                 const nextStep = getCustomerSalesNextStep(customer);
                 const salesStage = getCustomerSalesStage(customer);
+                const readinessGaps = getCustomerReadinessGaps(customer);
 
                 return (
                 <Link
@@ -108,7 +228,7 @@ export default async function HubCustomersPage({
                     <div>
                       <p className="font-medium text-[var(--hub-text)]">{customer.company_name}</p>
                       <p className="mt-1 text-sm text-[var(--hub-muted)]">
-                        {customer.contact_name || "Ingen kontaktperson"} • {customer.email || "Ingen e-post"}
+                        {customer.contact_name || "Ingen kontaktperson"} • {customer.email || customer.phone || "Ingen kontaktväg"}
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -130,6 +250,25 @@ export default async function HubCustomersPage({
                       <span>Ansvarig {customer.relationship_owner}</span>
                     ) : null}
                   </div>
+                  {readinessGaps.length ? (
+                    <div
+                      className="mt-3 flex flex-wrap gap-2"
+                      aria-label="Saknade prospektuppgifter"
+                    >
+                      {readinessGaps.map((gap) => (
+                        <span
+                          key={gap}
+                          className="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-900"
+                        >
+                          {customerReadinessGapLabel(gap)}
+                        </span>
+                      ))}
+                    </div>
+                  ) : customer.status === "lead" ? (
+                    <p className="mt-3 text-xs font-medium text-emerald-700">
+                      Minimikrav för prospekt uppfyllda
+                    </p>
+                  ) : null}
                   {customer.tags.length ? (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {customer.tags.map((tag) => (
@@ -147,10 +286,14 @@ export default async function HubCustomersPage({
               })
             ) : (
               <EmptyState
-                title={status || followUp || stage ? "Inga träffar i det här urvalet" : "Lägg till ditt första prospekt"}
+                title={
+                  status || followUp || stage || readiness || search
+                    ? "Inga träffar i det här urvalet"
+                    : "Lägg till ditt första prospekt"
+                }
                 description={
-                  status || followUp || stage
-                    ? "Byt filter för att se övriga kunder och prospekt."
+                  status || followUp || stage || readiness || search
+                    ? "Ändra sökningen eller byt filter för att se övriga kunder och prospekt."
                     : "Registrera en kontakt, sätt nästa återkoppling och bygg kundresan vidare därifrån."
                 }
               />
@@ -158,7 +301,7 @@ export default async function HubCustomersPage({
           </div>
           <HubPagination
             basePath="/hub/kunder"
-            query={{ status, followUp, stage }}
+            query={{ q: search, status, followUp, stage, readiness }}
             {...customers}
           />
         </HubCard>

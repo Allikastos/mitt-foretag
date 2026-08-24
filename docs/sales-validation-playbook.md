@@ -71,6 +71,12 @@ marginal.
 Om underliggande data inte kan hämtas ska panelen visa att mätningen är
 otillgänglig i stället för missvisande nollvärden.
 
+Kundregistret kan sökas på företagsnamn utan att ladda hela organisationens
+kundlista i webbläsaren. Filtren under **Komplettera** visar aktiva prospekt som
+saknar kontaktväg, ansvarig, behovsanteckning eller nästa återkoppling. De fyra
+markeringarna är minimikrav för ett användbart säljarbete, inte en automatisk
+bedömning av prospektets kvalitet eller köpvilja.
+
 ## Veckorytm
 
 ### Måndag

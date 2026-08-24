@@ -35,10 +35,14 @@ import {
 import { createSupabaseServerClient } from "./supabase-server";
 import type {
   CustomerFollowUpFilter,
+  CustomerReadinessFilter,
   CustomerSalesStage,
   CustomerStatusFilter,
 } from "./hub/sales.ts";
-import { customerSalesStageTag } from "./hub/sales.ts";
+import {
+  customerSalesStageTag,
+  normalizeCustomerRegistrySearch,
+} from "./hub/sales.ts";
 import {
   buildSalesValidationSummary,
   SALES_VALIDATION_END_EXCLUSIVE,
@@ -340,20 +344,27 @@ export async function getCustomers(options: {
   status?: CustomerStatusFilter | null;
   followUp?: CustomerFollowUpFilter | null;
   stage?: CustomerSalesStage | null;
+  readiness?: CustomerReadinessFilter | null;
+  search?: string | null;
 } = {}) {
   const { supabase, organization, membership, user } = await requireHubContext();
   const pagination = normalizePagination({ page: options.page });
+  const search = normalizeCustomerRegistrySearch(options.search);
   const isOwnerLevel = ["owner", "admin"].includes(membership.role);
   let query = supabase
     .from("customers")
     .select(
-      "id, company_name, contact_name, email, status, last_contacted_at, follow_up_date, preferred_contact_method, relationship_owner, tags, created_at, created_by, owner_user_id, visibility",
+      "id, company_name, contact_name, email, phone, notes, status, last_contacted_at, follow_up_date, preferred_contact_method, relationship_owner, tags, created_at, created_by, owner_user_id, visibility",
       { count: "exact" },
     )
     .eq("organization_id", organization.id)
     .order("follow_up_date", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false })
     .range(pagination.from, pagination.to);
+
+  if (search) {
+    query = query.ilike("company_name", `%${search}%`);
+  }
 
   if (options.status) {
     query = query.eq("status", options.status);
@@ -380,6 +391,20 @@ export async function getCustomers(options: {
 
   if (options.followUp === "scheduled") {
     query = query.gt("follow_up_date", today);
+  }
+
+  if (options.readiness) {
+    query = query.eq("status", "lead");
+
+    if (options.readiness === "missing_contact") {
+      query = query.is("email", null).is("phone", null);
+    } else if (options.readiness === "missing_owner") {
+      query = query.is("relationship_owner", null);
+    } else if (options.readiness === "missing_notes") {
+      query = query.is("notes", null);
+    } else if (options.readiness === "missing_follow_up") {
+      query = query.is("follow_up_date", null);
+    }
   }
 
   if (!isOwnerLevel) {

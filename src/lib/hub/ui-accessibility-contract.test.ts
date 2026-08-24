@@ -34,6 +34,18 @@ const dashboardSource = readFileSync(
   new URL("../../../app/hub/(protected)/page.tsx", import.meta.url),
   "utf8",
 );
+const customerRegistrySource = readFileSync(
+  new URL("../../../app/hub/(protected)/kunder/page.tsx", import.meta.url),
+  "utf8",
+);
+const hubServerSource = readFileSync(
+  new URL("../hub-server.ts", import.meta.url),
+  "utf8",
+);
+const customerRegistryQuerySource = hubServerSource.slice(
+  hubServerSource.indexOf("export async function getCustomers"),
+  hubServerSource.indexOf("export async function getCustomerDetail"),
+);
 const hubActionsSource = readFileSync(
   new URL("../../../app/hub/actions.ts", import.meta.url),
   "utf8",
@@ -87,6 +99,23 @@ test("remote customer search stays tenant and role scoped", () => {
   );
   assert.match(customerSearchRouteSource, /\.eq\("visibility", "organization"\)/);
   assert.match(customerSearchRouteSource, /employee_customer_scope === "assigned_only"/);
+});
+
+test("customer registry exposes server search and prospect quality filters", () => {
+  assert.match(customerRegistrySource, /type="search"/);
+  assert.match(customerRegistrySource, /name="q"/);
+  assert.match(customerRegistrySource, /Saknade prospektuppgifter/);
+  assert.match(customerRegistrySource, /parseCustomerReadinessFilter/);
+  assert.match(
+    customerRegistryQuerySource,
+    /\.ilike\("company_name", `%\$\{search\}%`\)/,
+  );
+  assert.match(
+    customerRegistryQuerySource,
+    /\.eq\("organization_id", organization\.id\)/,
+  );
+  assert.match(customerRegistryQuerySource, /if \(!isOwnerLevel\)/);
+  assert.match(customerRegistryQuerySource, /employee_customer_scope === "assigned_only"/);
 });
 
 test("sales validation exposes honest progress and protects mutations", () => {

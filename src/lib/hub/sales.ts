@@ -2,6 +2,12 @@ import type { Customer } from "../hub";
 
 export const customerStatusFilters = ["lead", "active", "inactive"] as const;
 export const customerFollowUpFilters = ["due", "missing", "scheduled"] as const;
+export const customerReadinessFilters = [
+  "missing_contact",
+  "missing_owner",
+  "missing_notes",
+  "missing_follow_up",
+] as const;
 export const customerSalesStages = [
   "new",
   "contacted",
@@ -13,7 +19,9 @@ export const customerSalesStages = [
 
 export type CustomerStatusFilter = (typeof customerStatusFilters)[number];
 export type CustomerFollowUpFilter = (typeof customerFollowUpFilters)[number];
+export type CustomerReadinessFilter = (typeof customerReadinessFilters)[number];
 export type CustomerSalesStage = (typeof customerSalesStages)[number];
+export type CustomerReadinessGap = CustomerReadinessFilter;
 
 const salesStageTags: Partial<Record<CustomerSalesStage, string>> = {
   new: "säljläge: ny",
@@ -24,6 +32,15 @@ const salesStageTags: Partial<Record<CustomerSalesStage, string>> = {
 
 type SalesCustomer = Pick<Customer, "status" | "follow_up_date">;
 type SalesStageCustomer = Pick<Customer, "status" | "last_contacted_at" | "tags">;
+type ProspectReadinessCustomer = Pick<
+  Customer,
+  | "status"
+  | "email"
+  | "phone"
+  | "relationship_owner"
+  | "notes"
+  | "follow_up_date"
+>;
 
 export function parseCustomerStatusFilter(value: string | null | undefined) {
   return customerStatusFilters.find((status) => status === value) ?? null;
@@ -31,6 +48,46 @@ export function parseCustomerStatusFilter(value: string | null | undefined) {
 
 export function parseCustomerFollowUpFilter(value: string | null | undefined) {
   return customerFollowUpFilters.find((filter) => filter === value) ?? null;
+}
+
+export function parseCustomerReadinessFilter(value: string | null | undefined) {
+  return customerReadinessFilters.find((filter) => filter === value) ?? null;
+}
+
+export function normalizeCustomerRegistrySearch(
+  value: string | null | undefined,
+) {
+  return (value ?? "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .replace(/[%_]/g, "")
+    .slice(0, 80);
+}
+
+export function customerReadinessGapLabel(gap: CustomerReadinessGap) {
+  switch (gap) {
+    case "missing_contact":
+      return "Kontaktväg saknas";
+    case "missing_owner":
+      return "Ansvarig saknas";
+    case "missing_notes":
+      return "Behovsanteckning saknas";
+    case "missing_follow_up":
+      return "Nästa återkoppling saknas";
+  }
+}
+
+export function getCustomerReadinessGaps(customer: ProspectReadinessCustomer) {
+  if (customer.status !== "lead") return [];
+
+  const gaps: CustomerReadinessGap[] = [];
+  if (!customer.email?.trim() && !customer.phone?.trim()) {
+    gaps.push("missing_contact");
+  }
+  if (!customer.relationship_owner?.trim()) gaps.push("missing_owner");
+  if (!customer.notes?.trim()) gaps.push("missing_notes");
+  if (!customer.follow_up_date) gaps.push("missing_follow_up");
+  return gaps;
 }
 
 export function parseCustomerSalesStage(value: string | null | undefined) {

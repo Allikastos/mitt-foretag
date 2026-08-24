@@ -3,9 +3,12 @@ import assert from "node:assert/strict";
 import {
   applyCustomerSalesStage,
   customerStatusForSalesStage,
+  getCustomerReadinessGaps,
   getCustomerSalesStage,
   getCustomerSalesNextStep,
+  normalizeCustomerRegistrySearch,
   parseCustomerFollowUpFilter,
+  parseCustomerReadinessFilter,
   parseCustomerSalesStage,
   parseCustomerStatusFilter,
 } from "./sales.ts";
@@ -17,6 +20,60 @@ test("sales filters accept only supported URL values", () => {
   assert.equal(parseCustomerFollowUpFilter("tomorrow"), null);
   assert.equal(parseCustomerSalesStage("offer"), "offer");
   assert.equal(parseCustomerSalesStage("invoiced"), null);
+  assert.equal(parseCustomerReadinessFilter("missing_owner"), "missing_owner");
+  assert.equal(parseCustomerReadinessFilter("complete"), null);
+});
+
+test("customer registry search is normalized before it reaches the query", () => {
+  assert.equal(
+    normalizeCustomerRegistrySearch("  Altura   Nova%_  "),
+    "Altura Nova",
+  );
+  assert.equal(normalizeCustomerRegistrySearch(null), "");
+  assert.equal(normalizeCustomerRegistrySearch("a".repeat(100)).length, 80);
+});
+
+test("prospect readiness reports only missing minimum information", () => {
+  assert.deepEqual(
+    getCustomerReadinessGaps({
+      status: "lead",
+      email: null,
+      phone: null,
+      relationship_owner: null,
+      notes: "  ",
+      follow_up_date: null,
+    }),
+    [
+      "missing_contact",
+      "missing_owner",
+      "missing_notes",
+      "missing_follow_up",
+    ],
+  );
+
+  assert.deepEqual(
+    getCustomerReadinessGaps({
+      status: "lead",
+      email: "kontakt@example.com",
+      phone: null,
+      relationship_owner: "Albin",
+      notes: "Behöver tydligare offertflöde.",
+      follow_up_date: "2026-08-28",
+    }),
+    [],
+  );
+
+  assert.deepEqual(
+    getCustomerReadinessGaps({
+      status: "active",
+      email: null,
+      phone: null,
+      relationship_owner: null,
+      notes: null,
+      follow_up_date: null,
+    }),
+    [],
+  );
 });
 
 test("sales stages map to the existing customer statuses", () => {
