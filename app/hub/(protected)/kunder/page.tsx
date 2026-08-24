@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CustomerForm } from "@/components/hub/forms";
 import { HubPagination } from "@/components/hub/pagination";
+import { ProspectBatchForm } from "@/components/hub/prospect-batch-form";
 import {
   EmptyState,
   HubCard,
@@ -339,9 +340,12 @@ export default async function HubCustomersPage({
               </p>
             </HubCard>
           ) : (
-            <div id="nytt-prospekt" className="scroll-mt-6">
-              <CustomerForm />
-            </div>
+            <>
+              <ProspectBatchForm />
+              <div id="nytt-prospekt" className="scroll-mt-6">
+                <CustomerForm />
+              </div>
+            </>
           )}
         </div>
       </div>

@@ -77,6 +77,11 @@ saknar kontaktväg, ansvarig, behovsanteckning eller nästa återkoppling. De fy
 markeringarna är minimikrav för ett användbart säljarbete, inte en automatisk
 bedömning av prospektets kvalitet eller köpvilja.
 
+Funktionen **Klistra in utvalda prospekt** får användas för mindre, manuellt
+granskade listor från ett kalkylark. Varje omgång är begränsad till 25 företag
+och kräver kontaktväg, återkopplingsdatum och behovsanteckning. Funktionen är
+inte ett massutskicksverktyg och skickar aldrig e-post eller andra meddelanden.
+
 ## Veckorytm
 
 ### Måndag

@@ -38,6 +38,10 @@ const customerRegistrySource = readFileSync(
   new URL("../../../app/hub/(protected)/kunder/page.tsx", import.meta.url),
   "utf8",
 );
+const prospectBatchFormSource = readFileSync(
+  new URL("../../../components/hub/prospect-batch-form.tsx", import.meta.url),
+  "utf8",
+);
 const hubServerSource = readFileSync(
   new URL("../hub-server.ts", import.meta.url),
   "utf8",
@@ -55,6 +59,10 @@ const salesValidationActionSource = hubActionsSource.slice(
     "export async function registerSalesValidationActivityAction",
   ),
   hubActionsSource.indexOf("async function requireMemberInOrganization"),
+);
+const prospectBatchActionSource = hubActionsSource.slice(
+  hubActionsSource.indexOf("export async function importProspectBatchAction"),
+  hubActionsSource.indexOf("export async function createOrganizationOnboardingAction"),
 );
 
 test("expandable navigation exposes state and controlled regions", () => {
@@ -116,6 +124,19 @@ test("customer registry exposes server search and prospect quality filters", () 
   );
   assert.match(customerRegistryQuerySource, /if \(!isOwnerLevel\)/);
   assert.match(customerRegistryQuerySource, /employee_customer_scope === "assigned_only"/);
+});
+
+test("prospect batches are previewed and stay tenant and role scoped", () => {
+  assert.match(prospectBatchFormSource, /Förhandsgranskning/);
+  assert.match(prospectBatchFormSource, /Inget meddelande skickas automatiskt/);
+  assert.match(prospectBatchFormSource, /aria-live="polite"/);
+  assert.match(prospectBatchActionSource, /membership\.role === "viewer"/);
+  assert.match(
+    prospectBatchActionSource,
+    /\.eq\("organization_id", organization\.id\)/,
+  );
+  assert.match(prospectBatchActionSource, /organization_id: organization\.id/);
+  assert.match(prospectBatchActionSource, /owner_user_id: user\.id/);
 });
 
 test("sales validation exposes honest progress and protects mutations", () => {

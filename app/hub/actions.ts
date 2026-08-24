@@ -18,6 +18,7 @@ import type {
 import { buildInvoicePdf } from "@/src/lib/invoice-pdf";
 import { hubFeatureFlags } from "@/src/lib/hub/feature-flags";
 import { normalizeIdempotencyKey } from "@/src/lib/hub/idempotency";
+import { parseProspectBatch } from "@/src/lib/hub/prospect-batch";
 import {
   applyCustomerSalesStage,
   customerStatusForSalesStage,
@@ -74,6 +75,14 @@ function parseTags(value: FormDataEntryValue | null) {
 function parseCheckbox(value: FormDataEntryValue | null) {
   return value === "on";
 }
+
+export type ProspectBatchActionState = {
+  status: "idle" | "success" | "error";
+  message: string;
+  importedCount: number;
+  skippedCount: number;
+  errors: string[];
+};
 
 type HubOperationResult = {
   outcome: "start" | "retry" | "replay" | "in_progress";
@@ -353,6 +362,123 @@ export async function saveCustomerAction(formData: FormData) {
   revalidatePath("/hub");
   revalidatePath("/hub/kunder");
   revalidatePath(`/hub/kunder/${data.id}`);
+}
+
+export async function importProspectBatchAction(
+  _previousState: ProspectBatchActionState,
+  formData: FormData,
+): Promise<ProspectBatchActionState> {
+  const { supabase, organization, membership, user } = await requireHubContext();
+
+  if (membership.role === "viewer") {
+    return {
+      status: "error",
+      message: "Du har inte behörighet att lägga till prospekt.",
+      importedCount: 0,
+      skippedCount: 0,
+      errors: [],
+    };
+  }
+
+  const source = formData.get("prospect_batch");
+  const parsed = parseProspectBatch(typeof source === "string" ? source : "");
+
+  if (!parsed.rows.length || parsed.errors.length) {
+    return {
+      status: "error",
+      message: parsed.errors.length
+        ? "Rätta de markerade raderna innan något sparas."
+        : "Klistra in minst ett fullständigt prospekt.",
+      importedCount: 0,
+      skippedCount: 0,
+      errors: parsed.errors,
+    };
+  }
+
+  const companyNames = parsed.rows.map((row) => row.companyName);
+  const { data: existingCustomers, error: existingError } = await supabase
+    .from("customers")
+    .select("company_name")
+    .eq("organization_id", organization.id)
+    .in("company_name", companyNames);
+
+  if (existingError) {
+    return {
+      status: "error",
+      message: "Dubblettkontrollen kunde inte genomföras.",
+      importedCount: 0,
+      skippedCount: 0,
+      errors: [],
+    };
+  }
+
+  const existingNames = new Set(
+    (existingCustomers ?? []).map((customer) => customer.company_name),
+  );
+  const newRows = parsed.rows.filter((row) => !existingNames.has(row.companyName));
+  const skippedCount = parsed.rows.length - newRows.length;
+
+  if (!newRows.length) {
+    return {
+      status: "success",
+      message: "Alla prospekt fanns redan i kundregistret. Ingenting sparades.",
+      importedCount: 0,
+      skippedCount,
+      errors: [],
+    };
+  }
+
+  const relationshipOwner = user.fullName ?? user.email ?? "Tilldelad användare";
+  const { data: insertedCustomers, error: insertError } = await supabase
+    .from("customers")
+    .insert(
+      newRows.map((row) => ({
+        organization_id: organization.id,
+        created_by: user.id,
+        owner_user_id: user.id,
+        visibility: "organization" as const,
+        company_name: row.companyName,
+        contact_name: row.contactName,
+        email: row.email,
+        phone: row.phone,
+        preferred_contact_method: row.email ? ("email" as const) : ("phone" as const),
+        follow_up_date: row.followUpDate,
+        relationship_owner: relationshipOwner,
+        tags: ["säljläge: ny", "källa: prospektomgång"],
+        notes: row.notes,
+        status: "lead" as const,
+      })),
+    )
+    .select("id");
+
+  if (insertError || !insertedCustomers) {
+    return {
+      status: "error",
+      message: "Prospekten kunde inte sparas. Inga rader rapporteras som klara.",
+      importedCount: 0,
+      skippedCount,
+      errors: [],
+    };
+  }
+
+  await logHubActivity({
+    organizationId: organization.id,
+    userId: user.id,
+    action: "prospect_batch_created",
+    entityType: "customer_batch",
+    description: `${insertedCustomers.length} utvalda prospekt lades till i kundregistret.`,
+  });
+
+  revalidatePath("/hub");
+  revalidatePath("/hub/kunder");
+
+  return {
+    status: "success",
+    message: `${insertedCustomers.length} prospekt lades till.`,
+    importedCount: insertedCustomers.length,
+    skippedCount,
+    errors: [],
+  };
 }
 
 export async function createOrganizationOnboardingAction(formData: FormData) {
