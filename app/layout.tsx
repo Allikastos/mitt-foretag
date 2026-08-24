@@ -23,11 +23,7 @@ export default function RootLayout({
     url: SITE_CONFIG.url,
     email: SITE_CONFIG.contact.email,
     telephone: SITE_CONFIG.contact.phoneDisplay,
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: SITE_CONFIG.contact.city,
-      addressCountry: SITE_CONFIG.contact.country,
-    },
+    areaServed: [SITE_CONFIG.contact.country, "Norden"],
   };
   const websiteSchema = {
     "@context": "https://schema.org",

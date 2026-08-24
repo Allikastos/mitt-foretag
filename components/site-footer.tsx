@@ -27,7 +27,7 @@ export function SiteFooter() {
             <ul className="mt-5 space-y-3 text-sm text-white/70">
               <li><a href={`mailto:${SITE_CONFIG.contact.email}`} className="hover:text-white">{SITE_CONFIG.contact.email}</a></li>
               <li><a href={SITE_CONFIG.contact.phoneHref} className="hover:text-white">{SITE_CONFIG.contact.phoneDisplay}</a></li>
-              <li>{SITE_CONFIG.contact.city}, {SITE_CONFIG.contact.country}</li>
+              <li>Digital leverans i {SITE_CONFIG.contact.country} och Norden</li>
             </ul>
           </div>
         </div>

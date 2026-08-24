@@ -42,8 +42,8 @@ Databas-, RLS-, Storage- och samtidighetstesternas säkra lokala ordning finns i
 
 - Produktion och Bidewind Consulting får inte användas för hubbtester.
 - Supabase-projektet `altura-nova-hub-staging` är den isolerade testdatabasen.
-- `altura-nova-hub-preview` är en separat, inloggningsskyddad Netlify-draft som
-  endast får använda staging och syntetiska uppgifter.
+- Vercel är kanonisk hostingplattform för både marknadswebb och skyddad preview.
+- Previewgrenar får endast använda Hub-staging och syntetiska uppgifter.
 - Ingen preview eller lokal körning innebär att skarp bokföring, billing,
   e-postautomation eller externa leverantörer är aktiverade.
 

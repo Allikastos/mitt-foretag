@@ -22,7 +22,6 @@ export const SITE_CONFIG = {
     email: "kontakt@alturanova.se",
     phoneDisplay: "076-0218499",
     phoneHref: "tel:+46760218499",
-    city: "Uppsala",
     country: "Sverige",
   },
 } as const;

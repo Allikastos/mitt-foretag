@@ -1,6 +1,6 @@
 # Stagingverifiering för Altura Nova Hub
 
-Datum: 2026-08-14
+Datum: 2026-08-24
 
 ## Avgränsning
 
@@ -8,14 +8,14 @@ Datum: 2026-08-14
 - Verifierad project ref: `jtposcdefsmromnouald`.
 - Förbjudet projekt: `Bidewind Consulting`, ref `zshdbqhuiuwjdpsavnml`.
 - Endast syntetisk data under `example.test` har använts.
-- Ingen Vercel-koppling, produktionsdeployment eller produktionsändring har
-  utförts.
-- En separat, inloggningsskyddad Netlify-draft används som preview. Den är inte
-  Netlifys produktionsdeployment och använder endast Supabase-staging.
+- Vercel är kanonisk previewplattform och samma Vercel-projekt äger
+  `alturanova.se`.
+- Preview och produktion är separata deployments. Hub-preview får endast använda
+  Supabase-staging och syntetiska uppgifter.
 
 ## Baslinje och databas
 
-- Branch: `codex/altura-nova-hub-preview`.
+- Kanonisk arbets- och previewbranch: `codex/altura-nova-web-offer`.
 - Utgångspunkt: `01672b5 Tighten staging database grants`.
 - Lokal och remote migrationshistorik matchar: 9 av 9 migrationer.
 - Inga migrationsfiler ändrades och ingen ny migration behövdes.
@@ -78,7 +78,7 @@ onboarding- och webbläsarfixtures har separata, ännu snävare cleanup-kommando
 
 ## Testresultat
 
-- Enhetstester: 86 av 86 passerade.
+- Enhetstester: 128 av 128 passerade.
 - pgTAP: 90 av 90 passerade.
 - Lokal Auth, REST/API, RPC, Storage och samtidighet: passerade.
 - Remote Auth, REST/API, RPC, Storage, RLS, idempotens och samtidighet:
@@ -145,9 +145,8 @@ senaste lyckade Advisor-kontrollen.
 
 ## Skyddad previewmiljö
 
-Netlify-sajten `altura-nova-hub-preview` är en separat, privat draftpreview.
-Följande variabler är lagrade i Netlify utan att hemliga värden dokumenteras i
-klartext:
+Vercel är kanonisk previewplattform. Previewvariabler ska vara avgränsade från
+produktion och inga hemliga värden dokumenteras i klartext. Hub-preview kräver:
 
 - `NEXT_PUBLIC_SUPABASE_URL` - stagingprojektets URL.
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - stagingprojektets publika nyckel.
@@ -167,7 +166,7 @@ En sådan nyckel får inte läggas i klientvariabler eller `NEXT_PUBLIC_*`.
 
 ## Checklista för preview
 
-1. Behåll branchen `codex/altura-nova-hub-preview` separat från `main`.
+1. Behåll branchen `codex/altura-nova-web-offer` separat från `main`.
 2. Kontrollera `jtposcdefsmromnouald` och 9 av 9 migrationer före nya
    databasändringar.
 3. Behåll previewen inloggningsskyddad och använd endast stagingvariabler.

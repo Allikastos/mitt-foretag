@@ -132,7 +132,7 @@ onboarding med organisation, ägarskap och auditpost i samma RPC.
 ## Kvar före pilot
 
 - Kör ett separat återställningstest för databas och Storage-filer.
-- Behåll den skyddade Netlify-draften kopplad endast till den isolerade
+- Behåll Vercel-previewen skyddad och kopplad endast till den isolerade
   Supabase-stagingmiljön; se `docs/staging-night-verification.md`.
 - Next.js är verifierat på exakt `16.2.11`. Både fullständig och production-only
   npm audit rapporterar 0 sårbarheter; se

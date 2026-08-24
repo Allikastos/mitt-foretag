@@ -98,7 +98,8 @@ får aldrig klistras in i chatt, kod eller databasens anslutningstabell.
   spårbar leverans. Webbplatsens befintliga Resend-kontaktformulär är separat.
 - **Kostnad:** Leverantörer har ofta en begränsad gratisnivå och tar därefter
   betalt efter volym eller plan.
-- **Förberedd kod:** `EmailDeliveryProvider` och en avstängd adapter som inte kan
+- **Förberedd kod:** Webbplatsens kontaktformulär använder Resend separat.
+  Hubbens `EmailDeliveryProvider` har fortsatt en avstängd adapter som inte kan
   skicka något av misstag.
 - **Miljövariabler:** `HUB_EMAIL_DELIVERY_PROVIDER`, leverantörens API-nyckel,
   verifierad avsändare, webhook-hemlighet och `HUB_FEATURE_EMAIL_AUTOMATION`.
@@ -164,9 +165,8 @@ får aldrig klistras in i chatt, kod eller databasens anslutningstabell.
 
 ## Felspårning och driftövervakning
 
-- **Varför och när:** Ska upptäcka fel innan betalande kunder påverkas. Den
-  nuvarande Netlify-previewens bygg- och funktionsloggar är inte full
-  hubbspecifik felspårning.
+- **Varför och när:** Ska upptäcka fel innan betalande kunder påverkas. Vercels
+  bygg- och funktionsloggar är inte full hubbspecifik felspårning.
 - **Kostnad:** Hostingplattformens grundfunktioner beror på plan; externa verktyg kostar ofta
   efter händelser, loggvolym och lagringstid.
 - **Förberedd kod:** `ErrorReporter` accepterar bara fel, korrelations-ID och

@@ -10,7 +10,7 @@
 
 Det här dokumentet är den gemensamma produktkompassen för Altura Nova Hub.
 Tekniska beslut ska stödja en sammanhållen, trygg och lättanvänd arbetsyta för
-småföretag, deras medarbetare och externa ekonomipartners.
+företag, deras medarbetare och externa ekonomipartners.
 
 Det långsiktiga målet är att **Altura Nova Komplett** ska erbjuda motsvarande
 programfunktioner och användarnytta som Spiris breda produktutbud, samlat i ett
@@ -125,7 +125,8 @@ produktionsprojekt får inte användas som testmiljö.
 ## Nuvarande miljögräns
 
 Supabase-staging är installerad och verifierad separat från Bidewind Consulting
-och produktion. En inloggningsskyddad Netlify-draft används som isolerad preview.
+och produktion. Vercel används som kanonisk hostingplattform och preview ska
+vara skyddad samt endast använda den isolerade stagingmiljön.
 Detta dokument ger inte tillstånd att ändra någon extern miljö, genomföra en
 deployment, lägga till en betald tjänst eller aktivera skarp bokföring.
 
