@@ -113,9 +113,33 @@ export const processSteps = [
 ];
 
 export const demoProjects = [
-  { slug: "malare", label: "Demokoncept", industry: "Måleriföretag", name: "Penseldrag", headline: "Ett hem att trivas i, målat med omsorg.", tone: "clay" as const },
-  { slug: "konsult", label: "Demokoncept", industry: "Konsultbolag", name: "Nordform", headline: "Tydligare beslut. Starkare organisationer.", tone: "navy" as const },
-  { slug: "salong", label: "Demokoncept", industry: "Salong", name: "Studio Linnea", headline: "En lugn stund, skapad för dig.", tone: "sage" as const },
+  {
+    slug: "penseldrag",
+    label: "Demokoncept",
+    industry: "Måleriföretag",
+    name: "Penseldrag",
+    headline: "Rum med värme. Ytor som håller.",
+    direction: "Varmt, hantverksmässigt och byggt kring genomförda projekt.",
+    tags: ["Projektgalleri", "Materialkänsla", "Offertförfrågan"],
+  },
+  {
+    slug: "nordform",
+    label: "Demokoncept",
+    industry: "Konsultbolag",
+    name: "Nordform",
+    headline: "Klarhet för beslut som formar nästa steg.",
+    direction: "Stringent, analytiskt och strukturerat kring expertis och resultat.",
+    tags: ["Analys", "Affärscase", "Samtalsbokning"],
+  },
+  {
+    slug: "studio-linnea",
+    label: "Demokoncept",
+    industry: "Salong",
+    name: "Studio Linnea",
+    headline: "Din stund. Ditt uttryck.",
+    direction: "Mjukt, exklusivt och skapat för att göra bokningen självklar.",
+    tags: ["Behandlingar", "Editorial känsla", "Onlinebokning"],
+  },
 ];
 
 export function getServiceBySlug(slug: string) {
