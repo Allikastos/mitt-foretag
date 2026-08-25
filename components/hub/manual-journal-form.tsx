@@ -30,10 +30,14 @@ export function ManualJournalForm({
   organizationId,
   accounts,
   canPersist,
+  entryType = "manual_journal_entry",
+  defaultDate,
 }: {
   organizationId: string;
   accounts: AccountingAccount[];
   canPersist: boolean;
+  entryType?: "manual_journal_entry" | "opening_balance";
+  defaultDate?: string;
 }) {
   const baseId = useId().replace(/:/g, "");
   const [nextLine, setNextLine] = useState(3);
@@ -74,9 +78,10 @@ export function ManualJournalForm({
       <input type="hidden" name="organization_id" value={organizationId} />
       <input type="hidden" name="client_request_key" value={`manual-${baseId}`} />
       <input type="hidden" name="lines_json" value={JSON.stringify(lines)} />
+      <input type="hidden" name="entry_type" value={entryType} />
       <div className="grid gap-4 md:grid-cols-[0.7fr_1.3fr]">
         <Field label="Verifikationsdatum">
-          <input type="date" name="posted_on" className={inputClassName} required />
+          <input type="date" name="posted_on" defaultValue={defaultDate} readOnly={entryType === "opening_balance"} className={inputClassName} required />
         </Field>
         <Field label="Beskrivning">
           <input name="description" className={inputClassName} maxLength={500} required />

@@ -32,6 +32,28 @@ export type GeneralLedgerAccount = ReportAccount & {
   entries: Array<ReportJournalLine & { amountMinor: number }>;
 };
 
+export const vatBoxDefinitions = [
+  { box: "05", label: "Momspliktig försäljning", accounts: ["3001", "3002", "3003", "3041", "3042", "3043", "3051"] },
+  { box: "10", label: "Utgående moms 25 %", accounts: ["2611"] },
+  { box: "11", label: "Utgående moms 12 %", accounts: ["2621"] },
+  { box: "12", label: "Utgående moms 6 %", accounts: ["2631"] },
+  { box: "20", label: "Inköp av varor från annat EU-land", accounts: ["4056"] },
+  { box: "21", label: "Inköp av tjänster från annat EU-land", accounts: ["4535"] },
+  { box: "22", label: "Inköp av tjänster utanför EU", accounts: ["4531", "4532"] },
+  { box: "30", label: "Utgående moms 25 % vid inköp", accounts: ["2614", "2615"] },
+  { box: "31", label: "Utgående moms 12 % vid inköp", accounts: ["2624", "2625"] },
+  { box: "32", label: "Utgående moms 6 % vid inköp", accounts: ["2634", "2635"] },
+  { box: "35", label: "Försäljning av varor till annat EU-land", accounts: ["3106"] },
+  { box: "36", label: "Försäljning av varor utanför EU", accounts: ["3105"] },
+  { box: "37", label: "Mellanmans försäljning vid trepartshandel", accounts: ["3108"] },
+  { box: "38", label: "Överföring av varor till annat EU-land", accounts: ["3107"] },
+  { box: "39", label: "Försäljning av tjänster till annat EU-land", accounts: ["3308"] },
+  { box: "40", label: "Övrig försäljning av tjänster utomlands", accounts: ["3305"] },
+  { box: "41", label: "Försäljning med omvänd skattskyldighet i Sverige", accounts: ["3231"] },
+  { box: "42", label: "Övrig momsfri försäljning", accounts: ["3044"] },
+  { box: "48", label: "Ingående moms", accounts: ["2641"] },
+] as const;
+
 function inPeriod(line: ReportJournalLine, from?: string | null, to?: string | null) {
   return (!from || line.postedOn >= from) && (!to || line.postedOn <= to);
 }
@@ -87,20 +109,16 @@ export function buildAccountingReports(input: AccountingReportInput) {
   const expenseMinor = expenseRows.reduce((sum, row) => sum + row.amountMinor, 0);
   const resultMinor = incomeMinor - expenseMinor;
 
-  const vatBoxAccounts: Record<string, string[]> = {
-    "05": ["3001", "3002", "3003", "3041", "3042", "3043", "3051"],
-    "10": ["2611"],
-    "11": ["2621"],
-    "12": ["2631"],
-    "48": ["2641"],
-  };
   const vatBoxes = Object.fromEntries(
-    Object.entries(vatBoxAccounts).map(([box, accountNumbers]) => [
-      box,
-      accountNumbers.reduce((sum, number) => sum + (periodTotals.get(number) ?? 0), 0),
+    vatBoxDefinitions.map((definition) => [
+      definition.box,
+      definition.accounts.reduce((sum, number) => sum + (periodTotals.get(number) ?? 0), 0),
     ]),
   );
-  const outputVatMinor = (vatBoxes["10"] ?? 0) + (vatBoxes["11"] ?? 0) + (vatBoxes["12"] ?? 0);
+  const outputVatMinor = ["10", "11", "12", "30", "31", "32"].reduce(
+    (sum, box) => sum + (vatBoxes[box] ?? 0),
+    0,
+  );
   const inputVatMinor = vatBoxes["48"] ?? 0;
 
   const salesByMonth = new Map<string, number>();

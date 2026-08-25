@@ -1,4 +1,4 @@
-import type { buildAccountingReports } from "@/src/lib/hub/accounting";
+import { vatBoxDefinitions, type buildAccountingReports } from "@/src/lib/hub/accounting";
 import { HubCard, StatCard, StatusBadge } from "./ui";
 
 type Reports = ReturnType<typeof buildAccountingReports>;
@@ -83,19 +83,18 @@ export function AccountingReports({ reports }: { reports: Reports }) {
         <HubCard>
           <h3 className="text-lg font-semibold text-[var(--hub-text)]">Momsredovisning</h3>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {[
-              ["05", "Momspliktig försäljning", reports.vat.boxes["05"] ?? 0],
-              ["10", "Utgående moms 25 %", reports.vat.boxes["10"] ?? 0],
-              ["11", "Utgående moms 12 %", reports.vat.boxes["11"] ?? 0],
-              ["12", "Utgående moms 6 %", reports.vat.boxes["12"] ?? 0],
-              ["48", "Ingående moms", reports.vat.boxes["48"] ?? 0],
-            ].map(([box, label, amount]) => (
-              <div key={String(box)} className="rounded-2xl bg-[var(--hub-card-soft)] p-4">
-                <p className="font-mono text-xs text-[var(--hub-accent-strong)]">Ruta {box}</p>
-                <p className="mt-1 text-sm text-[var(--hub-muted)]">{label}</p>
-                <p className="mt-2 font-semibold text-[var(--hub-text)]">{money(Number(amount))}</p>
+            {vatBoxDefinitions.map((definition) => (
+              <div key={definition.box} className="rounded-2xl bg-[var(--hub-card-soft)] p-4">
+                <p className="font-mono text-xs text-[var(--hub-accent-strong)]">Ruta {definition.box}</p>
+                <p className="mt-1 text-sm text-[var(--hub-muted)]">{definition.label}</p>
+                <p className="mt-2 font-semibold text-[var(--hub-text)]">{money(reports.vat.boxes[definition.box] ?? 0)}</p>
               </div>
             ))}
+            <div className="rounded-2xl border border-[var(--hub-accent-strong)]/20 bg-[var(--hub-card-soft)] p-4 sm:col-span-2">
+              <p className="font-mono text-xs text-[var(--hub-accent-strong)]">Ruta 49</p>
+              <p className="mt-1 text-sm text-[var(--hub-muted)]">Moms att betala eller få tillbaka</p>
+              <p className="mt-2 font-semibold text-[var(--hub-text)]">{money(reports.vat.payableMinor)}</p>
+            </div>
           </div>
           <p className="mt-4 text-xs leading-5 text-[var(--hub-muted)]">Kontrollera alltid period, momskoder och Skatteverkets aktuella regler innan deklaration lämnas.</p>
         </HubCard>

@@ -1,6 +1,7 @@
 import { AccountCatalog } from "@/components/hub/account-catalog";
 import { AccountingSetupForm, DraftWorkflowActions } from "@/components/hub/accounting-forms";
 import { AccountingPreview } from "@/components/hub/accounting-preview";
+import { AccountingPeriodControls } from "@/components/hub/accounting-period-controls";
 import { AccountingReports } from "@/components/hub/accounting-reports";
 import { ManualJournalForm } from "@/components/hub/manual-journal-form";
 import { EmptyState, HubCard, HubShell, StatCard, StatusBadge } from "@/components/hub/ui";
@@ -11,6 +12,7 @@ import {
   buildAccountingReports,
 } from "@/src/lib/hub/accounting";
 import { getAccountingOverview } from "@/src/lib/hub-accounting-server";
+import { createCorrectionDraftAction } from "@/app/hub/accounting-actions";
 
 function formatMinor(amountMinor: number | null) {
   return new Intl.NumberFormat("sv-SE", {
@@ -79,6 +81,9 @@ export default async function HubAccountingPage({
     kind: account.kind,
     reviewRequired: account.review_required,
   }));
+  const exportQuery = new URLSearchParams();
+  if (from) exportQuery.set("from", from);
+  if (to) exportQuery.set("to", to);
 
   return (
     <HubShell
@@ -184,6 +189,21 @@ export default async function HubAccountingPage({
         </div>
       </HubCard>
 
+      {overview.fiscalYears[0] ? (
+        <HubCard>
+          <details>
+            <summary className="cursor-pointer text-xl font-semibold text-[var(--hub-text)]">Ingående balans</summary>
+            <div className="mt-5 grid gap-6 xl:grid-cols-[0.65fr_1.35fr]">
+              <div>
+                <p className="text-sm leading-6 text-[var(--hub-muted)]">Registrera saldon som företaget hade när räkenskapsåret började. Datumet låses till räkenskapsårets första dag och underlaget går alltid via granskning.</p>
+                <p className="mt-3 text-xs leading-5 text-[var(--hub-muted)]">Använd en balanserad motpost för eget kapital eller överförda balanser. Endast en ingående balans tillåts per räkenskapsår.</p>
+              </div>
+              <ManualJournalForm organizationId={overview.organization.id} accounts={manualAccounts} canPersist={canPersist} entryType="opening_balance" defaultDate={overview.fiscalYears[0].starts_on} />
+            </div>
+          </details>
+        </HubCard>
+      ) : null}
+
       <HubCard>
         <details>
           <summary className="cursor-pointer text-xl font-semibold text-[var(--hub-text)]">Kontoplan och kontokatalog</summary>
@@ -203,9 +223,24 @@ export default async function HubAccountingPage({
           <label className="grid gap-2 text-sm font-medium text-[var(--hub-text)]">Till datum<input type="date" name="to" defaultValue={to ?? ""} className="min-h-12 rounded-2xl border border-black/10 bg-[var(--hub-input)] px-4" /></label>
           <button type="submit" className="min-h-12 rounded-2xl bg-[var(--hub-panel)] px-5 text-sm font-medium text-[var(--hub-panel-contrast)]">Uppdatera rapporter</button>
         </form>
+        <div className="mt-4 flex flex-wrap gap-3 border-t border-black/8 pt-4">
+          <a href={`/hub/bokforing/export?format=csv&${exportQuery}`} className="rounded-2xl border border-black/10 px-4 py-2.5 text-sm font-medium text-[var(--hub-text)]">Ladda ner CSV</a>
+          <a href={`/hub/bokforing/export?format=sie&${exportQuery}`} className="rounded-2xl border border-black/10 px-4 py-2.5 text-sm font-medium text-[var(--hub-text)]">Ladda ner preliminär SIE4i</a>
+          <p className="self-center text-xs text-[var(--hub-muted)]">Exporten följer samma datumfilter som rapporterna.</p>
+        </div>
       </HubCard>
 
       <AccountingReports reports={accountingReports} />
+
+      <HubCard>
+        <details>
+          <summary className="cursor-pointer text-xl font-semibold text-[var(--hub-text)]">Perioder och låsning</summary>
+          <div className="mt-5">
+            <p className="mb-4 max-w-3xl text-sm leading-6 text-[var(--hub-muted)]">Lås först när periodens underlag är granskat. Åtgärden är medvetet enkelriktad i förhandsversionen för att skydda bokföringen mot efterhandsändringar.</p>
+            <AccountingPeriodControls periods={overview.periods} canConfigure={overview.runtimeEnabled && overview.permissions.canConfigure} />
+          </div>
+        </details>
+      </HubCard>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <HubCard>
@@ -251,6 +286,17 @@ export default async function HubAccountingPage({
                 </div>
                 <p className="mt-2 text-sm font-medium text-[var(--hub-text)]">{entry.description}</p>
                 <p className="mt-1 text-xs text-[var(--hub-muted)]">{entry.posted_on}</p>
+                {overview.permissions.canConfigure ? (
+                  <details className="mt-3 border-t border-black/8 pt-3">
+                    <summary className="cursor-pointer text-xs font-medium text-[var(--hub-accent-strong)]">Skapa rättelseutkast</summary>
+                    <form action={createCorrectionDraftAction} className="mt-3 grid gap-3">
+                      <input type="hidden" name="journal_entry_id" value={entry.id} />
+                      <label className="grid gap-1 text-xs text-[var(--hub-muted)]">Rättelsedatum<input type="date" name="happened_on" className="min-h-11 rounded-xl border border-black/10 bg-[var(--hub-input)] px-3" required /></label>
+                      <label className="grid gap-1 text-xs text-[var(--hub-muted)]">Anledning<input name="reason" maxLength={500} className="min-h-11 rounded-xl border border-black/10 bg-[var(--hub-input)] px-3" required /></label>
+                      <button type="submit" className="min-h-11 rounded-xl border border-black/10 px-3 text-sm font-medium text-[var(--hub-text)]">Skapa rättelse</button>
+                    </form>
+                  </details>
+                ) : null}
               </div>
             )) : (
               <p className="rounded-[1.2rem] bg-[var(--hub-card-soft)] p-4 text-sm leading-6 text-[var(--hub-muted)]">Inga verifikationer har bokförts. Förhandsläget påverkar inte denna lista.</p>

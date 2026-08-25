@@ -243,7 +243,21 @@ export async function saveManualBookkeepingDraftAction(formData: FormData) {
   const clientRequestKey = normalizeIdempotencyKey(
     requireString(formData.get("client_request_key"), "Förfrågningsnyckel"),
   );
-  const { data, error } = await supabase.rpc("save_manual_bookkeeping_draft", {
+  const entryType = formData.get("entry_type") === "opening_balance" ? "opening_balance" : "manual_journal_entry";
+  const rpcResult = entryType === "opening_balance"
+    ? await supabase.rpc("save_special_bookkeeping_draft", {
+      target_organization_id: organization.id,
+      target_client_request_key: `opening-${clientRequestKey}`,
+      target_happened_on: postedOn,
+      target_amount_minor: totalAmountMinor,
+      target_description: description,
+      target_lines: draft.lines,
+      target_note: typeof formData.get("note") === "string" ? String(formData.get("note")).trim().slice(0, 500) : null,
+      target_event_type: "opening_balance",
+      target_original_journal_entry_id: null,
+      target_reason: null,
+    })
+    : await supabase.rpc("save_manual_bookkeeping_draft", {
     target_organization_id: organization.id,
     target_client_request_key: clientRequestKey,
     target_happened_on: postedOn,
@@ -252,6 +266,7 @@ export async function saveManualBookkeepingDraftAction(formData: FormData) {
     target_lines: draft.lines,
     target_note: typeof formData.get("note") === "string" ? String(formData.get("note")).trim().slice(0, 500) : null,
   });
+  const { data, error } = rpcResult;
   if (error || !data) throw new Error("Det manuella bokföringsutkastet kunde inte sparas.");
 
   await logHubActivity({
@@ -260,7 +275,76 @@ export async function saveManualBookkeepingDraftAction(formData: FormData) {
     action: "manual_bookkeeping_draft_created",
     entityType: "bookkeeping_draft",
     entityId: data,
-    description: "En manuell verifikation sparades för granskning.",
+    description: entryType === "opening_balance" ? "En ingående balans sparades för granskning." : "En manuell verifikation sparades för granskning.",
+  });
+  revalidatePath("/hub/bokforing");
+}
+
+export async function lockAccountingPeriodAction(formData: FormData) {
+  requireAccountingRuntime();
+  const { supabase, organization, membership, user } = await requireHubContext();
+  requireAccountingCapability(membership.role, "configure");
+  const periodId = requireString(formData.get("period_id"), "Period");
+  const { error } = await supabase.rpc("lock_accounting_period", {
+    target_organization_id: organization.id,
+    target_period_id: periodId,
+  });
+  if (error) throw new Error("Perioden kunde inte låsas. Kontrollera att alla utkast är hanterade.");
+  await logHubActivity({
+    organizationId: organization.id,
+    userId: user.id,
+    action: "accounting_period_locked",
+    entityType: "accounting_period",
+    entityId: periodId,
+    description: "En bokföringsperiod låstes.",
+  });
+  revalidatePath("/hub/bokforing");
+}
+
+export async function createCorrectionDraftAction(formData: FormData) {
+  requireAccountingRuntime();
+  const { supabase, organization, membership, user } = await requireHubContext();
+  requireAccountingCapability(membership.role, "configure");
+  const journalEntryId = requireString(formData.get("journal_entry_id"), "Originalverifikation");
+  const happenedOn = requireString(formData.get("happened_on"), "Rättelsedatum");
+  const reason = requireString(formData.get("reason"), "Anledning");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(happenedOn) || reason.length > 500) {
+    throw new Error("Rättelsedatum eller anledning är ogiltig.");
+  }
+  const [{ data: entry, error: entryError }, { data: originalLines, error: linesError }] = await Promise.all([
+    supabase.from("journal_entries").select("id, description").eq("organization_id", organization.id).eq("id", journalEntryId).maybeSingle(),
+    supabase.from("journal_lines").select("account_number, debit_minor, credit_minor, description").eq("organization_id", organization.id).eq("journal_entry_id", journalEntryId),
+  ]);
+  if (entryError || linesError || !entry || !originalLines?.length) throw new Error("Originalverifikationen kunde inte läsas.");
+  const lines = originalLines.map((line) => ({
+    accountNumber: line.account_number,
+    accountName: line.account_number,
+    side: line.debit_minor > 0 ? "credit" as const : "debit" as const,
+    amountMinor: line.debit_minor || line.credit_minor,
+    vatCode: null,
+    description: line.description ?? `Rättelse av ${entry.description}`,
+  }));
+  const totalAmountMinor = lines.filter((line) => line.side === "debit").reduce((sum, line) => sum + line.amountMinor, 0);
+  const { data, error } = await supabase.rpc("save_special_bookkeeping_draft", {
+    target_organization_id: organization.id,
+    target_client_request_key: normalizeIdempotencyKey(`correction-${journalEntryId}`),
+    target_happened_on: happenedOn,
+    target_amount_minor: totalAmountMinor,
+    target_description: `Rättelse av ${entry.description}`.slice(0, 500),
+    target_lines: lines,
+    target_note: reason,
+    target_event_type: "correction_entry",
+    target_original_journal_entry_id: journalEntryId,
+    target_reason: reason,
+  });
+  if (error || !data) throw new Error("Rättelseutkastet kunde inte skapas.");
+  await logHubActivity({
+    organizationId: organization.id,
+    userId: user.id,
+    action: "correction_draft_created",
+    entityType: "bookkeeping_draft",
+    entityId: data,
+    description: "Ett rättelseutkast skapades från en bokförd verifikation.",
   });
   revalidatePath("/hub/bokforing");
 }

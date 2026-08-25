@@ -10,6 +10,9 @@ const accounts = [
   { number: "3041", name: "Tjänsteförsäljning", kind: "income" as const },
   { number: "5460", name: "Förbrukningsmaterial", kind: "expense" as const },
   { number: "1220", name: "Inventarier", kind: "asset" as const },
+  { number: "4056", name: "EU-varuinköp", kind: "expense" as const },
+  { number: "2614", name: "Utgående moms omvänd", kind: "liability" as const },
+  { number: "3106", name: "EU-varuförsäljning", kind: "income" as const },
 ];
 
 const lines = [
@@ -51,4 +54,20 @@ test("classifies cash movement and respects report dates", () => {
   assert.equal(bankLedger?.openingMinor, 125_000);
   assert.equal(bankLedger?.periodChangeMinor, -40_000);
   assert.equal(bankLedger?.closingMinor, 85_000);
+});
+
+test("maps EU trade and reverse-charge VAT to the extended VAT return", () => {
+  const report = buildAccountingReports({
+    accounts,
+    lines: [
+      { journalEntryId: "eu-purchase", postedOn: "2026-04-01", accountNumber: "4056", debitMinor: 100_000, creditMinor: 0 },
+      { journalEntryId: "eu-purchase", postedOn: "2026-04-01", accountNumber: "2614", debitMinor: 0, creditMinor: 25_000 },
+      { journalEntryId: "eu-sale", postedOn: "2026-04-02", accountNumber: "3106", debitMinor: 0, creditMinor: 80_000 },
+    ],
+  });
+
+  assert.equal(report.vat.boxes["20"], 100_000);
+  assert.equal(report.vat.boxes["30"], 25_000);
+  assert.equal(report.vat.boxes["35"], 80_000);
+  assert.equal(report.vat.outputVatMinor, 25_000);
 });

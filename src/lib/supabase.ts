@@ -1259,6 +1259,25 @@ export type Database = {
         };
         Returns: string;
       };
+      save_special_bookkeeping_draft: {
+        Args: {
+          target_organization_id: string;
+          target_client_request_key: string;
+          target_happened_on: string;
+          target_amount_minor: number;
+          target_description: string;
+          target_lines: unknown;
+          target_note: string | null;
+          target_event_type: "opening_balance" | "correction_entry";
+          target_original_journal_entry_id?: string | null;
+          target_reason?: string | null;
+        };
+        Returns: string;
+      };
+      lock_accounting_period: {
+        Args: { target_organization_id: string; target_period_id: string };
+        Returns: undefined;
+      };
       approve_bookkeeping_draft: {
         Args: {
           target_organization_id: string;

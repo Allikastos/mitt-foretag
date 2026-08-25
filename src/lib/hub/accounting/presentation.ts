@@ -31,6 +31,10 @@ export function accountingEventLabel(type: SupportedBusinessEventType | string) 
       return "Överföring mellan egna konton";
     case "manual_journal_entry":
       return "Manuell verifikation";
+    case "opening_balance":
+      return "Ingående balans";
+    case "correction_entry":
+      return "Rättelseverifikation";
     default:
       return "Okänd affärshändelse";
   }

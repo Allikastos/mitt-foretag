@@ -297,3 +297,18 @@ test("manual accounting migration preserves review, tenant and append-only bound
   assert.match(migration, /revoke all on function public\.save_manual_bookkeeping_draft[^;]+from public, anon, authenticated/i);
   assert.doesNotMatch(migration, /grant (insert|update|delete) on public\.journal_(entries|lines)/i);
 });
+
+test("period controls preserve append-only corrections and fail-closed locking", () => {
+  const migration = readFileSync(
+    resolve(process.cwd(), "supabase", "migrations", "20260825143000_accounting_period_controls.sql"),
+    "utf8",
+  );
+  assert.match(migration, /save_special_bookkeeping_draft/i);
+  assert.match(migration, /opening_balance/);
+  assert.match(migration, /correction_entry/);
+  assert.match(migration, /link_posted_correction_trigger/i);
+  assert.match(migration, /has unresolved drafts/i);
+  assert.match(migration, /can_manage_org_settings\(target_organization_id\)/i);
+  assert.match(migration, /revoke all on function public\.lock_accounting_period[^;]+from public, anon, authenticated/i);
+  assert.doesNotMatch(migration, /update public\.journal_(entries|lines)/i);
+});
