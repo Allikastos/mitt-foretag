@@ -29,6 +29,8 @@ export function accountingEventLabel(type: SupportedBusinessEventType | string) 
       return "Eget uttag";
     case "transfer_between_own_accounts":
       return "Överföring mellan egna konton";
+    case "manual_journal_entry":
+      return "Manuell verifikation";
     default:
       return "Okänd affärshändelse";
   }

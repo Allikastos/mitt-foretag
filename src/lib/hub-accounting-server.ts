@@ -46,6 +46,8 @@ export async function getAccountingOverview() {
     events: [],
     drafts: [],
     journalEntries: [],
+    reportEntries: [],
+    journalLines: [],
     stats: {
       needsReview: 0,
       readyToPost: 0,
@@ -70,6 +72,8 @@ export async function getAccountingOverview() {
     readyToPostResult,
     postedResult,
     openPeriodsResult,
+    reportEntriesResult,
+    journalLinesResult,
   ] = await Promise.all([
     supabase
       .from("company_accounting_settings")
@@ -84,7 +88,7 @@ export async function getAccountingOverview() {
       .eq("organization_id", organization.id)
       .eq("is_active", true)
       .order("account_number", { ascending: true })
-      .limit(30),
+      .limit(2_000),
     supabase
       .from("fiscal_years")
       .select("id, organization_id, starts_on, ends_on, status, created_at, updated_at")
@@ -134,6 +138,17 @@ export async function getAccountingOverview() {
       .select("id", { count: "exact", head: true })
       .eq("organization_id", organization.id)
       .eq("status", "open"),
+    supabase
+      .from("journal_entries")
+      .select("id, organization_id, journal_series, journal_number, posted_on, description")
+      .eq("organization_id", organization.id)
+      .order("posted_on", { ascending: true })
+      .limit(2_000),
+    supabase
+      .from("journal_lines")
+      .select("id, organization_id, journal_entry_id, account_number, debit_minor, credit_minor")
+      .eq("organization_id", organization.id)
+      .limit(5_000),
   ]);
 
   const errors = [
@@ -148,6 +163,8 @@ export async function getAccountingOverview() {
     readyToPostResult.error,
     postedResult.error,
     openPeriodsResult.error,
+    reportEntriesResult.error,
+    journalLinesResult.error,
   ];
   const firstError = errors.find(Boolean);
 
@@ -169,6 +186,8 @@ export async function getAccountingOverview() {
     events: eventsResult.data ?? [],
     drafts: draftsResult.data ?? [],
     journalEntries: journalEntriesResult.data ?? [],
+    reportEntries: reportEntriesResult.data ?? [],
+    journalLines: journalLinesResult.data ?? [],
     stats: {
       needsReview: needsReviewResult.count ?? 0,
       readyToPost: readyToPostResult.count ?? 0,

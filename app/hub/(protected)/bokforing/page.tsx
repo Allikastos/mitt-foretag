@@ -1,10 +1,14 @@
+import { AccountCatalog } from "@/components/hub/account-catalog";
 import { AccountingSetupForm, DraftWorkflowActions } from "@/components/hub/accounting-forms";
 import { AccountingPreview } from "@/components/hub/accounting-preview";
+import { AccountingReports } from "@/components/hub/accounting-reports";
+import { ManualJournalForm } from "@/components/hub/manual-journal-form";
 import { EmptyState, HubCard, HubShell, StatCard, StatusBadge } from "@/components/hub/ui";
 import {
   accountingEventLabel,
   accountingStatusLabel,
   accountingStatusTone,
+  buildAccountingReports,
 } from "@/src/lib/hub/accounting";
 import { getAccountingOverview } from "@/src/lib/hub-accounting-server";
 
@@ -28,7 +32,14 @@ function descriptionFromFacts(facts: unknown) {
   return "Ingen beskrivning";
 }
 
-export default async function HubAccountingPage() {
+export default async function HubAccountingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string; to?: string }>;
+}) {
+  const filters = await searchParams;
+  const from = /^\d{4}-\d{2}-\d{2}$/.test(filters.from ?? "") ? filters.from : null;
+  const to = /^\d{4}-\d{2}-\d{2}$/.test(filters.to ?? "") ? filters.to : null;
   const overview = await getAccountingOverview();
   const isConfigured = Boolean(overview.settings?.accounting_enabled);
   const canPersist =
@@ -37,11 +48,42 @@ export default async function HubAccountingPage() {
     isConfigured &&
     overview.permissions.canCreateDraft;
   const eventsById = new Map(overview.events.map((event) => [event.id, event]));
+  const reportEntriesById = new Map(
+    overview.reportEntries.map((entry) => [entry.id, entry]),
+  );
+  const reportAccounts = overview.accounts.map((account) => ({
+    number: account.account_number,
+    name: account.name,
+    kind: account.kind,
+  }));
+  const accountingReports = buildAccountingReports({
+    accounts: reportAccounts,
+    lines: overview.journalLines.flatMap((line) => {
+      const entry = reportEntriesById.get(line.journal_entry_id);
+      return entry ? [{
+        journalEntryId: line.journal_entry_id,
+        journalLabel: `${entry.journal_series}${entry.journal_number}`,
+        description: entry.description,
+        postedOn: entry.posted_on,
+        accountNumber: line.account_number,
+        debitMinor: line.debit_minor,
+        creditMinor: line.credit_minor,
+      }] : [];
+    }),
+    from,
+    to,
+  });
+  const manualAccounts = overview.accounts.map((account) => ({
+    number: account.account_number,
+    name: account.name,
+    kind: account.kind,
+    reviewRequired: account.review_required,
+  }));
 
   return (
     <HubShell
       title="Bokföring – förhandsversion"
-      description="Förhandsgranska enkla svenska affärshändelser. Funktionen är inte redo för faktisk bokföring."
+      description="Skapa manuella verifikationer, följ kontoplanen och granska företagets ekonomiska rapporter. Funktionen är fortfarande en förhandsversion."
     >
       <section className="overflow-hidden rounded-[1.8rem] bg-[var(--hub-panel)] text-[var(--hub-panel-contrast)] shadow-[0_32px_80px_-54px_rgba(0,0,0,0.65)]">
         <div className="grid gap-7 p-6 md:p-8 xl:grid-cols-[1.35fr_0.65fr] xl:items-end">
@@ -66,9 +108,9 @@ export default async function HubAccountingPage() {
             </div>
           </div>
           <div className="rounded-[1.4rem] border border-white/10 bg-white/[0.07] p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-[var(--hub-accent)]">Avgränsad första version</p>
-            <p className="mt-3 text-lg font-semibold">Enskild firma</p>
-            <p className="mt-1 text-sm leading-6 text-[var(--hub-panel-muted)]">Endast enskild firma, kontantmetoden, kalenderår och SEK. Lön, lån, EU-handel, periodisering och bokslut stoppas.</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-[var(--hub-accent)]">Automatisk hjälp – avgränsad</p>
+            <p className="mt-3 text-lg font-semibold">Sju säkra standardregler</p>
+            <p className="mt-1 text-sm leading-6 text-[var(--hub-panel-muted)]">De automatiska reglerna stöder ännu bara enskild firma, kontantmetoden, kalenderår och SEK. Manuell bokföring och egna konton finns separat nedan.</p>
           </div>
         </div>
       </section>
@@ -130,6 +172,40 @@ export default async function HubAccountingPage() {
           </HubCard>
         </div>
       </div>
+
+      <HubCard>
+        <div className="grid gap-6 xl:grid-cols-[0.65fr_1.35fr]">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--hub-accent-strong)]">Manuell bokföring</p>
+            <h2 className="mt-2 text-xl font-semibold text-[var(--hub-text)]">Skapa fri verifikation</h2>
+            <p className="mt-3 text-sm leading-6 text-[var(--hub-muted)]">Välj själv konton, debet, kredit och belopp. Hubben kontrollerar att verifikationen balanserar men bedömer inte om ditt kontoval är skattemässigt korrekt.</p>
+          </div>
+          <ManualJournalForm organizationId={overview.organization.id} accounts={manualAccounts} canPersist={canPersist} />
+        </div>
+      </HubCard>
+
+      <HubCard>
+        <details>
+          <summary className="cursor-pointer text-xl font-semibold text-[var(--hub-text)]">Kontoplan och kontokatalog</summary>
+          <div className="mt-5 grid gap-6 xl:grid-cols-[0.55fr_1.45fr]">
+            <div>
+              <p className="text-sm leading-6 text-[var(--hub-muted)]">Aktivera de konton företaget behöver. Katalogen täcker vanliga tillgångar, skulder, eget kapital, intäkter, kostnader, moms, personal och finansiella poster.</p>
+              <p className="mt-3 text-xs leading-5 text-[var(--hub-muted)]">Katalogen är en praktisk startpunkt och inte en ersättning för den officiella årliga BAS-kontoplanen eller professionell rådgivning.</p>
+            </div>
+            <AccountCatalog activeNumbers={overview.accounts.map((account) => account.account_number)} canConfigure={canPersist && overview.permissions.canConfigure} />
+          </div>
+        </details>
+      </HubCard>
+
+      <HubCard>
+        <form method="get" action="/hub/bokforing" className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+          <label className="grid gap-2 text-sm font-medium text-[var(--hub-text)]">Från datum<input type="date" name="from" defaultValue={from ?? ""} className="min-h-12 rounded-2xl border border-black/10 bg-[var(--hub-input)] px-4" /></label>
+          <label className="grid gap-2 text-sm font-medium text-[var(--hub-text)]">Till datum<input type="date" name="to" defaultValue={to ?? ""} className="min-h-12 rounded-2xl border border-black/10 bg-[var(--hub-input)] px-4" /></label>
+          <button type="submit" className="min-h-12 rounded-2xl bg-[var(--hub-panel)] px-5 text-sm font-medium text-[var(--hub-panel-contrast)]">Uppdatera rapporter</button>
+        </form>
+      </HubCard>
+
+      <AccountingReports reports={accountingReports} />
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <HubCard>

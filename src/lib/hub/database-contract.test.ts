@@ -281,3 +281,19 @@ test("Phase C requires a validated approval workflow for accounting writes", () 
     /Managers can manage (business_events|bookkeeping_drafts)/i,
   );
 });
+
+test("manual accounting migration preserves review, tenant and append-only boundaries", () => {
+  const migration = readFileSync(
+    resolve(process.cwd(), "supabase", "migrations", "20260825111757_manual_accounting_reports.sql"),
+    "utf8",
+  );
+
+  assert.match(migration, /manual_journal_entry/);
+  assert.match(migration, /can_manage_org_data\(target_organization_id\)/i);
+  assert.match(migration, /can_manage_org_settings\(target_organization_id\)/i);
+  assert.match(migration, /debit_total <> credit_total/i);
+  assert.match(migration, /pg_advisory_xact_lock/i);
+  assert.match(migration, /status[^;]+needs_review/i);
+  assert.match(migration, /revoke all on function public\.save_manual_bookkeeping_draft[^;]+from public, anon, authenticated/i);
+  assert.doesNotMatch(migration, /grant (insert|update|delete) on public\.journal_(entries|lines)/i);
+});

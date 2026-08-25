@@ -1238,6 +1238,27 @@ export type Database = {
         };
         Returns: string;
       };
+      save_manual_bookkeeping_draft: {
+        Args: {
+          target_organization_id: string;
+          target_client_request_key: string;
+          target_happened_on: string;
+          target_amount_minor: number;
+          target_description: string;
+          target_lines: unknown;
+          target_note?: string | null;
+        };
+        Returns: string;
+      };
+      activate_accounting_account: {
+        Args: {
+          target_organization_id: string;
+          target_account_number: string;
+          target_name: string;
+          target_kind: "asset" | "liability" | "equity" | "income" | "expense";
+        };
+        Returns: string;
+      };
       approve_bookkeeping_draft: {
         Args: {
           target_organization_id: string;

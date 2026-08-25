@@ -4,11 +4,13 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import {
   accountingEventTypes,
+  buildManualPostingResult,
   buildAccountingEventInput,
   createBookkeepingDraft,
   requireAccountingCapability,
   type SupportedBusinessEventType,
 } from "@/src/lib/hub/accounting";
+import { getCatalogAccount } from "@/src/lib/hub/accounting/catalog";
 import { hubFeatureFlags } from "@/src/lib/hub/feature-flags";
 import { normalizeIdempotencyKey } from "@/src/lib/hub/idempotency";
 import { logHubActivity, requireHubContext } from "@/src/lib/hub-server";
@@ -35,6 +37,31 @@ function parseEventType(value: FormDataEntryValue | null) {
   }
 
   return eventType as SupportedBusinessEventType;
+}
+
+function parseManualLines(value: FormDataEntryValue | null) {
+  if (typeof value !== "string" || value.length > 25_000) {
+    throw new Error("Konteringsraderna är ogiltiga.");
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    throw new Error("Konteringsraderna kunde inte läsas.");
+  }
+
+  if (!Array.isArray(parsed)) throw new Error("Konteringsraderna är ogiltiga.");
+  return parsed.map((line) => {
+    if (!line || typeof line !== "object") throw new Error("En konteringsrad är ogiltig.");
+    const candidate = line as Record<string, unknown>;
+    return {
+      accountNumber: String(candidate.accountNumber ?? ""),
+      side: String(candidate.side ?? "") as "debit" | "credit",
+      amountSek: String(candidate.amountSek ?? ""),
+      description: String(candidate.description ?? ""),
+    };
+  });
 }
 
 export async function initializeAccountingMvpAction(formData: FormData) {
@@ -179,6 +206,120 @@ export async function postBookkeepingDraftAction(formData: FormData) {
     entityType: "journal_entry",
     entityId: data,
     description: "En verifierad verifikation bokfördes i serie A.",
+  });
+  revalidatePath("/hub/bokforing");
+}
+
+export async function saveManualBookkeepingDraftAction(formData: FormData) {
+  requireAccountingRuntime();
+  const { supabase, organization, membership, user } = await requireHubContext();
+  requireAccountingCapability(membership.role, "create_draft");
+  const postedOn = requireString(formData.get("posted_on"), "Verifikationsdatum");
+  const description = requireString(formData.get("description"), "Beskrivning");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(postedOn) || description.length > 500) {
+    throw new Error("Datum eller beskrivning är ogiltig.");
+  }
+
+  const { data: activeAccounts, error: accountsError } = await supabase
+    .from("accounting_accounts")
+    .select("account_number, name, kind, review_required")
+    .eq("organization_id", organization.id)
+    .eq("is_active", true)
+    .limit(2_000);
+  if (accountsError) throw new Error("Företagets kontoplan kunde inte läsas.");
+
+  const draft = buildManualPostingResult(
+    parseManualLines(formData.get("lines_json")),
+    (activeAccounts ?? []).map((item) => ({
+      number: item.account_number,
+      name: item.name,
+      kind: item.kind,
+      reviewRequired: item.review_required,
+    })),
+  );
+  const totalAmountMinor = draft.lines
+    .filter((line) => line.side === "debit")
+    .reduce((sum, line) => sum + line.amountMinor, 0);
+  const clientRequestKey = normalizeIdempotencyKey(
+    requireString(formData.get("client_request_key"), "Förfrågningsnyckel"),
+  );
+  const { data, error } = await supabase.rpc("save_manual_bookkeeping_draft", {
+    target_organization_id: organization.id,
+    target_client_request_key: clientRequestKey,
+    target_happened_on: postedOn,
+    target_amount_minor: totalAmountMinor,
+    target_description: description,
+    target_lines: draft.lines,
+    target_note: typeof formData.get("note") === "string" ? String(formData.get("note")).trim().slice(0, 500) : null,
+  });
+  if (error || !data) throw new Error("Det manuella bokföringsutkastet kunde inte sparas.");
+
+  await logHubActivity({
+    organizationId: organization.id,
+    userId: user.id,
+    action: "manual_bookkeeping_draft_created",
+    entityType: "bookkeeping_draft",
+    entityId: data,
+    description: "En manuell verifikation sparades för granskning.",
+  });
+  revalidatePath("/hub/bokforing");
+}
+
+export async function activateAccountingAccountAction(formData: FormData) {
+  requireAccountingRuntime();
+  const { supabase, organization, membership, user } = await requireHubContext();
+  requireAccountingCapability(membership.role, "configure");
+  const accountNumber = requireString(formData.get("account_number"), "Konto");
+  const selected = getCatalogAccount(accountNumber);
+  if (!selected) throw new Error("Kontot finns inte i den granskade startkatalogen.");
+
+  const { error } = await supabase.rpc("activate_accounting_account", {
+    target_organization_id: organization.id,
+    target_account_number: selected.number,
+    target_name: selected.name,
+    target_kind: selected.kind,
+  });
+  if (error) throw new Error("Kontot kunde inte läggas till i företagets kontoplan.");
+
+  await logHubActivity({
+    organizationId: organization.id,
+    userId: user.id,
+    action: "accounting_account_activated",
+    entityType: "accounting_account",
+    entityId: organization.id,
+    description: `Konto ${selected.number} lades till i kontoplanen.`,
+  });
+  revalidatePath("/hub/bokforing");
+}
+
+export async function createCustomAccountingAccountAction(formData: FormData) {
+  requireAccountingRuntime();
+  const { supabase, organization, membership, user } = await requireHubContext();
+  requireAccountingCapability(membership.role, "configure");
+  const accountNumber = requireString(formData.get("account_number"), "Kontonummer");
+  const name = requireString(formData.get("account_name"), "Kontonamn");
+  const kind = requireString(formData.get("account_kind"), "Kontotyp");
+  const allowedKinds = new Set(["asset", "liability", "equity", "income", "expense"]);
+
+  if (!/^\d{4}$/.test(accountNumber) || name.length > 120 || !allowedKinds.has(kind)) {
+    throw new Error("Kontonummer, namn eller kontotyp är ogiltig.");
+  }
+
+  const { error } = await supabase.rpc("activate_accounting_account", {
+    target_organization_id: organization.id,
+    target_account_number: accountNumber,
+    target_name: name,
+    target_kind: kind as "asset" | "liability" | "equity" | "income" | "expense",
+  });
+  if (error) throw new Error("Det egna kontot kunde inte läggas till i kontoplanen.");
+
+  await logHubActivity({
+    organizationId: organization.id,
+    userId: user.id,
+    action: "custom_accounting_account_created",
+    entityType: "accounting_account",
+    entityId: organization.id,
+    description: `Eget konto ${accountNumber} lades till i kontoplanen.`,
   });
   revalidatePath("/hub/bokforing");
 }
