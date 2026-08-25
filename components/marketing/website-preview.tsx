@@ -66,9 +66,9 @@ function NordformPreview({ compact }: { compact: boolean }) {
           <span className="mt-5 inline-flex bg-[#78d6c6] px-3 py-2 text-[9px] font-bold tracking-[0.14em] text-[#0d1720] uppercase">Boka ett första möte →</span>
         </div>
         <div className="flex flex-col justify-end border-l border-white/20 pl-4">
-          <span className="font-mono text-[8px] text-white/45">UPPDRAG 04/26</span>
-          <span className={`${compact ? "mt-2 text-3xl" : "mt-4 text-5xl"} font-light text-[#78d6c6]`}>+18%</span>
-          <span className="mt-1 text-[8px] leading-4 tracking-[0.12em] uppercase text-white/55">Kortare ledtid från beslut till effekt</span>
+          <span className="font-mono text-[8px] text-white/45">ARBETSSÄTT / 01</span>
+          <span className={`${compact ? "mt-2 text-xl" : "mt-4 text-3xl"} font-light text-[#78d6c6]`}>Klarhet</span>
+          <span className="mt-1 text-[8px] leading-4 tracking-[0.12em] uppercase text-white/55">Från komplexitet till gemensam riktning</span>
         </div>
       </div>
       {!compact ? <div className="absolute right-7 bottom-7 h-16 w-32 bg-cover bg-center opacity-50 grayscale" style={{ backgroundImage: `url(${demoImage.nordform})` }} /> : null}

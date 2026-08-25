@@ -42,7 +42,7 @@ export function PenseldragSite() {
             </div>
             <div className="mt-10 flex flex-wrap items-center gap-6">
               <a href="#projekt" className="inline-flex items-center gap-3 bg-[#a45134] px-6 py-4 text-sm font-bold text-white">Se våra projekt <span aria-hidden="true">↓</span></a>
-              <span className="text-xs font-bold tracking-[0.12em] uppercase">4,9 / 5 från 86 omdömen</span>
+              <span className="text-xs font-bold tracking-[0.12em] uppercase">Varsamt förarbete · tydlig dialog</span>
             </div>
             <span className="pointer-events-none absolute -bottom-5 left-24 h-20 w-72 -rotate-3 rounded-[50%] border-[14px] border-[#b65f3b]/15" />
           </div>
@@ -113,15 +113,15 @@ export function NordformSite() {
           <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,.13)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.13)_1px,transparent_1px)] [background-size:80px_80px]" />
           <div className="relative grid gap-14 lg:grid-cols-[1.35fr_.65fr]">
             <div>
-              <p className="font-mono text-[10px] tracking-[0.2em] text-[#78d6c6] uppercase">Management consulting · Stockholm / Norden</p>
+              <p className="font-mono text-[10px] tracking-[0.2em] text-[#78d6c6] uppercase">Strategi · organisation · genomförande</p>
               <h1 className="mt-8 max-w-5xl text-6xl leading-[.9] font-semibold tracking-[-0.06em] sm:text-7xl lg:text-[7.5rem]">Klarhet för beslut som formar <span className="text-[#78d6c6]">nästa steg.</span></h1>
               <div className="mt-12 flex flex-wrap items-center gap-6"><a href="#expertis" className="bg-[#edf3f4] px-6 py-4 text-xs font-bold tracking-[0.14em] text-[#0d1720] uppercase">Utforska vår metod ↓</a><p className="max-w-xs text-xs leading-6 text-white/50">Strategi, organisation och genomförande för ledningsgrupper i förändring.</p></div>
             </div>
             <aside className="flex flex-col justify-end border-l border-white/20 pl-7">
-              <span className="font-mono text-[10px] text-white/40">SIGNAL / 2026.04</span>
-              <span className="mt-8 text-7xl font-light text-[#78d6c6]">67%</span>
-              <p className="mt-3 max-w-xs text-sm leading-6 text-white/55">av strategiska initiativ tappar fart när ansvar och beslutsrytm förblir otydliga.</p>
-              <div className="mt-8 h-1 w-full bg-white/10"><div className="h-full w-2/3 bg-[#78d6c6]" /></div>
+              <span className="font-mono text-[10px] text-white/40">ARBETSSÄTT / 01</span>
+              <span className="mt-8 text-5xl font-light text-[#78d6c6]">Fokus</span>
+              <p className="mt-3 max-w-xs text-sm leading-6 text-white/55">Vi gör ansvar, beslutsvägar och nästa prioritering tydliga innan genomförandet börjar.</p>
+              <div className="mt-8 h-1 w-full bg-white/10"><div className="h-full w-1/2 bg-[#78d6c6]" /></div>
             </aside>
           </div>
         </section>
@@ -135,7 +135,7 @@ export function NordformSite() {
         </section>
 
         <section id="case" className="bg-[#edf3f4] px-5 py-20 text-[#0d1720] md:px-10 lg:px-16">
-          <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr]"><div><p className="font-mono text-[10px] tracking-[0.2em] text-[#277a6e] uppercase">Case 04 / Industribolag</p><h2 className="mt-6 text-5xl leading-[.95] font-semibold tracking-[-0.05em] md:text-7xl">Från nio initiativ till tre prioriteringar.</h2></div><div className="grid gap-px bg-[#0d1720]/15 sm:grid-cols-3">{[["−42%","Färre parallella initiativ"],["+18%","Kortare beslutsledtid"],["12 v","Till ny styrmodell"]].map(([value,label]) => <div key={value} className="bg-[#edf3f4] p-7"><span className="text-5xl font-light text-[#277a6e]">{value}</span><p className="mt-12 text-xs font-bold tracking-[0.12em] uppercase">{label}</p></div>)}</div></div>
+          <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr]"><div><p className="font-mono text-[10px] tracking-[0.2em] text-[#277a6e] uppercase">Exempeluppdrag / Industribolag</p><h2 className="mt-6 text-5xl leading-[.95] font-semibold tracking-[-0.05em] md:text-7xl">Från splittrade initiativ till gemensam riktning.</h2></div><div className="grid gap-px bg-[#0d1720]/15 sm:grid-cols-3">{[["Fokus","Prioriteringarna samlas"],["Rytm","Besluten följs upp"],["Ansvar","Mandaten blir tydliga"]].map(([value,label]) => <div key={value} className="bg-[#edf3f4] p-7"><span className="text-3xl font-light text-[#277a6e]">{value}</span><p className="mt-12 text-xs font-bold tracking-[0.12em] uppercase">{label}</p></div>)}</div></div>
           <div className="mt-12 min-h-72 bg-cover bg-center grayscale" style={{ backgroundImage: `linear-gradient(90deg,rgba(13,23,32,.85),rgba(13,23,32,.1)),url(${images.nordformTeam})` }} />
         </section>
 

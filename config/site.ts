@@ -17,10 +17,10 @@ export const SITE_CONFIG = {
     serviceDetails: "Se paketet",
     readArticle: "Läs artikel",
   },
-  legalNotice: `${BRAND_NAME} är en personlig webbstudio för företag i Sverige och Norden. Alla priser på webbplatsen anges exklusive moms.`,
+  legalNotice: `Hela processen kan genomföras digitalt, oavsett var ditt företag finns. Alla priser på webbplatsen anges exklusive moms.`,
   contact: {
     email: "kontakt@alturanova.se",
-    phoneDisplay: "076-0218499",
+    phoneDisplay: "076-021 84 99",
     phoneHref: "tel:+46760218499",
     country: "Sverige",
   },

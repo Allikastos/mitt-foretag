@@ -22,6 +22,14 @@ export function createMetadata(
     openGraph: {
       title: `${title} | ${SITE_CONFIG.name}`,
       description,
+      images: [
+        {
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: `${SITE_CONFIG.name} - ${SITE_CONFIG.tagline}`,
+        },
+      ],
       locale: "sv_SE",
       type: options.type || "website",
       siteName: SITE_CONFIG.name,
@@ -31,6 +39,7 @@ export function createMetadata(
       card: "summary_large_image",
       title: `${title} | ${SITE_CONFIG.name}`,
       description,
+      images: ["/twitter-image"],
     },
   };
 }

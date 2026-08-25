@@ -9,6 +9,13 @@ export const metadata: Metadata = {
   },
   description: SITE_CONFIG.description,
   metadataBase: new URL(SITE_CONFIG.url),
+  openGraph: {
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: `${SITE_CONFIG.name} - ${SITE_CONFIG.tagline}` }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/twitter-image"],
+  },
 };
 
 export default function RootLayout({
@@ -23,7 +30,6 @@ export default function RootLayout({
     url: SITE_CONFIG.url,
     email: SITE_CONFIG.contact.email,
     telephone: SITE_CONFIG.contact.phoneDisplay,
-    areaServed: [SITE_CONFIG.contact.country, "Norden"],
   };
   const websiteSchema = {
     "@context": "https://schema.org",
