@@ -7,8 +7,8 @@ import { createMetadata } from "@/lib/metadata";
 import { demoProjects, processSteps, services } from "@/lib/site";
 
 export const metadata = createMetadata(
-  "Moderna hemsidor för företag",
-  "Professionella och mobilanpassade hemsidor för företag från 4 995 kr till fast pris.",
+  "Hemsidor för småföretag till fast pris",
+  "Professionella, snabba och mobilanpassade hemsidor för småföretag med personlig kontakt och tydligt fast pris.",
   { pathname: "/" }
 );
 
@@ -37,10 +37,10 @@ export default function HomePage() {
                 <span className="h-2 w-2 rounded-full bg-[#e86f44]" /> Din personliga webbstudio
               </div>
               <h1 className="mt-7 text-5xl font-semibold leading-[0.95] tracking-[-0.065em] text-[#173f35] text-balance md:text-7xl lg:text-[5.2rem]">
-                Behöver ditt företag en <span className="text-[#e86f44]">modern hemsida?</span>
+                Professionella hemsidor för småföretag <span className="text-[#e86f44]">– till fast pris</span>
               </h1>
               <p className="mt-7 max-w-xl text-lg leading-8 text-[#5c6d65] md:text-xl">
-                Jag bygger professionella och mobilanpassade hemsidor för företag, från 4 995 kr till fast pris. Hela processen sker digitalt, oavsett var ditt företag finns.
+                Jag bygger moderna, snabba och mobilanpassade företagshemsidor med personlig kontakt genom hela processen.
               </p>
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <Link href="/kontakt" className="inline-flex items-center justify-center rounded-full bg-[#e86f44] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_20px_35px_-20px_rgba(156,66,35,.7)] transition hover:-translate-y-0.5 hover:bg-[#d95f35]">Få ett kostnadsfritt förslag <span aria-hidden="true" className="ml-2">→</span></Link>
@@ -97,9 +97,31 @@ export default function HomePage() {
             {demoProjects.map((project) => (
               <article key={project.slug}>
                 <WebsitePreview {...project} compact />
-                <div className="mt-4 flex items-center justify-between px-1"><div><p className="text-xs font-bold tracking-[0.16em] text-[#e86f44] uppercase">{project.label}</p><h3 className="mt-1 font-semibold text-[#173f35]">{project.name}</h3></div><span className="text-sm text-[#617169]">{project.industry}</span></div>
+                <div className="mt-4 flex items-center justify-between gap-4 px-1"><div><p className="text-xs font-bold tracking-[0.16em] text-[#e86f44] uppercase">{project.label}</p><h3 className="mt-1 font-semibold text-[#173f35]">{project.name}</h3></div><Link href={project.industryHref} className="text-right text-sm text-[#617169] underline decoration-[#e86f44]/60 underline-offset-4">{project.industry}</Link></div>
               </article>
             ))}
+          </div>
+        </SectionContainer>
+      </section>
+
+      <section className="py-16 md:py-24">
+        <SectionContainer>
+          <div className="grid gap-6 rounded-[2.5rem] border border-[#173f35]/10 bg-[#fffdf8] p-7 md:p-10 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:gap-14">
+            <div>
+              <p className="text-xs font-bold tracking-[0.2em] text-[#e86f44] uppercase">Hemsida till företag</p>
+              <h2 className="mt-5 text-4xl font-semibold tracking-[-0.05em] text-[#173f35] text-balance md:text-5xl">
+                En företagshemsida som är tydlig före den är avancerad.
+              </h2>
+              <p className="mt-5 text-base leading-8 text-[#617169]">
+                Varje sida byggs kring vad kunderna behöver förstå och göra. Du får en genomarbetad struktur, mobilanpassning och grundläggande SEO inom en tydligt beskriven omfattning och till fast pris.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Link href="/hemsida-for-malare" className="rounded-[1.35rem] bg-[#eef2ec] p-5 text-sm font-semibold text-[#173f35] transition hover:bg-[#e5ebe4]">Hemsida för målare <span aria-hidden="true">→</span></Link>
+              <Link href="/hemsida-for-konsultbolag" className="rounded-[1.35rem] bg-[#eef2ec] p-5 text-sm font-semibold text-[#173f35] transition hover:bg-[#e5ebe4]">Hemsida för konsultbolag <span aria-hidden="true">→</span></Link>
+              <Link href="/hemsida-for-salong" className="rounded-[1.35rem] bg-[#eef2ec] p-5 text-sm font-semibold text-[#173f35] transition hover:bg-[#e5ebe4]">Hemsida för salong <span aria-hidden="true">→</span></Link>
+              <Link href="/blogg" className="rounded-[1.35rem] bg-[#173f35] p-5 text-sm font-semibold text-white transition hover:bg-[#245448]">Guider inför webbprojektet <span aria-hidden="true">→</span></Link>
+            </div>
           </div>
         </SectionContainer>
       </section>
