@@ -297,7 +297,7 @@ export default async function HubCustomerDetailPage({
             </HubCard>
           ) : (
             <>
-              <SalesValidationActivityForm customerId={detail.customer.id} />
+              <SalesValidationActivityForm customer={detail.customer} />
               <CustomerForm customer={detail.customer} />
               <ContactForm customerId={detail.customer.id} />
             </>

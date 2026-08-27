@@ -22,6 +22,7 @@ export const hubNavAreas: readonly HubNavArea[] = [
     items: [
       { href: "/hub/kunder", label: "Kunder", compactLabel: "KU" },
       { href: "/hub/uppgifter", label: "Uppgifter", compactLabel: "UP" },
+      { href: "/hub/mal", label: "Mål", compactLabel: "MÅ" },
     ],
   },
   {

@@ -6,6 +6,7 @@ export const HUB_MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 export const customerStatuses = ["lead", "active", "inactive"] as const;
 export const taskStatuses = ["todo", "in_progress", "waiting", "done"] as const;
 export const taskPriorities = ["low", "medium", "high"] as const;
+export const goalStatuses = ["active", "paused", "completed"] as const;
 export const invoiceStatuses = [
   "draft",
   "sent",
@@ -46,6 +47,7 @@ export type OrganizationMember =
 export type Customer = Database["public"]["Tables"]["customers"]["Row"];
 export type Contact = Database["public"]["Tables"]["contacts"]["Row"];
 export type Task = Database["public"]["Tables"]["tasks"]["Row"];
+export type BusinessGoal = Database["public"]["Tables"]["business_goals"]["Row"];
 export type DocumentRecord = Database["public"]["Tables"]["documents"]["Row"];
 export type Invoice = Database["public"]["Tables"]["invoices"]["Row"];
 export type InvoiceLine = Database["public"]["Tables"]["invoice_lines"]["Row"];
@@ -182,6 +184,27 @@ export function priorityLabel(priority: Task["priority"]) {
     default:
       return priority;
   }
+}
+
+export function goalStatusLabel(status: BusinessGoal["status"]) {
+  switch (status) {
+    case "active":
+      return "Aktivt";
+    case "paused":
+      return "Pausat";
+    case "completed":
+      return "Uppnått";
+    default:
+      return status;
+  }
+}
+
+export function goalProgress(goal: Pick<BusinessGoal, "current_value" | "target_value">) {
+  const current = Number(goal.current_value);
+  const target = Number(goal.target_value);
+
+  if (!Number.isFinite(current) || !Number.isFinite(target) || target <= 0) return 0;
+  return Math.min(100, Math.max(0, Math.round((current / target) * 100)));
 }
 
 export function emailProviderLabel(provider: EmailConnection["provider"]) {

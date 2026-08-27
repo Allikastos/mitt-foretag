@@ -43,6 +43,7 @@ export type CustomerVisibility = "organization" | "owners_only";
 export type PreferredContactMethod = "email" | "phone" | "meeting" | "none";
 export type TaskStatus = "todo" | "in_progress" | "waiting" | "done";
 export type TaskPriority = "low" | "medium" | "high";
+export type GoalStatus = "active" | "paused" | "completed";
 export type DocumentCategory =
   | "receipt"
   | "supplier_invoice"
@@ -230,6 +231,21 @@ export type TaskRow = {
   status: TaskStatus;
   priority: TaskPriority;
   due_date: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type BusinessGoalRow = {
+  id: string;
+  organization_id: string;
+  created_by: string | null;
+  title: string;
+  description: string | null;
+  target_value: number | string;
+  current_value: number | string;
+  unit: string;
+  due_date: string | null;
+  status: GoalStatus;
   created_at: string;
   updated_at: string;
 };
@@ -707,6 +723,25 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<TaskRow>;
+        Relationships: [];
+      };
+      business_goals: {
+        Row: BusinessGoalRow;
+        Insert: {
+          id?: string;
+          organization_id: string;
+          created_by?: string | null;
+          title: string;
+          description?: string | null;
+          target_value: number | string;
+          current_value?: number | string;
+          unit?: string;
+          due_date?: string | null;
+          status?: GoalStatus;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<BusinessGoalRow>;
         Relationships: [];
       };
       documents: {

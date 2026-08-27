@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import {
   DocumentUploadForm,
+  DeleteInvoiceLineForm,
   InvoiceForm,
   InvoiceLineForm,
   InvoiceStatusForm,
@@ -108,6 +109,17 @@ export default async function HubInvoiceDetailPage({
                     <p className="mt-2 text-sm text-[#6B6B6B]">
                       {line.quantity} x {formatCurrency(line.unit_price)} • Moms {line.vat_rate}%
                     </p>
+                    {!isLocked && context.membership.role !== "viewer" ? (
+                      <details className="mt-3 border-t border-black/8 pt-3">
+                        <summary className="cursor-pointer text-sm font-medium text-[var(--hub-text)]">
+                          Redigera rad
+                        </summary>
+                        <div className="mt-3 space-y-3">
+                          <InvoiceLineForm invoiceId={detail.invoice.id} line={line} />
+                          <DeleteInvoiceLineForm invoiceId={detail.invoice.id} lineId={line.id} />
+                        </div>
+                      </details>
+                    ) : null}
                   </div>
                 ))
               ) : (

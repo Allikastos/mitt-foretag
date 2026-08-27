@@ -1,6 +1,6 @@
 begin;
 
-select plan(23);
+select plan(26);
 
 select is(
   (select count(*)::integer from public.organizations where org_number like 'TEST-%'),
@@ -22,6 +22,27 @@ select is((select count(*)::integer from public.tasks), 1, 'customer scope appli
 select is((select count(*)::integer from public.documents), 1, 'customer scope applies to document metadata');
 select is((select count(*)::integer from public.invoices), 1, 'customer scope applies to invoices');
 select is((select count(*)::integer from public.invoice_lines), 1, 'customer scope applies to invoice lines');
+with created as (
+  insert into public.business_goals (
+    organization_id, created_by, title, target_value, current_value, unit
+  ) values (
+    '10000000-0000-4000-8000-000000000001',
+    '11000000-0000-4000-8000-000000000003',
+    'Syntetiskt säljmål',
+    10,
+    2,
+    'kontakter'
+  )
+  returning 1
+)
+select is((select count(*)::integer from created), 1, 'member can create a goal in the active organization');
+select throws_ok(
+  $$insert into public.business_goals (organization_id, title, target_value)
+    values ('20000000-0000-4000-8000-000000000002', 'Blocked goal', 1)$$,
+  '42501',
+  'new row violates row-level security policy for table "business_goals"',
+  'member cannot forge a goal in another organization'
+);
 with changed as (
   update public.customers set notes = 'blocked'
   where id = '23000000-0000-4000-8000-000000000001'
@@ -105,6 +126,13 @@ select throws_ok(
   '42501',
   'new row violates row-level security policy for table "tasks"',
   'viewer cannot create tasks'
+);
+select throws_ok(
+  $$insert into public.business_goals (organization_id, title, target_value)
+    values ('10000000-0000-4000-8000-000000000001', 'Blocked viewer goal', 1)$$,
+  '42501',
+  'new row violates row-level security policy for table "business_goals"',
+  'viewer cannot create goals'
 );
 
 reset role;

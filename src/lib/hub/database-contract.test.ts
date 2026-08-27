@@ -56,6 +56,24 @@ test("explicit API grants remove broad cloud defaults before regranting", () => 
   );
 });
 
+test("business goals remain organization scoped and protected by RLS", () => {
+  const migration = readFileSync(
+    resolve(
+      process.cwd(),
+      "supabase",
+      "migrations",
+      "20260827090000_business_goals.sql",
+    ),
+    "utf8",
+  );
+
+  assert.match(migration, /organization_id uuid not null references public\.organizations/i);
+  assert.match(migration, /alter table public\.business_goals enable row level security/i);
+  assert.match(migration, /using \(public\.is_org_member\(organization_id\)\)/i);
+  assert.match(migration, /with check \(public\.can_manage_org_data\(organization_id\)\)/i);
+  assert.match(migration, /revoke all on table public\.business_goals from public, anon, authenticated/i);
+});
+
 test("synthetic seed is isolated, multi-tenant and never automatic", () => {
   const seedPath = resolve(
     process.cwd(),

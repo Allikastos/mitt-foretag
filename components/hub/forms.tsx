@@ -8,6 +8,8 @@ import {
   employeeCustomerScopeLabel,
   employeeCustomerScopes,
   formatTags,
+  goalStatuses,
+  goalStatusLabel,
   getCustomerFieldPreferences,
   invoiceStatusLabel,
   invoiceStatuses,
@@ -29,6 +31,7 @@ import {
 } from "@/src/lib/hub/sales-validation";
 import type {
   Customer,
+  BusinessGoal,
   Invoice,
   InvoiceLine,
   Organization,
@@ -45,23 +48,29 @@ import {
 import { SubmitButton } from "./submit-button";
 import { ThemePicker } from "./theme-picker";
 import { CustomerCombobox } from "./customer-combobox";
+import { ConfirmSubmitButton } from "./confirm-submit-button";
 import {
+  deleteBusinessGoalAction,
+  deleteInvoiceLineAction,
+  deleteTaskAction,
   finalizeInvoiceAction,
   registerSalesValidationActivityAction,
   saveContactAction,
+  saveBusinessGoalAction,
   saveCustomerAction,
   saveInvoiceAction,
   saveInvoiceLineAction,
   saveTaskAction,
+  updateTaskStatusAction,
   updateInvoiceStatusAction,
   updateOrganizationSettingsAction,
   uploadDocumentAction,
 } from "@/app/hub/actions";
 
 export function SalesValidationActivityForm({
-  customerId,
+  customer,
 }: {
-  customerId: string;
+  customer: Customer;
 }) {
   return (
     <HubCard>
@@ -69,7 +78,7 @@ export function SalesValidationActivityForm({
         action={registerSalesValidationActivityAction}
         className="space-y-4"
       >
-        <input type="hidden" name="customer_id" value={customerId} />
+        <input type="hidden" name="customer_id" value={customer.id} />
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--hub-accent-strong)]">
             Sex veckors validering
@@ -95,6 +104,33 @@ export function SalesValidationActivityForm({
             ))}
           </select>
         </Field>
+        <FormGrid>
+          <Field label="Säljläge efter kontakten">
+            <select
+              name="sales_stage"
+              defaultValue=""
+              className={inputClassName}
+            >
+              <option value="">Uppdatera automatiskt</option>
+              {customerSalesStages.map((stage) => (
+                <option key={stage} value={stage}>
+                  {customerSalesStageLabel(stage)}
+                </option>
+              ))}
+            </select>
+            <p className="mt-2 text-xs leading-5 text-[var(--hub-subtle)]">
+              Nuvarande läge: {customerSalesStageLabel(getCustomerSalesStage(customer))}.
+            </p>
+          </Field>
+          <Field label="Nästa återkoppling">
+            <input
+              type="date"
+              name="follow_up_date"
+              defaultValue={customer.follow_up_date ?? ""}
+              className={inputClassName}
+            />
+          </Field>
+        </FormGrid>
         <Field label="Utfall och nästa lärdom">
           <textarea
             name="outcome"
@@ -358,6 +394,81 @@ export function TaskForm({
   );
 }
 
+export function TaskActions({ task }: { task: Task }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {task.status !== "done" ? (
+        <form action={updateTaskStatusAction}>
+          <input type="hidden" name="task_id" value={task.id} />
+          <input type="hidden" name="status" value="done" />
+          <SubmitButton pendingLabel="Markerar...">Markera klar</SubmitButton>
+        </form>
+      ) : (
+        <form action={updateTaskStatusAction}>
+          <input type="hidden" name="task_id" value={task.id} />
+          <input type="hidden" name="status" value="todo" />
+          <SubmitButton pendingLabel="Återöppnar...">Återöppna</SubmitButton>
+        </form>
+      )}
+      <form action={deleteTaskAction}>
+        <input type="hidden" name="task_id" value={task.id} />
+        <ConfirmSubmitButton message={`Ta bort uppgiften ”${task.title}”?`}>
+          Ta bort
+        </ConfirmSubmitButton>
+      </form>
+    </div>
+  );
+}
+
+export function BusinessGoalForm({ goal }: { goal?: BusinessGoal | null }) {
+  return (
+    <HubCard>
+      <form action={saveBusinessGoalAction} className="space-y-4">
+        <input type="hidden" name="goal_id" defaultValue={goal?.id ?? ""} />
+        <FormGrid>
+          <Field label="Mål">
+            <input name="title" defaultValue={goal?.title ?? ""} className={inputClassName} required />
+          </Field>
+          <Field label="Enhet">
+            <input name="unit" defaultValue={goal?.unit ?? "st"} className={inputClassName} required />
+          </Field>
+          <Field label="Nuvarande värde">
+            <input type="number" min="0" step="0.01" name="current_value" defaultValue={goal?.current_value ?? 0} className={inputClassName} required />
+          </Field>
+          <Field label="Målvärde">
+            <input type="number" min="0.01" step="0.01" name="target_value" defaultValue={goal?.target_value ?? 1} className={inputClassName} required />
+          </Field>
+          <Field label="Slutdatum">
+            <input type="date" name="due_date" defaultValue={goal?.due_date ?? ""} className={inputClassName} />
+          </Field>
+          <Field label="Status">
+            <select name="status" defaultValue={goal?.status ?? "active"} className={inputClassName}>
+              {goalStatuses.map((status) => (
+                <option key={status} value={status}>{goalStatusLabel(status)}</option>
+              ))}
+            </select>
+          </Field>
+        </FormGrid>
+        <Field label="Beskrivning">
+          <textarea name="description" defaultValue={goal?.description ?? ""} className={textareaClassName} />
+        </Field>
+        <SubmitButton>{goal ? "Uppdatera mål" : "Skapa mål"}</SubmitButton>
+      </form>
+    </HubCard>
+  );
+}
+
+export function DeleteBusinessGoalForm({ goalId }: { goalId: string }) {
+  return (
+    <form action={deleteBusinessGoalAction}>
+      <input type="hidden" name="goal_id" value={goalId} />
+      <ConfirmSubmitButton message="Ta bort målet permanent?">
+        Ta bort mål
+      </ConfirmSubmitButton>
+    </form>
+  );
+}
+
 export function InvoiceForm({
   invoice,
   customers,
@@ -513,6 +624,28 @@ export function InvoiceLineForm({
         </SubmitButton>
       </form>
     </HubCard>
+  );
+}
+
+export function DeleteInvoiceLineForm({
+  invoiceId,
+  lineId,
+  locked = false,
+}: {
+  invoiceId: string;
+  lineId: string;
+  locked?: boolean;
+}) {
+  if (locked) return null;
+
+  return (
+    <form action={deleteInvoiceLineAction}>
+      <input type="hidden" name="invoice_id" value={invoiceId} />
+      <input type="hidden" name="line_id" value={lineId} />
+      <ConfirmSubmitButton message="Ta bort fakturaraden från utkastet?">
+        Ta bort rad
+      </ConfirmSubmitButton>
+    </form>
   );
 }
 

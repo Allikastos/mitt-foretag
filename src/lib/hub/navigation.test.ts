@@ -29,6 +29,7 @@ test("grouping preserves every existing route and includes integrations", () => 
       "/hub",
       "/hub/kunder",
       "/hub/uppgifter",
+      "/hub/mal",
       "/hub/fakturor",
       "/hub/bokforing",
       "/hub/dokument",

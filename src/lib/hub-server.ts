@@ -7,6 +7,7 @@ import {
   buildDocumentPath,
   buildOrganizationAddressLines,
   type ActivityLog,
+  type BusinessGoal,
   type Contact,
   type Customer,
   type DocumentRecord,
@@ -539,7 +540,7 @@ export async function getTasks(filters?: {
   let query = supabase
     .from("tasks")
     .select(
-      "id, customer_id, title, description, status, priority, due_date, created_at",
+      "id, organization_id, customer_id, assigned_to, title, description, status, priority, due_date, created_at, updated_at",
       { count: "exact" },
     )
     .eq("organization_id", organization.id)
@@ -594,6 +595,24 @@ export async function getTasks(filters?: {
     page: pagination.page,
     pageSize: pagination.pageSize,
   });
+}
+
+export async function getBusinessGoals() {
+  const { supabase, organization } = await requireHubContext();
+  const { data, error } = await supabase
+    .from("business_goals")
+    .select(
+      "id, organization_id, created_by, title, description, target_value, current_value, unit, due_date, status, created_at, updated_at",
+    )
+    .eq("organization_id", organization.id)
+    .order("status", { ascending: true })
+    .order("due_date", { ascending: true, nullsFirst: false });
+
+  if (error) {
+    throw new Error("Målen kunde inte hämtas just nu.");
+  }
+
+  return (data ?? []) as BusinessGoal[];
 }
 
 export async function getDocuments(paginationInput: PaginationInput = {}) {

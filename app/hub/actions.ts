@@ -9,6 +9,7 @@ import type {
   DocumentCategory,
   EmployeeCustomerScope,
   HubTheme,
+  GoalStatus,
   InvoiceRow,
   InvoiceStatus,
   PreferredContactMethod,
@@ -24,6 +25,7 @@ import {
   customerStatusForSalesStage,
   getCustomerSalesStage,
   parseCustomerSalesStage,
+  type CustomerSalesStage,
 } from "@/src/lib/hub/sales";
 import {
   advanceSalesStageForActivity,
@@ -214,12 +216,18 @@ export async function registerSalesValidationActivityAction(formData: FormData) 
     organizationId: organization.id,
   });
   const nextStage = advanceSalesStageForActivity(customer, activityType);
+  const requestedStage = parseCustomerSalesStage(
+    parseOptionalString(formData.get("sales_stage")),
+  );
+  const effectiveStage = (requestedStage ?? nextStage.stage) as CustomerSalesStage;
+  const followUpDate = parseOptionalDate(formData.get("follow_up_date"));
   const { error } = await supabase
     .from("customers")
     .update({
-      status: nextStage.status,
-      tags: nextStage.tags,
+      status: customerStatusForSalesStage(effectiveStage),
+      tags: applyCustomerSalesStage(nextStage.tags, effectiveStage),
       last_contacted_at: new Date().toISOString().slice(0, 10),
+      follow_up_date: effectiveStage === "won" || effectiveStage === "paused" ? null : followUpDate,
     })
     .eq("organization_id", organization.id)
     .eq("id", customer.id);
@@ -629,6 +637,150 @@ export async function saveTaskAction(formData: FormData) {
   }
 }
 
+export async function updateTaskStatusAction(formData: FormData) {
+  const { supabase, organization, user } = await requireHubContext();
+  const taskId = requireString(formData.get("task_id"), "Uppgift");
+  const status = requireString(formData.get("status"), "Status") as TaskStatus;
+
+  if (!["todo", "in_progress", "waiting", "done"].includes(status)) {
+    throw new Error("Välj en giltig uppgiftsstatus.");
+  }
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .update({ status })
+    .eq("organization_id", organization.id)
+    .eq("id", taskId)
+    .select("id, title, customer_id")
+    .single();
+
+  if (error || !data) throw new Error("Uppgiftsstatusen kunde inte uppdateras.");
+
+  await logHubActivity({
+    organizationId: organization.id,
+    userId: user.id,
+    action: "task_status_updated",
+    entityType: "task",
+    entityId: data.id,
+    description: `${data.title} ändrades till ${status}.`,
+  });
+
+  revalidatePath("/hub");
+  revalidatePath("/hub/uppgifter");
+  if (data.customer_id) revalidatePath(`/hub/kunder/${data.customer_id}`);
+}
+
+export async function deleteTaskAction(formData: FormData) {
+  const { supabase, organization, user } = await requireHubContext();
+  const taskId = requireString(formData.get("task_id"), "Uppgift");
+  const { data: task, error: readError } = await supabase
+    .from("tasks")
+    .select("id, title, customer_id")
+    .eq("organization_id", organization.id)
+    .eq("id", taskId)
+    .single();
+
+  if (readError || !task) throw new Error("Uppgiften kunde inte hittas.");
+
+  const { error } = await supabase
+    .from("tasks")
+    .delete()
+    .eq("organization_id", organization.id)
+    .eq("id", taskId);
+
+  if (error) throw new Error("Uppgiften kunde inte tas bort.");
+
+  await logHubActivity({
+    organizationId: organization.id,
+    userId: user.id,
+    action: "task_deleted",
+    entityType: "task",
+    entityId: task.id,
+    description: `${task.title} togs bort från uppgiftslistan.`,
+  });
+
+  revalidatePath("/hub");
+  revalidatePath("/hub/uppgifter");
+  if (task.customer_id) revalidatePath(`/hub/kunder/${task.customer_id}`);
+}
+
+export async function saveBusinessGoalAction(formData: FormData) {
+  const { supabase, organization, user } = await requireHubContext();
+  const goalId = parseOptionalString(formData.get("goal_id"));
+  const status = (parseOptionalString(formData.get("status")) ?? "active") as GoalStatus;
+
+  if (!["active", "paused", "completed"].includes(status)) {
+    throw new Error("Välj en giltig målstatus.");
+  }
+
+  const targetValue = parseOptionalNumber(formData.get("target_value"));
+  const currentValue = parseOptionalNumber(formData.get("current_value")) ?? 0;
+  if (!targetValue || targetValue <= 0) throw new Error("Målvärdet måste vara större än noll.");
+  if (currentValue < 0) throw new Error("Nuvarande värde kan inte vara negativt.");
+
+  const payload = {
+    organization_id: organization.id,
+    title: requireString(formData.get("title"), "Målnamn").slice(0, 120),
+    description: parseOptionalString(formData.get("description")),
+    target_value: targetValue,
+    current_value: currentValue,
+    unit: (parseOptionalString(formData.get("unit")) ?? "st").slice(0, 24),
+    due_date: parseOptionalDate(formData.get("due_date")),
+    status,
+  };
+
+  const query = goalId
+    ? supabase.from("business_goals").update(payload).eq("organization_id", organization.id).eq("id", goalId)
+    : supabase.from("business_goals").insert({ ...payload, created_by: user.id });
+  const { data, error } = await query.select("id").single();
+
+  if (error || !data) throw new Error("Målet kunde inte sparas.");
+
+  await logHubActivity({
+    organizationId: organization.id,
+    userId: user.id,
+    action: goalId ? "business_goal_updated" : "business_goal_created",
+    entityType: "business_goal",
+    entityId: data.id,
+    description: `${payload.title} sparades som verksamhetsmål.`,
+  });
+
+  revalidatePath("/hub");
+  revalidatePath("/hub/mal");
+}
+
+export async function deleteBusinessGoalAction(formData: FormData) {
+  const { supabase, organization, user } = await requireHubContext();
+  const goalId = requireString(formData.get("goal_id"), "Mål");
+  const { data: goal, error: readError } = await supabase
+    .from("business_goals")
+    .select("id, title")
+    .eq("organization_id", organization.id)
+    .eq("id", goalId)
+    .single();
+
+  if (readError || !goal) throw new Error("Målet kunde inte hittas.");
+  const { error } = await supabase
+    .from("business_goals")
+    .delete()
+    .eq("organization_id", organization.id)
+    .eq("id", goalId);
+
+  if (error) throw new Error("Målet kunde inte tas bort.");
+
+  await logHubActivity({
+    organizationId: organization.id,
+    userId: user.id,
+    action: "business_goal_deleted",
+    entityType: "business_goal",
+    entityId: goal.id,
+    description: `${goal.title} togs bort från mållistan.`,
+  });
+
+  revalidatePath("/hub");
+  revalidatePath("/hub/mal");
+}
+
 export async function saveInvoiceAction(formData: FormData) {
   const { supabase, organization, user } = await requireHubContext();
   const invoiceId = parseOptionalString(formData.get("invoice_id"));
@@ -768,6 +920,45 @@ export async function saveInvoiceLineAction(formData: FormData) {
     entityType: "invoice_line",
     entityId: data.id,
     description: `Fakturarad "${payload.description}" sparades.`,
+  });
+
+  revalidatePath("/hub");
+  revalidatePath("/hub/fakturor");
+  revalidatePath(`/hub/fakturor/${invoiceId}`);
+}
+
+export async function deleteInvoiceLineAction(formData: FormData) {
+  const { supabase, organization, user } = await requireHubContext();
+  const invoiceId = requireString(formData.get("invoice_id"), "Faktura");
+  const lineId = requireString(formData.get("line_id"), "Fakturarad");
+  const invoice = await getInvoiceForMutation({ invoiceId, organizationId: organization.id });
+  ensureInvoiceEditable(invoice);
+
+  const { data: line, error: readError } = await supabase
+    .from("invoice_lines")
+    .select("id, description")
+    .eq("organization_id", organization.id)
+    .eq("invoice_id", invoiceId)
+    .eq("id", lineId)
+    .single();
+
+  if (readError || !line) throw new Error("Fakturaraden kunde inte hittas.");
+  const { error } = await supabase
+    .from("invoice_lines")
+    .delete()
+    .eq("organization_id", organization.id)
+    .eq("invoice_id", invoiceId)
+    .eq("id", lineId);
+
+  if (error) throw new Error("Fakturaraden kunde inte tas bort.");
+
+  await logHubActivity({
+    organizationId: organization.id,
+    userId: user.id,
+    action: "invoice_line_deleted",
+    entityType: "invoice_line",
+    entityId: line.id,
+    description: `Fakturarad "${line.description}" togs bort.`,
   });
 
   revalidatePath("/hub");

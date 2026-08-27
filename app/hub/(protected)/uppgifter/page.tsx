@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { TaskForm } from "@/components/hub/forms";
+import { TaskActions, TaskForm } from "@/components/hub/forms";
 import { HubPagination } from "@/components/hub/pagination";
 import { EmptyState, HubCard, HubShell, StatusBadge } from "@/components/hub/ui";
 import {
@@ -72,6 +72,19 @@ export default async function HubTasksPage({
                   </p>
                   {task.description ? (
                     <p className="mt-3 text-sm leading-6 text-[#5F5F5F]">{task.description}</p>
+                  ) : null}
+                  {membership.role !== "viewer" ? (
+                    <div className="mt-4 space-y-3 border-t border-black/8 pt-4">
+                      <TaskActions task={task} />
+                      <details>
+                        <summary className="cursor-pointer text-sm font-medium text-[var(--hub-text)]">
+                          Redigera uppgift
+                        </summary>
+                        <div className="mt-3">
+                          <TaskForm task={task} customers={lists.customers} />
+                        </div>
+                      </details>
+                    </div>
                   ) : null}
                 </div>
               ))
