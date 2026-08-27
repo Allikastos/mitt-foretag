@@ -1,4 +1,5 @@
 import { PageIntro } from "@/components/page-intro";
+import { Breadcrumbs } from "@/components/marketing/breadcrumbs";
 import { SectionContainer } from "@/components/section-container";
 import { SITE_CONFIG } from "@/config/site";
 import { createMetadata } from "@/lib/metadata";
@@ -15,6 +16,7 @@ const linkClass = "font-semibold text-[#173f35] underline decoration-[#e86f44] u
 export default function PrivacyPage() {
   return (
     <>
+      <Breadcrumbs items={[{ label: "Hem", href: "/" }, { label: "Integritet" }]} />
       <PageIntro
         eyebrow="Integritet"
         title="Tydligt om vilka uppgifter som används och varför."

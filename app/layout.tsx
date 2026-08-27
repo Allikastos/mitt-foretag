@@ -25,11 +25,30 @@ export default function RootLayout({
 }>) {
   const organizationSchema = {
     "@context": "https://schema.org",
-    "@type": "ProfessionalService",
+    "@type": "Organization",
+    "@id": `${SITE_CONFIG.url}/#organization`,
     name: SITE_CONFIG.name,
     url: SITE_CONFIG.url,
+    logo: new URL(SITE_CONFIG.logoPath, SITE_CONFIG.url).toString(),
+    description: SITE_CONFIG.description,
     email: SITE_CONFIG.contact.email,
     telephone: SITE_CONFIG.contact.phoneDisplay,
+    founder: {
+      "@type": "Person",
+      name: "Albin Holmberg",
+    },
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "kundservice",
+      email: SITE_CONFIG.contact.email,
+      telephone: SITE_CONFIG.contact.phoneDisplay,
+      availableLanguage: "sv",
+      areaServed: "SE",
+    },
+    areaServed: {
+      "@type": "Country",
+      name: "Sverige",
+    },
   };
   const websiteSchema = {
     "@context": "https://schema.org",
@@ -40,11 +59,11 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="sv" className="h-full antialiased">
+    <html lang="sv" className="h-full antialiased" data-scroll-behavior="smooth">
       <body className="min-h-full">
         {children}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, "\\u003c") }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema).replace(/</g, "\\u003c") }} />
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE_CONFIG } from "@/config/site";
+import { industryPages, marketingArticles } from "@/lib/marketing-seo";
 import { services } from "@/lib/site";
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_CONFIG.url;
@@ -48,6 +49,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    {
+      url: `${baseUrl}/blogg`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.75,
+    },
   ];
 
   const servicePages: MetadataRoute.Sitemap = services.map((service) => ({
@@ -57,5 +64,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...staticPages, ...servicePages];
+  const industryLandingPages: MetadataRoute.Sitemap = industryPages.map((page) => ({
+    url: `${baseUrl}/${page.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.85,
+  }));
+
+  const articlePages: MetadataRoute.Sitemap = marketingArticles.map((article) => ({
+    url: `${baseUrl}/blogg/${article.slug}`,
+    lastModified: now,
+    changeFrequency: "yearly",
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...servicePages, ...industryLandingPages, ...articlePages];
 }

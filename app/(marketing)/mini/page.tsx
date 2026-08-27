@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { CTABlock } from "@/components/cta-block";
+import { Breadcrumbs } from "@/components/marketing/breadcrumbs";
 import { PageIntro } from "@/components/page-intro";
 import { SectionContainer } from "@/components/section-container";
 import { SITE_CONFIG } from "@/config/site";
 import { createMetadata } from "@/lib/metadata";
 
 export const metadata = createMetadata(
-  "Altura Mini - begränsat pilotpaket",
+  "Enkel hemsida för företag – 2 995 kr",
   "En kompakt ensideshemsida från en fast grundlayout för 2 995 kr exklusive moms.",
   { pathname: "/mini" },
 );
@@ -29,6 +30,7 @@ const boundaries = [
 export default function MiniPage() {
   return (
     <>
+      <Breadcrumbs items={[{ label: "Hem", href: "/" }, { label: "Altura Mini" }]} />
       <PageIntro
         eyebrow="Begränsat pilotpaket"
         title="En professionell väg online när allt innehåll redan är klart."

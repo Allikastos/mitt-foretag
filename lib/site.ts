@@ -3,6 +3,7 @@ import { SITE_CONFIG } from "@/config/site";
 export const navigationItems = [
   { href: "/exempel", label: "Exempel" },
   { href: "/tjanster", label: "Paket" },
+  { href: "/blogg", label: "Guider" },
   { href: "/#process", label: "Så fungerar det" },
   { href: "/om", label: "Om" },
 ];
@@ -117,6 +118,7 @@ export const demoProjects = [
     slug: "penseldrag",
     label: "Demokoncept",
     industry: "Måleriföretag",
+    industryHref: "/hemsida-for-malare",
     name: "Penseldrag",
     headline: "Rum med värme. Ytor som håller.",
     direction: "Varmt, hantverksmässigt och byggt kring genomförda projekt.",
@@ -126,6 +128,7 @@ export const demoProjects = [
     slug: "nordform",
     label: "Demokoncept",
     industry: "Konsultbolag",
+    industryHref: "/hemsida-for-konsultbolag",
     name: "Nordform",
     headline: "Klarhet för beslut som formar nästa steg.",
     direction: "Stringent, analytiskt och strukturerat kring expertis och resultat.",
@@ -135,6 +138,7 @@ export const demoProjects = [
     slug: "studio-linnea",
     label: "Demokoncept",
     industry: "Salong",
+    industryHref: "/hemsida-for-salong",
     name: "Studio Linnea",
     headline: "Din stund. Ditt uttryck.",
     direction: "Mjukt, exklusivt och skapat för att göra bokningen självklar.",

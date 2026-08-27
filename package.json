@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test --experimental-strip-types src/lib/contact.test.ts src/lib/hub/*.test.ts src/lib/hub/accounting/*.test.ts src/lib/hub/documents/*.test.ts src/lib/hub/integrations/*.test.ts src/lib/hub/jobs/*.test.ts src/lib/hub/providers/*.test.ts",
+    "test": "node --test --experimental-strip-types src/lib/contact.test.ts src/lib/marketing-seo.test.ts src/lib/hub/*.test.ts src/lib/hub/accounting/*.test.ts src/lib/hub/documents/*.test.ts src/lib/hub/integrations/*.test.ts src/lib/hub/jobs/*.test.ts src/lib/hub/providers/*.test.ts",
     "typecheck": "tsc --noEmit",
     "db:migrations:prepare": "node scripts/prepare-supabase-migrations.mjs",
     "db:seed:synthetic": "node scripts/run-synthetic-supabase-seed.mjs",
