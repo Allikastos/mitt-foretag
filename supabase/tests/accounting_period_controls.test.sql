@@ -1,6 +1,6 @@
 begin;
 
-select plan(11);
+select plan(13);
 
 select ok(
   to_regprocedure('public.save_special_bookkeeping_draft(uuid,text,date,bigint,text,jsonb,text,text,uuid,text)') is not null,
@@ -35,6 +35,14 @@ where conname = 'business_events_event_type_check'
 select ok(
   exists (select 1 from pg_trigger where tgname = 'link_posted_correction_trigger' and not tgisinternal),
   'posted corrections are linked by a database trigger'
+);
+select ok(
+  not has_function_privilege('anon', 'public.link_posted_correction()', 'EXECUTE'),
+  'anonymous users cannot execute the correction trigger function'
+);
+select ok(
+  not has_function_privilege('authenticated', 'public.link_posted_correction()', 'EXECUTE'),
+  'authenticated users cannot execute the correction trigger function directly'
 );
 
 insert into public.accounting_periods (id, organization_id, fiscal_year_id, starts_on, ends_on, status) values

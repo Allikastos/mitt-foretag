@@ -74,6 +74,23 @@ test("business goals remain organization scoped and protected by RLS", () => {
   assert.match(migration, /revoke all on table public\.business_goals from public, anon, authenticated/i);
 });
 
+test("correction trigger function cannot be executed directly", () => {
+  const migration = readFileSync(
+    resolve(
+      process.cwd(),
+      "supabase",
+      "migrations",
+      "20260827133000_restrict_correction_trigger_execution.sql",
+    ),
+    "utf8",
+  );
+
+  assert.match(
+    migration,
+    /revoke all on function public\.link_posted_correction\(\)[\s\S]+from public, anon, authenticated/i,
+  );
+});
+
 test("synthetic seed is isolated, multi-tenant and never automatic", () => {
   const seedPath = resolve(
     process.cwd(),
