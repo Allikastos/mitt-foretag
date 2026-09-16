@@ -3,7 +3,6 @@ import { SITE_CONFIG } from "@/config/site";
 export const navigationItems = [
   { href: "/exempel", label: "Exempel" },
   { href: "/tjanster", label: "Paket" },
-  { href: "/blogg", label: "Guider" },
   { href: "/#process", label: "Så fungerar det" },
   { href: "/om", label: "Om" },
 ];
