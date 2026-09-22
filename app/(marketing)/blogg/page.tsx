@@ -3,7 +3,8 @@ import { Breadcrumbs } from "@/components/marketing/breadcrumbs";
 import { PageIntro } from "@/components/page-intro";
 import { SectionContainer } from "@/components/section-container";
 import { createMetadata } from "@/lib/metadata";
-import { marketingArticles } from "@/lib/marketing-seo";
+import { getMarketingArticle, marketingArticles } from "@/lib/marketing-seo";
+import { getPublishedMarketingPosts } from "@/src/lib/marketing-supabase-server";
 
 export const metadata = createMetadata(
   "Guider om hemsidor för företag",
@@ -11,7 +12,32 @@ export const metadata = createMetadata(
   { pathname: "/blogg" },
 );
 
-export default function BlogPage() {
+export const dynamic = "force-dynamic";
+
+function getReadingTime(content: string) {
+  const wordCount = content.replace(/<[^>]*>/g, " ").trim().split(/\s+/).filter(Boolean).length;
+  return `${Math.max(3, Math.ceil(wordCount / 200))} min läsning`;
+}
+
+export default async function BlogPage() {
+  const scheduledPosts = await getPublishedMarketingPosts();
+  const articles = [
+    ...scheduledPosts
+      .filter((post) => !getMarketingArticle(post.slug))
+      .map((post) => ({
+        slug: post.slug,
+        title: post.title,
+        excerpt: post.excerpt ?? post.seo_description ?? "Praktisk vägledning för företag som vill få mer nytta av sin hemsida.",
+        readTime: getReadingTime(post.content),
+      })),
+    ...marketingArticles.map((article) => ({
+      slug: article.slug,
+      title: article.title,
+      excerpt: article.excerpt,
+      readTime: article.readTime,
+    })),
+  ];
+
   return (
     <>
       <Breadcrumbs items={[{ label: "Hem", href: "/" }, { label: "Guider" }]} />
@@ -23,7 +49,7 @@ export default function BlogPage() {
       <section className="pb-16 md:pb-24">
         <SectionContainer>
           <div className="grid gap-6 md:grid-cols-2">
-            {marketingArticles.map((article, index) => (
+            {articles.map((article, index) => (
               <article
                 key={article.slug}
                 className={`flex flex-col rounded-[2.25rem] border border-[#173f35]/10 p-7 md:p-9 ${

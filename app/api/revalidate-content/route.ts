@@ -1,13 +1,13 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { getLoggedInUser } from "@/src/lib/supabase-server";
+import { getMarketingLoggedInUser } from "@/src/lib/marketing-supabase-server";
 
 type RevalidateRequest = {
   slug?: string;
 };
 
 export async function POST(request: Request) {
-  const user = await getLoggedInUser();
+  const user = await getMarketingLoggedInUser();
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

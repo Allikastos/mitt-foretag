@@ -5,15 +5,30 @@ import {
   isSupabaseAuthCookieName,
 } from "@/src/lib/supabase-auth-cookies";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey =
+const hubSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const hubSupabaseAnonKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const marketingSupabaseUrl = process.env.NEXT_PUBLIC_MARKETING_SUPABASE_URL;
+const marketingSupabaseAnonKey =
+  process.env.NEXT_PUBLIC_MARKETING_SUPABASE_ANON_KEY ||
+  process.env.NEXT_PUBLIC_MARKETING_SUPABASE_PUBLISHABLE_DEFAULT_KEY ||
+  process.env.NEXT_PUBLIC_MARKETING_SUPABASE_PUBLISHABLE_KEY;
 
-function clearStaleAuthCookies(request: NextRequest, response: NextResponse) {
+function getSupabaseProjectRef(url: string) {
+  return new URL(url).hostname.split(".")[0];
+}
+
+function clearStaleAuthCookies(
+  request: NextRequest,
+  response: NextResponse,
+  projectRef: string
+) {
   for (const { name } of request.cookies.getAll()) {
-    if (!isSupabaseAuthCookieName(name)) continue;
+    if (!isSupabaseAuthCookieName(name) || !name.startsWith(`sb-${projectRef}-`)) {
+      continue;
+    }
 
     request.cookies.delete(name);
     response.cookies.set(name, "", {
@@ -31,9 +46,17 @@ export async function proxy(request: NextRequest) {
     request,
   });
 
+  const isMarketingAdmin = request.nextUrl.pathname.startsWith("/admin");
+  const supabaseUrl = isMarketingAdmin ? marketingSupabaseUrl : hubSupabaseUrl;
+  const supabaseAnonKey = isMarketingAdmin
+    ? marketingSupabaseAnonKey
+    : hubSupabaseAnonKey;
+
   if (!supabaseUrl || !supabaseAnonKey) {
     return response;
   }
+
+  const projectRef = getSupabaseProjectRef(supabaseUrl);
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -63,11 +86,11 @@ export async function proxy(request: NextRequest) {
   try {
     const { error } = await supabase.auth.getUser();
     if (isStaleRefreshTokenError(error)) {
-      clearStaleAuthCookies(request, response);
+      clearStaleAuthCookies(request, response, projectRef);
     }
   } catch (error) {
     if (!isStaleRefreshTokenError(error)) throw error;
-    clearStaleAuthCookies(request, response);
+    clearStaleAuthCookies(request, response, projectRef);
   }
 
   return response;

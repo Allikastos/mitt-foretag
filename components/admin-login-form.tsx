@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  getSupabaseBrowserClient,
-  hasSupabaseEnv,
-} from "@/src/lib/supabase";
+  getMarketingSupabaseBrowserClient,
+  hasMarketingSupabaseEnv,
+} from "@/src/lib/marketing-supabase";
 
 export function AdminLoginForm() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export function AdminLoginForm() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!hasSupabaseEnv()) {
+    if (!hasMarketingSupabaseEnv()) {
       setErrorMessage(
         "Supabase är inte konfigurerat ännu. Lägg till miljövariablerna först."
       );
@@ -28,7 +28,7 @@ export function AdminLoginForm() {
     setErrorMessage(null);
 
     try {
-      const supabase = getSupabaseBrowserClient();
+      const supabase = getMarketingSupabaseBrowserClient();
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,

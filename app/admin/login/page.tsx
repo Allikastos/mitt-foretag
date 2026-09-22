@@ -4,7 +4,7 @@ import { SITE_CONFIG } from "@/config/site";
 import { AdminLoginForm } from "@/components/admin-login-form";
 import { SectionContainer } from "@/components/section-container";
 import { createMetadata } from "@/lib/metadata";
-import { getLoggedInUser } from "@/src/lib/supabase-server";
+import { getMarketingLoggedInUser } from "@/src/lib/marketing-supabase-server";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminLoginPage() {
-  const user = await getLoggedInUser();
+  const user = await getMarketingLoggedInUser();
 
   if (user) {
     redirect("/admin");

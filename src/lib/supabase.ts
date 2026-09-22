@@ -3,6 +3,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { assertSafeHubEnvironment } from "./hub/runtime-environment";
 
 export type PostStatus = "draft" | "scheduled" | "published";
+export type PostScope = "legacy" | "altura_nova";
 
 export type PostRow = {
   id: string;
@@ -13,6 +14,7 @@ export type PostRow = {
   image_url: string | null;
   seo_title: string | null;
   seo_description: string | null;
+  site_scope: PostScope;
   status: PostStatus;
   publish_at: string | null;
   created_at: string;
@@ -568,6 +570,7 @@ export type Database = {
           image_url?: string | null;
           seo_title?: string | null;
           seo_description?: string | null;
+          site_scope?: PostScope;
           status?: PostStatus;
           publish_at?: string | null;
           created_at?: string;

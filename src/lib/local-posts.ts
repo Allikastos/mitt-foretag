@@ -36,6 +36,7 @@ export const LOCAL_SEO_POSTS: PostRow[] = [
     seo_title: "Vad kostar redovisning? Pris, nivåer och vad som påverkar",
     seo_description:
       "Lär dig vad som påverkar priset på redovisning och hur du utvärderar kostnad mot affärsnytta i ett växande företag.",
+    site_scope: "legacy",
     status: "published",
     publish_at: "2026-03-18T08:00:00.000Z",
     created_at: "2026-03-18T08:00:00.000Z",
@@ -74,6 +75,7 @@ export const LOCAL_SEO_POSTS: PostRow[] = [
     seo_title: "Bokföring för konsultbolag: checklista för bättre kontroll",
     seo_description:
       "Praktisk guide till bokföring för konsultbolag med fokus på intäkter, uppföljning, avstämningar och lönsamhet.",
+    site_scope: "legacy",
     status: "published",
     publish_at: "2026-03-20T08:00:00.000Z",
     created_at: "2026-03-20T08:00:00.000Z",
@@ -112,6 +114,7 @@ export const LOCAL_SEO_POSTS: PostRow[] = [
     seo_title: "När behöver man månadsrapportering? Tecken och upplägg",
     seo_description:
       "Se när månadsrapportering blir nödvändig och hur rätt uppföljning förbättrar beslut, likviditet och lönsamhet.",
+    site_scope: "legacy",
     status: "published",
     publish_at: "2026-03-22T08:00:00.000Z",
     created_at: "2026-03-22T08:00:00.000Z",
@@ -150,6 +153,7 @@ export const LOCAL_SEO_POSTS: PostRow[] = [
     seo_title: "Byta redovisningsbyrå: checklista och vanliga misstag",
     seo_description:
       "Guide för företag som vill byta redovisningsbyrå med trygg överlämning, tydlig tidplan och bättre ekonomiskt stöd.",
+    site_scope: "legacy",
     status: "published",
     publish_at: "2026-03-24T08:00:00.000Z",
     created_at: "2026-03-24T08:00:00.000Z",
@@ -190,6 +194,7 @@ export const LOCAL_SEO_POSTS: PostRow[] = [
     seo_title: "Vanliga bokföringsmisstag: checklista för bättre kvalitet",
     seo_description:
       "Lär dig de vanligaste bokföringsmisstagen och hur företag förebygger fel med tydliga rutiner och löpande avstämningar.",
+    site_scope: "legacy",
     status: "published",
     publish_at: "2026-03-26T08:00:00.000Z",
     created_at: "2026-03-26T08:00:00.000Z",

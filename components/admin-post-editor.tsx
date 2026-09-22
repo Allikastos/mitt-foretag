@@ -12,11 +12,10 @@ import { AdminRichTextEditor } from "@/components/admin-rich-text-editor";
 import { BlogRichText } from "@/components/blog-rich-text";
 import {
   BLOG_IMAGES_BUCKET,
-  getSupabaseBrowserClient,
-  hasSupabaseEnv,
-  type PostRow,
-  type PostStatus,
-} from "@/src/lib/supabase";
+  getMarketingSupabaseBrowserClient,
+  hasMarketingSupabaseEnv,
+} from "@/src/lib/marketing-supabase";
+import type { PostRow, PostScope, PostStatus } from "@/src/lib/supabase";
 
 type AdminPostEditorProps = {
   initialPosts: PostRow[];
@@ -30,6 +29,7 @@ type PostFormState = {
   imageUrl: string;
   seoTitle: string;
   seoDescription: string;
+  siteScope: PostScope;
   status: PostStatus;
   publishAt: string;
 };
@@ -42,6 +42,7 @@ const initialFormState: PostFormState = {
   imageUrl: "",
   seoTitle: "",
   seoDescription: "",
+  siteScope: "altura_nova",
   status: "draft",
   publishAt: "",
 };
@@ -121,6 +122,7 @@ function createFormState(post?: PostRow): PostFormState {
     imageUrl: post.image_url ?? "",
     seoTitle: post.seo_title ?? "",
     seoDescription: post.seo_description ?? post.excerpt ?? "",
+    siteScope: post.site_scope ?? "legacy",
     status: post.status,
     publishAt: toDateTimeLocalValue(post.publish_at),
   };
@@ -266,13 +268,13 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
   }
 
   async function uploadImage(file: File) {
-    if (!hasSupabaseEnv()) {
+    if (!hasMarketingSupabaseEnv()) {
       throw new Error(
         "Supabase är inte konfigurerat ännu. Lägg till miljövariablerna först."
       );
     }
 
-    const supabase = getSupabaseBrowserClient();
+    const supabase = getMarketingSupabaseBrowserClient();
     const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "-");
     const filePath = `posts/${Date.now()}-${safeName}`;
     const { error } = await supabase.storage
@@ -325,7 +327,7 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
   }
 
   async function persistPost(nextStatus: PostStatus) {
-    if (!hasSupabaseEnv()) {
+    if (!hasMarketingSupabaseEnv()) {
       setErrorMessage(
         "Supabase är inte konfigurerat ännu. Lägg till miljövariablerna först."
       );
@@ -351,7 +353,7 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
     setFeedback(null);
 
     try {
-      const supabase = getSupabaseBrowserClient();
+      const supabase = getMarketingSupabaseBrowserClient();
       const publishAtIso =
         nextStatus === "published"
           ? form.publishAt
@@ -370,6 +372,7 @@ export function AdminPostEditor({ initialPosts }: AdminPostEditorProps) {
         seo_title: form.seoTitle.trim() || null,
         seo_description:
           form.seoDescription.trim() || form.excerpt.trim() || null,
+        site_scope: form.siteScope,
         status: nextStatus,
         publish_at: publishAtIso,
       };

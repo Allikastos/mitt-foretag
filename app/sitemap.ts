@@ -2,7 +2,11 @@ import type { MetadataRoute } from "next";
 import { SITE_CONFIG } from "@/config/site";
 import { industryPages, marketingArticles } from "@/lib/marketing-seo";
 import { services } from "@/lib/site";
-export default function sitemap(): MetadataRoute.Sitemap {
+import { getPublishedMarketingPosts } from "@/src/lib/marketing-supabase-server";
+
+export const dynamic = "force-dynamic";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_CONFIG.url;
   const now = new Date();
 
@@ -78,5 +82,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...servicePages, ...industryLandingPages, ...articlePages];
+  const scheduledArticlePages: MetadataRoute.Sitemap = (await getPublishedMarketingPosts())
+    .filter((post) => !marketingArticles.some((article) => article.slug === post.slug))
+    .map((post) => ({
+      url: `${baseUrl}/blogg/${post.slug}`,
+      lastModified: post.updated_at,
+      changeFrequency: "yearly",
+      priority: 0.7,
+    }));
+
+  return [
+    ...staticPages,
+    ...servicePages,
+    ...industryLandingPages,
+    ...articlePages,
+    ...scheduledArticlePages,
+  ];
 }

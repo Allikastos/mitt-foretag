@@ -6,7 +6,10 @@ import { AdminPostEditor } from "@/components/admin-post-editor";
 import { AdminSignOutButton } from "@/components/admin-sign-out-button";
 import { SectionContainer } from "@/components/section-container";
 import { createMetadata } from "@/lib/metadata";
-import { getAdminPosts, getLoggedInUser } from "@/src/lib/supabase-server";
+import {
+  getMarketingAdminPosts,
+  getMarketingLoggedInUser,
+} from "@/src/lib/marketing-supabase-server";
 
 export const dynamic = "force-dynamic";
 
@@ -37,13 +40,13 @@ function isLiveByPublishDate(
 }
 
 export default async function AdminPage() {
-  const user = await getLoggedInUser();
+  const user = await getMarketingLoggedInUser();
 
   if (!user) {
     redirect("/admin/login");
   }
 
-  const posts = await getAdminPosts();
+  const posts = await getMarketingAdminPosts();
   const publishedCount = posts.filter((post) =>
     isLiveByPublishDate(post.status, post.publish_at)
   ).length;

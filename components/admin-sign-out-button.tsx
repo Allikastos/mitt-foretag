@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  getSupabaseBrowserClient,
-  hasSupabaseEnv,
-} from "@/src/lib/supabase";
+  getMarketingSupabaseBrowserClient,
+  hasMarketingSupabaseEnv,
+} from "@/src/lib/marketing-supabase";
 
 export function AdminSignOutButton() {
   const router = useRouter();
@@ -15,8 +15,8 @@ export function AdminSignOutButton() {
     setIsLoading(true);
 
     try {
-      if (hasSupabaseEnv()) {
-        const supabase = getSupabaseBrowserClient();
+      if (hasMarketingSupabaseEnv()) {
+        const supabase = getMarketingSupabaseBrowserClient();
         await supabase.auth.signOut();
       }
 
