@@ -87,7 +87,7 @@ Ett vanligt skäl till att projekt drar ut på tiden är att texter, bilder och 
 
 Gör därför en enkel innehållsinventering tidigt. Samla tjänster, frågor från kunder, eventuella referensprojekt, kontaktuppgifter, bilder som får användas och sådant som skiljer er från andra. Du behöver inte skriva perfekta webbtexter innan projektet börjar. Men en tydlig grund gör att innehållet kan formas utan att man gissar fram verksamheten.
 
-För en mer praktisk genomgång av hur man samlar material kan du använda guiden om [innehåll till företagshemsidan](/blogg/innehall-till-foretagshemsida) när den finns publicerad. Poängen är att skapa ordning, inte att göra kunden ansvarig för hela produktionen.
+För en mer praktisk genomgång av hur man samlar material kan du utgå från samma enkla princip: samla tjänster, bilder, fakta och beslut i ett gemensamt underlag innan formgivningen låser sig. Poängen är att skapa ordning, inte att göra kunden ansvarig för hela produktionen.
 
 ## SEO är ett resultat av tydlighet, inte en rad ord i botten
 
@@ -161,7 +161,7 @@ Ett fast pris bygger också på en arbetsprocess. Hur lämnar ni material? När 
 
 ### Lansering och ansvar efteråt
 
-Fråga hur publicering, domän, drift, tekniska uppdateringar och framtida ändringar hanteras. Det ska vara lätt att förstå vad som ingår vid lanseringen och vad som är ett separat löpande behov. Läs gärna mer om vilka frågor som bör vara tydliga i en [överenskommelse för hemsideprojekt](/blogg/avtal-for-hemsida) när den guiden har publicerats.
+Fråga hur publicering, domän, drift, tekniska uppdateringar och framtida ändringar hanteras. Det ska vara lätt att förstå vad som ingår vid lanseringen och vad som är ett separat löpande behov. De frågorna bör vara tydliga innan ett webbprojekt startar, oavsett vilken leverantör du väljer.
 
 ## När fast pris kan vara fel modell
 
@@ -181,7 +181,7 @@ Gör en enkel jämförelse på samma rader: mål, målgrupp, sidor, innehåll, d
 
 Du behöver inte leverera färdiga webbtexter eller en komplett kravspecifikation innan första samtalet. Men det hjälper att ha några saker klara: vad ni vill att hemsidan ska leda till, vilka tjänster som är viktigast, vilka kundfrågor som återkommer och vilket material som redan finns. En kort prioriterad lista räcker långt.
 
-Om du står inför ett nytt projekt kan guiden om [vad som är bra att ha klart innan du beställer en hemsida](/blogg/innan-du-bestaller-hemsida) hjälpa dig samla rätt underlag utan att fastna i detaljer.
+Om du står inför ett nytt projekt kan en enkel lista över mål, viktigaste tjänster och tillgängligt material hjälpa dig samla rätt underlag utan att fastna i detaljer.
 
 ## Vanliga frågor om fast pris för hemsida
 
@@ -228,7 +228,7 @@ En startsida behöver nästan alltid en primär handling. För vissa företag ä
 
 En bra knapptext beskriver vad som händer: “Berätta om ditt projekt”, “Se våra tjänster” eller “Boka ett första samtal” ger mer information än “Klicka här”. I närheten kan ni också minska osäkerheten: hur snabbt brukar ni svara, vilka underlag är bra att skicka in eller vad innebär ett första samtal? Små besked gör stor skillnad när någon överväger att ta kontakt.
 
-Det räcker sällan med en enda kontaktknapp allra högst upp. Besökaren kan behöva läsa tjänster eller exempel innan hen är redo. Lägg därför relevanta nästa steg efter viktiga avsnitt, men variera dem efter sammanhanget. Artikeln om [CTA på hemsidan](/blogg/cta-pa-hemsidan) går djupare in på hur sådana uppmaningar kan formuleras utan att kännas påträngande.
+Det räcker sällan med en enda kontaktknapp allra högst upp. Besökaren kan behöva läsa tjänster eller exempel innan hen är redo. Lägg därför relevanta nästa steg efter viktiga avsnitt, men variera dem efter sammanhanget så att uppmaningen känns relevant och inte påträngande.
 
 ## Visa de viktigaste tjänsterna, inte hela internhandboken
 
@@ -250,7 +250,7 @@ En startsida blir lätt spretig när varje intern önskan får ett eget avsnitt.
 
 Designen ska göra innehållet lättare att skanna. Rubriker, luft, kontrast och relevanta bilder hjälper besökaren hitta rätt. Men designelement som tar uppmärksamhet från budskapet är sällan en vinst. Särskilt på mobil behöver text, knappar och kontaktuppgifter vara enkla att använda utan att zooma eller leta.
 
-En startsida som laddar långsamt skapar också onödig friktion. Optimera bilder och undvik teknik som inte ger ett tydligt värde. Läs gärna guiden om [långsam företagshemsida](/blogg/langsam-hemsida-foretag) om sidan känns seg eller tung.
+En startsida som laddar långsamt skapar också onödig friktion. Optimera bilder och undvik teknik som inte ger ett tydligt värde, särskilt i sidans första sektioner.
 
 ## Kontrollera startsidan utifrån en ny besökares perspektiv
 
@@ -313,7 +313,7 @@ På sidan [Exempel](/exempel) går det att se hur verkligt arbete och tydlig pre
 
 Ett formulär för hantverkstjänster ska inte efterlikna en detaljerad besiktningsmall. Det ska hjälpa kunden ta första steget. Namn, kontaktuppgifter, en kort beskrivning av projektet och möjlighet att ange område räcker ofta för att starta en relevant dialog. Om bilder behövs kan ni tydligt beskriva hur de skickas, i stället för att anta att alla vill eller kan ladda upp direkt.
 
-Det är också bra att berätta vad som händer efter att formuläret skickats. Får kunden en återkoppling med frågor, ett telefonsamtal eller ett förslag på platsbesök? När processen är synlig känns det mindre riskfyllt att höra av sig. Läs mer om hur kontaktvägar kan utformas i guiden om [kontaktformulär för företag](/blogg/kontaktformular-foretag).
+Det är också bra att berätta vad som händer efter att formuläret skickats. Får kunden en återkoppling med frågor, ett telefonsamtal eller ett förslag på platsbesök? När processen är synlig känns det mindre riskfyllt att höra av sig.
 
 Telefonnumret ska vara lätt att hitta och fungera på mobil. För brådskande arbeten kan ni ange om ni har jour eller inte, men lova aldrig tillgänglighet som verksamheten inte kan hålla. Tydliga förväntningar ger färre missförstånd än en ständigt synlig knapp med “akut hjälp”.
 
@@ -321,7 +321,7 @@ Telefonnumret ska vara lätt att hitta och fungera på mobil. För brådskande a
 
 För hantverkare spelar geografiskt område ofta stor roll. Kunden vill veta om ni arbetar där projektet finns, medan företaget vill undvika förfrågningar som ligger för långt bort. Beskriv därför ert faktiska serviceområde på ett begripligt sätt: kommun, region eller utvalda närliggande områden när det är relevant.
 
-Det betyder inte att ni bör skapa nästan identiska sidor för varje ort. Sådana sidor ger sällan kunden mer hjälp och kan göra webbplatsen tunn. En bättre grund är en stark tjänstesida med tydlig geografisk information, konsekventa kontaktuppgifter och korrekt företagsprofil. Guiden om [lokal SEO för tjänsteföretag](/blogg/lokal-seo-tjansteforetag) förklarar hur lokal synlighet kan byggas utan massproducerade ortssidor.
+Det betyder inte att ni bör skapa nästan identiska sidor för varje ort. Sådana sidor ger sällan kunden mer hjälp och kan göra webbplatsen tunn. En bättre grund är en stark tjänstesida med tydlig geografisk information, konsekventa kontaktuppgifter och korrekt företagsprofil.
 
 ## Förklara hur ett uppdrag brukar börja
 
@@ -389,7 +389,7 @@ När du jämför att bygga själv med att anlita hjälp är startpriset synligt,
 
 När du anlitar en webbutvecklare eller webbstudio ska värdet inte bara vara att någon “kan bygga”. Hjälpen bör göra besluten lättare: tydliggöra mål och målgrupp, föreslå en struktur, översätta verksamheten till begripliga webbtexter och skapa en mobil upplevelse som leder vidare.
 
-En bra process gör också ansvar tydligt. Vem tar fram material? Hur får du lämna återkoppling? När får du se förslag? Vad ingår vid lansering och vad behöver skötas löpande? Se gärna över [vad som bör vara klart före ett hemsideprojekt](/blogg/innan-du-bestaller-hemsida) innan första mötet, så att ni kan börja i rätt frågor.
+En bra process gör också ansvar tydligt. Vem tar fram material? Hur får du lämna återkoppling? När får du se förslag? Vad ingår vid lansering och vad behöver skötas löpande? Se över de frågorna innan första mötet, så att ni kan börja i rätt frågor.
 
 ## Tre situationer där hjälp ofta är rätt
 
@@ -442,7 +442,7 @@ En företagshemsida behöver inte generera kontakt från varje besök. Målet ä
 
 ## Börja med att skilja på synlighet och konvertering
 
-Låg trafik och låg konvertering är olika problem. Om få personer hittar sidan behöver du först undersöka om webbplatsen är indexerad, om innehållet svarar på relevanta sökningar och om andra kanaler faktiskt leder dit. Guiden om [varför hemsidan inte syns på Google](/blogg/hemsidan-syns-inte-pa-google) fokuserar på den delen.
+Låg trafik och låg konvertering är olika problem. Om få personer hittar sidan behöver du först undersöka om webbplatsen är indexerad, om innehållet svarar på relevanta sökningar och om andra kanaler faktiskt leder dit.
 
 Om ni får besök men få frågor är nästa fråga: kommer rätt besökare till rätt sida? Ett inlägg som svarar på en allmän fråga kan locka trafik utan att läsaren har ett behov av att köpa tjänsten. Det är inte misslyckat i sig, men det ska inte bedömas med samma mått som en tjänstesida eller en sida med tydlig köpintention.
 
@@ -468,7 +468,7 @@ Undvik att fylla bristerna med påhittade recensioner eller logotyper som inte g
 
 En besökare som vill höra av sig ska inte behöva leta. Telefonnummer, kontaktlänk och nästa steg behöver synas när de är relevanta, inte bara i sidfoten. Men synlighet räcker inte om vägen känns krånglig. Ett långt formulär med många obligatoriska fält kan få en intresserad kund att avbryta. Samma sak gäller om personen inte vet när någon återkommer eller vad som händer efter att formuläret skickats.
 
-Håll den första kontakten enkel. Be bara om information som behövs för att starta en bra dialog, exempelvis kontaktuppgifter och en kort projektbeskrivning. Vid mer komplexa uppdrag kan ni samla mer senare. Guiden om [kontaktformulär för företag](/blogg/kontaktformular-foretag) visar hur frågor och förväntningar kan anpassas efter uppgiften.
+Håll den första kontakten enkel. Be bara om information som behövs för att starta en bra dialog, exempelvis kontaktuppgifter och en kort projektbeskrivning. Vid mer komplexa uppdrag kan ni samla mer senare.
 
 ## Upprepar sidan samma sak utan att hjälpa kunden vidare?
 
@@ -480,7 +480,7 @@ Ge varje sektion en uppgift. En ska förklara erbjudandet. En annan kan hjälpa 
 
 En svåranvänd mobilwebbplats kan innebära att besökaren aldrig ens når er kontaktväg. Testa med en vanlig telefon, inte bara genom att minska ett webbläsarfönster. Är knapparna enkla att trycka på? Är telefonnumret klickbart? Håller viktiga bilder och rubriker ihop? Går formuläret att fylla i utan att tangentbordet täcker fält eller knappar?
 
-Även laddningstiden spelar roll. Tunga bilder, video som startar automatiskt eller gammal teknik kan göra att sidan känns långsam och mindre trovärdig. Om detta verkar vara en del av problemet, börja med de mest besökta sidorna och läs mer om [vanliga orsaker till en långsam hemsida](/blogg/langsam-hemsida-foretag).
+Även laddningstiden spelar roll. Tunga bilder, video som startar automatiskt eller gammal teknik kan göra att sidan känns långsam och mindre trovärdig. Om detta verkar vara en del av problemet, börja med de mest besökta sidorna och avlägsna de tydligaste hindren först.
 
 ## Gör en enkel diagnos före större förändringar
 
@@ -557,13 +557,13 @@ Google Search Console är ett bra verktyg för att se hur webbplatsen genomsöks
 
 En sida som är svår att använda på mobil blir sällan ett bra svar på en sökning. Besökaren kanske lämnar innan innehållet hinner göra nytta. Kontrollera därför viktiga sidor på en riktig telefon. Går texten att läsa? Finns tydliga rubriker? Är knappar och formulär lätta att använda? Är bilder så tunga att sidan känns seg?
 
-Hastighet handlar inte om att jaga ett perfekt mätvärde. Den handlar om att inte lägga hinder mellan besökaren och informationen. Börja med stora bilder, onödiga scripts och delar av sidan som fördröjer den viktigaste texten eller kontaktvägen. Om ni misstänker prestandaproblem kan ni använda guiden om [långsam hemsida](/blogg/langsam-hemsida-foretag) för att prioritera rätt.
+Hastighet handlar inte om att jaga ett perfekt mätvärde. Den handlar om att inte lägga hinder mellan besökaren och informationen. Börja med stora bilder, onödiga scripts och delar av sidan som fördröjer den viktigaste texten eller kontaktvägen.
 
 ## Lokal synlighet utan tunna ortssidor
 
 För ett företag som arbetar i ett visst område är lokal information viktig. Kunder behöver veta om ni tar uppdrag där de finns, och företagsuppgifter behöver vara korrekta och konsekventa. En välskött Google Business Profile kan vara ett relevant komplement till webbplatsen, särskilt för verksamheter med lokal service.
 
-Det betyder inte att ni ska massproducera en sida för varje närliggande ort. Om texterna i praktiken är identiska hjälper de varken kunder eller långsiktig synlighet. Beskriv i stället verkliga serviceområden på relevanta tjänstesidor, använd rätt kontaktuppgifter och skapa lokalt innehåll bara när det finns ett genuint särskilt värde. Artikeln om [lokal SEO för tjänsteföretag](/blogg/lokal-seo-tjansteforetag) går igenom detta mer konkret.
+Det betyder inte att ni ska massproducera en sida för varje närliggande ort. Om texterna i praktiken är identiska hjälper de varken kunder eller långsiktig synlighet. Beskriv i stället verkliga serviceområden på relevanta tjänstesidor, använd rätt kontaktuppgifter och skapa lokalt innehåll bara när det finns ett genuint särskilt värde.
 
 ## Följ upp med frågor, inte bara positioner
 
