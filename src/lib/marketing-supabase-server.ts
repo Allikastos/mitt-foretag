@@ -4,6 +4,7 @@ import { createServerClient } from "@supabase/ssr";
 import type { User } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { Database, PostRow } from "./supabase";
+import { getMarketingContentOverride } from "./marketing-content-overrides";
 import {
   createMarketingPublicSupabaseClient,
   getMarketingSupabaseEnv,
@@ -12,6 +13,11 @@ import {
 
 const publicPostStatuses: PostRow["status"][] = ["published", "scheduled"];
 const publicMarketingPostScope = "altura_nova" as const;
+
+function withFullDraftContent(post: PostRow): PostRow {
+  const content = getMarketingContentOverride(post.slug);
+  return content ? { ...post, content } : post;
+}
 
 function isPostPublic(post: PostRow) {
   if (!publicPostStatuses.includes(post.status)) {
@@ -105,7 +111,7 @@ export async function getPublishedMarketingPosts(): Promise<PostRow[]> {
     return [];
   }
 
-  return (data ?? []).filter(isPostPublic);
+  return (data ?? []).filter(isPostPublic).map(withFullDraftContent);
 }
 
 export async function getPublishedMarketingPostBySlug(
@@ -131,5 +137,5 @@ export async function getPublishedMarketingPostBySlug(
     return null;
   }
 
-  return isPostPublic(data) ? data : null;
+  return isPostPublic(data) ? withFullDraftContent(data) : null;
 }
